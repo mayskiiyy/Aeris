@@ -1,0 +1,227 @@
+<Window x:Class="Aeris.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Aeris" Icon="Assets/aeris.ico" Width="1280" Height="880" MinWidth="960" MinHeight="700" Background="{DynamicResource Canvas}" Foreground="{DynamicResource Ink}" FontFamily="Segoe UI" FontSize="14" WindowStartupLocation="CenterScreen" PreviewMouseDown="DismissDrivePopup">
+  <Window.Resources>
+    <Style x:Key="PageTitle" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="28"/><Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="TextWrapping" Value="Wrap"/><Setter Property="Margin" Value="0,6,200,24"/>
+    </Style>
+    <Style x:Key="ActionIcon" TargetType="Path">
+      <Setter Property="Width" Value="22"/><Setter Property="Height" Value="22"/><Setter Property="Stretch" Value="Uniform"/>
+      <Setter Property="Stroke" Value="{DynamicResource Accent}"/><Setter Property="StrokeThickness" Value="1.6"/>
+      <Setter Property="StrokeStartLineCap" Value="Round"/><Setter Property="StrokeEndLineCap" Value="Round"/><Setter Property="StrokeLineJoin" Value="Round"/>
+      <Setter Property="VerticalAlignment" Value="Top"/><Setter Property="Margin" Value="0,2,0,0"/>
+    </Style>
+    <Style x:Key="ActionTitle" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="16"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <Style x:Key="ActionHint" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="12"/><Setter Property="FontWeight" Value="Normal"/><Setter Property="Foreground" Value="{DynamicResource Muted}"/>
+      <Setter Property="TextWrapping" Value="Wrap"/><Setter Property="Margin" Value="0,8,0,0"/><Setter Property="LineHeight" Value="18"/>
+    </Style>
+    <Style x:Key="ActionButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+      <EventSetter Event="Click" Handler="HomeAction"/>
+      <Setter Property="Padding" Value="20"/><Setter Property="MinHeight" Value="112"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    </Style>
+  </Window.Resources>
+  <Grid Background="{DynamicResource Canvas}">
+    <Grid.ColumnDefinitions><ColumnDefinition Width="208"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+    <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <Border Grid.RowSpan="2" Background="#14291F"/>
+    <TabControl x:Name="MainTabs" Grid.ColumnSpan="2" SelectedIndex="0" TabStripPlacement="Left" BorderThickness="0" SelectionChanged="TabChanged">
+      <TabItem x:Name="HomeTab"><TabItem.Header><DockPanel><Path Style="{StaticResource NavigationIcon}" Data="M3 10 L12 3 L21 10 M5 9 V21 H10 V15 H14 V21 H19 V9"/><TextBlock Text="{DynamicResource Nav.Home}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></TabItem.Header>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal" Margin="0,0,0,16">
+            <TextBlock Text="{DynamicResource Home.Title}" Style="{StaticResource PageTitle}"/>
+            <Grid Margin="0,0,0,26"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="18"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+              <Border Style="{StaticResource Card}" Padding="22"><StackPanel><TextBlock Text="{DynamicResource Home.FreeSpace}" Foreground="{DynamicResource Muted}"/><TextBlock Text="{Binding Text, ElementName=DiskSpace}" FontSize="38" FontWeight="SemiBold" Margin="0,8,0,12"/><ProgressBar Value="{Binding Value, ElementName=DiskBar}" Height="6" Foreground="{DynamicResource Accent}" Background="{DynamicResource Track}" BorderThickness="0"/><TextBlock Text="{Binding Text, ElementName=DiskDetail}" Foreground="{DynamicResource Muted}" FontSize="12" Margin="0,10,0,0"/></StackPanel></Border>
+              <Border Grid.Column="2" Style="{StaticResource Card}" Padding="22"><StackPanel><TextBlock Text="{DynamicResource Home.Caches}" Foreground="{DynamicResource Muted}"/><TextBlock x:Name="HomeCacheSize" FontSize="30" FontWeight="SemiBold" Margin="0,12,0,14"/><TextBlock x:Name="HomeCacheHint" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap"/></StackPanel></Border>
+            </Grid>
+            <TextBlock Text="{DynamicResource Home.QuickActions}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,14"/>
+            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="18"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="16"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+              <Button x:Name="HomeCacheAction" Grid.Column="0" Grid.Row="0" Tag="cache" Style="{StaticResource ActionButton}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="32"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Path Data="M3 6 H9 L11 8 H21 V20 H3 Z M3 6 V4 H9 L11 6" Style="{StaticResource ActionIcon}"/><StackPanel Grid.Column="1" Margin="10,0,0,0"><TextBlock Text="{DynamicResource Caches.Check}" Style="{StaticResource ActionTitle}"/><TextBlock Text="{DynamicResource Home.CheckCachesHint}" Style="{StaticResource ActionHint}"/></StackPanel></Grid></Button>
+              <Button Grid.Column="2" Grid.Row="0" Tag="files" Style="{StaticResource ActionButton}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="32"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Path Data="M5 2 H14 L20 8 V22 H5 Z M14 2 V8 H20 M9 12 H16 M9 16 H16" Style="{StaticResource ActionIcon}"/><StackPanel Grid.Column="1" Margin="10,0,0,0"><TextBlock Text="{DynamicResource Home.FindLarge}" Style="{StaticResource ActionTitle}"/><TextBlock Text="{DynamicResource Home.FindLargeHint}" Style="{StaticResource ActionHint}"/></StackPanel></Grid></Button>
+              <Button Grid.Column="0" Grid.Row="2" Tag="map" Style="{StaticResource ActionButton}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="32"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Path Data="M3 3 H13 V11 H3 Z M16 3 H21 V15 H16 Z M3 14 H13 V21 H3 Z M16 18 H21 V21 H16 Z" Style="{StaticResource ActionIcon}"/><StackPanel Grid.Column="1" Margin="10,0,0,0"><TextBlock Text="{DynamicResource Home.Map}" Style="{StaticResource ActionTitle}"/><TextBlock Text="{DynamicResource Home.MapHint}" Style="{StaticResource ActionHint}"/></StackPanel></Grid></Button>
+              <Button Grid.Column="2" Grid.Row="2" Tag="duplicates" Style="{StaticResource ActionButton}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="32"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Path Data="M8 8 H21 V21 H8 Z M4 16 H3 V3 H16 V4" Style="{StaticResource ActionIcon}"/><StackPanel Grid.Column="1" Margin="10,0,0,0"><TextBlock Text="{DynamicResource Home.Duplicates}" Style="{StaticResource ActionTitle}"/><TextBlock Text="{DynamicResource Home.DuplicatesHint}" Style="{StaticResource ActionHint}"/></StackPanel></Grid></Button>
+            </Grid>
+            <Border Style="{StaticResource Card}" Padding="18" Margin="0,26,0,0"><DockPanel><Button Content="{DynamicResource Nav.History}" Tag="history" DockPanel.Dock="Right" Click="HomeAction" Margin="12,0,0,0"/><StackPanel VerticalAlignment="Center"><TextBlock Text="{DynamicResource Home.LastOperation}" Foreground="{DynamicResource Muted}" FontSize="12"/><TextBlock x:Name="HomeLastAction" TextWrapping="Wrap" FontSize="13" Margin="0,6,0,0"/></StackPanel></DockPanel></Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+      <TabItem x:Name="CacheTab"><TabItem.Header><DockPanel><Path Style="{StaticResource NavigationIcon}" Data="M3 6 H9 L11 8 H21 V20 H3 Z M3 6 V4 H9 L11 6"/><TextBlock Text="{DynamicResource Nav.Caches}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></TabItem.Header>
+        <Grid TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal">
+          <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <TextBlock Text="{DynamicResource Home.Caches}" Style="{StaticResource PageTitle}"/>
+          <Border Grid.Row="1" Style="{StaticResource Card}" Padding="16" Margin="0,0,0,18">
+            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+              <TextBlock Text="{DynamicResource Caches.OlderThan}" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0"/>
+              <ComboBox x:Name="Retention" Grid.Column="1" Width="150" ToolTip="{Binding SelectedItem.Content, RelativeSource={RelativeSource Self}}" SelectedIndex="0" VerticalAlignment="Center" AutomationProperties.Name="{DynamicResource Caches.Retention}" SelectionChanged="RetentionChanged">
+                <ComboBoxItem Tag="2"/><ComboBoxItem Tag="7"/><ComboBoxItem Tag="30"/><ComboBoxItem Tag="custom"/>
+              </ComboBox>
+              <Button x:Name="CacheScanButton" Grid.Column="2" Style="{StaticResource PrimaryButton}" Click="RefreshCaches" Margin="14,0,0,0" VerticalAlignment="Center"/>
+            </Grid>
+          </Border>
+          <Border Grid.Row="2" Background="{DynamicResource ProgressSurface}" CornerRadius="10" Padding="14" Margin="0,0,0,14">
+            <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding IsIndeterminate, ElementName=Activity}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Border.Style>
+            <StackPanel><TextBlock Text="{Binding Text, ElementName=Status}" TextWrapping="Wrap" FontSize="13" FontWeight="SemiBold"/><TextBlock x:Name="ScanLocation" FontFamily="Consolas" FontSize="12" Margin="0,8,0,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/><TextBlock x:Name="ScanFile" Foreground="{DynamicResource Muted}" FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/><ProgressBar Height="3" Margin="0,10,0,0" IsIndeterminate="{Binding IsIndeterminate, ElementName=Activity}" Foreground="{DynamicResource Accent}" Background="{DynamicResource ProgressTrack}" BorderThickness="0"/></StackPanel>
+          </Border>
+          <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="290"/></Grid.ColumnDefinitions>
+            <Border Style="{StaticResource Card}">
+              <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <Grid Margin="20,18,20,12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="{DynamicResource Caches.Categories}" Style="{StaticResource Caption}"/><TextBlock Grid.Column="1" Text="{DynamicResource Caches.ToClean}" Style="{StaticResource Caption}"/></Grid>
+                <ListBox x:Name="CacheList" Grid.Row="1" SelectionMode="Single" AutomationProperties.Name="{DynamicResource Caches.List}" SelectionChanged="CacheDetailChanged" Padding="0,0,0,8">
+                  <ListBox.ItemTemplate><DataTemplate>
+                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="30"/><ColumnDefinition Width="*"/><ColumnDefinition Width="120"/></Grid.ColumnDefinitions>
+                      <CheckBox IsChecked="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CanClean}" AutomationProperties.Name="{Binding Name}" ToolTip="{DynamicResource Caches.SelectTip}" Checked="CacheSelectionChanged" Unchecked="CacheSelectionChanged" Margin="0,0,8,0"/>
+                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0"><TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" FontSize="13"/><TextBlock Text="{Binding Description}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,5,0,0"/></StackPanel>
+                      <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"><TextBlock Text="{Binding EligibleText}" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Right"/><TextBlock Text="{Binding TotalText}" FontSize="11" Foreground="{DynamicResource Muted}" HorizontalAlignment="Right" TextAlignment="Right" TextWrapping="Wrap" Margin="0,4,0,0"/></StackPanel>
+                    </Grid>
+                  </DataTemplate></ListBox.ItemTemplate>
+                </ListBox>
+              </Grid>
+            </Border>
+            <Border Grid.Column="2" Style="{StaticResource Card}" Padding="20">
+              <ScrollViewer x:Name="DetailScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch">
+                <StackPanel Width="{Binding ViewportWidth, ElementName=DetailScroll}" DataContext="{Binding SelectedItem, ElementName=CacheList}">
+                  <TextBlock Text="{DynamicResource Caches.About}" Style="{StaticResource Caption}"/>
+                  <TextBlock Text="{Binding Name}" FontSize="21" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,10,0,12"/>
+                  <TextBlock Text="{Binding Description}" FontSize="13" TextWrapping="Wrap" LineHeight="20"/>
+                  <TextBlock Text="{DynamicResource Caches.Where}" Style="{StaticResource Caption}" Margin="0,18,0,8"/>
+                  <TextBlock Text="{Binding FriendlyLocation}" FontSize="13" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" LineHeight="20"/>
+                  <Expander x:Name="RootExpander" Header="{Binding RootsTitle}" Margin="0,12,0,0" FontSize="12" Foreground="{DynamicResource Ink}">
+                    <TextBox Foreground="{DynamicResource Ink}" Text="{Binding RootsText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas" FontSize="11" BorderThickness="0" Background="{DynamicResource FieldSoft}" Padding="8" Margin="0,8,0,0" MaxHeight="160" VerticalScrollBarVisibility="Auto" AutomationProperties.Name="{DynamicResource Caches.ExactFolders}"/>
+                  </Expander>
+                  <TextBlock Text="{Binding ScanStatus}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,16,0,0"/>
+                </StackPanel>
+              </ScrollViewer>
+            </Border>
+          </Grid>
+          <Grid Grid.Row="4" Margin="0,16,0,16"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Margin="0,0,12,0"><TextBlock x:Name="SelectionSummary" FontSize="16" FontWeight="SemiBold"/><TextBlock Text="{DynamicResource Caches.NoRecycle}" Foreground="{DynamicResource Muted}" FontSize="11" TextWrapping="Wrap" Margin="0,5,0,0"/></StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"><Button x:Name="SelectAllButton" Click="SelectAllCaches" Margin="0,0,10,0" IsEnabled="False"/><Button x:Name="CleanButton" Content="{DynamicResource Caches.CleanSelected}" Style="{StaticResource PrimaryButton}" Click="CleanSelected" IsEnabled="False"/></StackPanel>
+          </Grid>
+        </Grid>
+      </TabItem>
+      <TabItem x:Name="FilesTab"><TabItem.Header><DockPanel><Path Style="{StaticResource NavigationIcon}" Data="M5 2 H14 L20 8 V22 H5 Z M14 2 V8 H20 M9 12 H16 M9 16 H16"/><TextBlock Text="{DynamicResource Nav.Files}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></TabItem.Header>
+        <Grid TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal">
+          <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <StackPanel Margin="0,0,0,22"><TextBlock Text="{DynamicResource Files.Title}" Style="{StaticResource PageTitle}" Margin="0,6,200,6"/><ComboBox x:Name="FileType" Width="240" HorizontalAlignment="Left" SelectedIndex="0" Margin="0,8,0,0" SelectionChanged="TypeChanged" AutomationProperties.Name="{DynamicResource Files.Type}"><ComboBoxItem Content="{DynamicResource Type.All}"/><ComboBoxItem Content="{DynamicResource Type.Video}"/><ComboBoxItem Content="{DynamicResource Type.Archives}"/><ComboBoxItem Content="{DynamicResource Type.Installers}"/><ComboBoxItem Content="{DynamicResource Type.Documents}"/><ComboBoxItem Content="{DynamicResource Type.Images}"/></ComboBox></StackPanel>
+          <Border Grid.Row="1" Style="{StaticResource Card}" Padding="16" Margin="0,0,0,18">
+            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+              <StackPanel VerticalAlignment="Center" Margin="0,0,12,0"><TextBlock Text="{DynamicResource Files.FolderCaption}" Style="{StaticResource Caption}"/><TextBlock x:Name="FolderLabel" TextTrimming="CharacterEllipsis" Margin="0,6,0,0" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/></StackPanel>
+              <Button x:Name="ChooseButton" Grid.Column="1" Content="{DynamicResource Common.Choose}" Click="ChooseFolder" Margin="0,0,10,0"/>
+              <ComboBox x:Name="Threshold" Grid.Column="2" Width="150" ToolTip="{Binding SelectedItem.Content, RelativeSource={RelativeSource Self}}" SelectedIndex="1" AutomationProperties.Name="{DynamicResource Files.MinSize}" SelectionChanged="ThresholdChanged" Margin="0,0,10,0">
+                <ComboBoxItem Tag="10"/><ComboBoxItem Tag="100"/><ComboBoxItem Tag="500"/><ComboBoxItem Tag="1024"/><ComboBoxItem Tag="5120"/><ComboBoxItem Tag="custom"/>
+              </ComboBox>
+              <Button x:Name="ScanButton" Grid.Column="3" Content="{DynamicResource Common.Scan}" Style="{StaticResource PrimaryButton}" Click="StartScan"/>
+            </Grid>
+          </Border>
+          <Border Grid.Row="2" Style="{StaticResource Card}" Padding="8">
+            <DataGrid x:Name="FilesGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserResizeRows="False" GridLinesVisibility="None" HeadersVisibility="Column" BorderThickness="0" RowHeight="48" Background="{DynamicResource Surface}" AlternatingRowBackground="{DynamicResource Field}" SelectionMode="Extended" HorizontalScrollBarVisibility="Disabled" MouseDoubleClick="RevealFile">
+              <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Name}" Width="2*"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.File}"/></DataGridTextColumn.Header></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding DisplaySize}" Width="110" SortMemberPath="Size"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Size}"/></DataGridTextColumn.Header></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Directory}" Width="3*"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Location}"/></DataGridTextColumn.Header></DataGridTextColumn>
+              </DataGrid.Columns>
+            </DataGrid>
+          </Border>
+          <StackPanel Grid.Row="3" Margin="0,12,0,16"><TextBlock x:Name="FilesHint" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,10"/><WrapPanel><Button x:Name="ExportButton" Content="{DynamicResource Files.SaveCsv}" Click="SaveCsv" IsEnabled="False" Margin="0,0,10,4"/><Button Content="{DynamicResource Common.ShowInExplorer}" Click="RevealFile" Margin="0,0,10,4"/><Button x:Name="TrashFilesButton" Content="{DynamicResource Common.MoveToRecycle}" Click="TrashSelected" IsEnabled="False" Margin="0,0,0,4"/></WrapPanel></StackPanel>
+        </Grid>
+      </TabItem>
+      <TabItem x:Name="MapTab"><TabItem.Header><DockPanel><Path Style="{StaticResource NavigationIcon}" Data="M3 3 H13 V11 H3 Z M16 3 H21 V15 H16 Z M3 14 H13 V21 H3 Z M16 18 H21 V21 H16 Z"/><TextBlock Text="{DynamicResource Nav.Map}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></TabItem.Header>
+        <Grid TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <TextBlock Text="{DynamicResource Nav.Map}" Style="{StaticResource PageTitle}"/>
+          <Border Grid.Row="1" Style="{StaticResource Card}" Padding="14" Margin="0,0,0,18"><DockPanel><Button x:Name="MapScanButton" DockPanel.Dock="Right" Content="{DynamicResource Common.Scan}" Click="StartScan" Style="{StaticResource PrimaryButton}" Margin="10,0,0,0"/><Button x:Name="MapChooseButton" DockPanel.Dock="Right" Content="{DynamicResource Common.Choose}" Click="ChooseFolder" Margin="10,0,0,0"/><TextBlock x:Name="MapFolder" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/></DockPanel></Border>
+          <Border Grid.Row="2" Style="{StaticResource Card}"><ListBox x:Name="MapList" AutomationProperties.Name="{DynamicResource Map.List}" MouseDoubleClick="OpenMapFolder"><ListBox.ItemTemplate><DataTemplate><Grid Margin="0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="130"/></Grid.ColumnDefinitions><StackPanel Margin="0,0,16,0"><TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding Path}"/><ProgressBar Value="{Binding Share, Mode=OneWay}" Maximum="100" Height="7" Foreground="{DynamicResource Accent}" Background="{DynamicResource Track}" BorderThickness="0" Margin="0,10,0,5"/><TextBlock Text="{Binding Detail}" Foreground="{DynamicResource Muted}" FontSize="12"/></StackPanel><TextBlock Grid.Column="1" Text="{Binding DisplaySize}" HorizontalAlignment="Right" FontSize="18" VerticalAlignment="Center"/></Grid></DataTemplate></ListBox.ItemTemplate></ListBox></Border>
+          <DockPanel Grid.Row="3" Margin="0,14,0,16"><Button Content="{DynamicResource Map.OpenFolder}" Click="OpenMapFolder" DockPanel.Dock="Right" Margin="12,0,0,0"/><TextBlock Text="{DynamicResource Map.Footer}" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel>
+        </Grid>
+      </TabItem>
+      <TabItem x:Name="DuplicatesTab"><TabItem.Header><DockPanel><Path Style="{StaticResource NavigationIcon}" Data="M8 8 H21 V21 H8 Z M4 16 H3 V3 H16 V4"/><TextBlock Text="{DynamicResource Nav.Duplicates}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></TabItem.Header>
+        <Grid TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <TextBlock Text="{DynamicResource Nav.Duplicates}" Style="{StaticResource PageTitle}"/>
+          <Border Grid.Row="1" Style="{StaticResource Card}" Padding="14" Margin="0,0,0,18"><DockPanel><Button x:Name="DuplicateScanButton" DockPanel.Dock="Right" Content="{DynamicResource Dup.Find}" Click="FindDuplicates" Style="{StaticResource PrimaryButton}" Margin="10,0,0,0"/><Button x:Name="DuplicateChooseButton" DockPanel.Dock="Right" Content="{DynamicResource Common.Choose}" Click="ChooseFolder" Margin="10,0,0,0"/><TextBlock x:Name="DuplicateFolder" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/></DockPanel></Border>
+          <Border Grid.Row="2" Style="{StaticResource Card}" Padding="8">
+            <DataGrid x:Name="DuplicatesGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" SelectionMode="Extended" GridLinesVisibility="None" HeadersVisibility="Column" RowHeight="44" BorderThickness="0" Background="{DynamicResource Surface}" MouseDoubleClick="RevealDuplicate">
+              <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Group}" Width="90"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Group}"/></DataGridTextColumn.Header></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Name}" Width="2*"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.File}"/></DataGridTextColumn.Header></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding DisplaySize}" Width="110"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Size}"/></DataGridTextColumn.Header></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path}" Width="3*"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Path}"/></DataGridTextColumn.Header></DataGridTextColumn>
+              </DataGrid.Columns>
+            </DataGrid>
+          </Border>
+          <StackPanel Grid.Row="3" Margin="0,12,0,16"><TextBlock Text="{DynamicResource Dup.Footer}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,10"/><WrapPanel><Button Content="{DynamicResource Common.ShowInExplorer}" Click="RevealDuplicate" Margin="0,0,10,0"/><Button x:Name="TrashDuplicatesButton" Content="{DynamicResource Common.MoveToRecycle}" Click="TrashSelected" IsEnabled="False"/></WrapPanel></StackPanel>
+        </Grid>
+      </TabItem>
+      <TabItem x:Name="HistoryTab"><TabItem.Header><DockPanel><Path Style="{StaticResource NavigationIcon}" Data="M4 7 A9 9 0 1 1 3 14 M3 3 V8 H8 M12 7 V12 L16 14"/><TextBlock Text="{DynamicResource Nav.History}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></TabItem.Header>
+        <Grid TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <TextBlock Text="{DynamicResource History.Title}" Style="{StaticResource PageTitle}"/>
+          <Border Grid.Row="1" Style="{StaticResource Card}" Padding="8">
+            <DataGrid x:Name="HistoryGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="None" HeadersVisibility="Column" RowHeight="44" BorderThickness="0" Background="{DynamicResource Surface}">
+              <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding DisplayTime}" Width="150" SortMemberPath="Time"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.When}"/></DataGridTextColumn.Header></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding DisplayAction}" Width="*"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Action}"/></DataGridTextColumn.Header></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Files}" Width="90"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Files}"/></DataGridTextColumn.Header></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding DisplaySize}" Width="100" SortMemberPath="Bytes"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Volume}"/></DataGridTextColumn.Header></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Skipped}" Width="115"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Skipped}"/></DataGridTextColumn.Header></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding DisplayResult}" Width="1.3*"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Result}"/></DataGridTextColumn.Header></DataGridTextColumn>
+              </DataGrid.Columns>
+            </DataGrid>
+          </Border>
+          <TextBox Grid.Row="2" Text="{Binding SelectedItem.Details, ElementName=HistoryGrid, Mode=OneWay}" IsReadOnly="True" MaxHeight="120" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Background="{DynamicResource Field}" Foreground="{DynamicResource Ink}" BorderThickness="0" Padding="12" Margin="0,12,0,16" AutomationProperties.Name="{DynamicResource History.Details}"/>
+        </Grid>
+      </TabItem>
+      <TabItem x:Name="ExclusionsTab"><TabItem.Header><DockPanel><Path Style="{StaticResource NavigationIcon}" Data="M12 2 L21 6 V12 Q21 19 12 22 Q3 19 3 12 V6 Z M8 12 H16"/><TextBlock Text="{DynamicResource Nav.Exclusions}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></TabItem.Header>
+        <Grid TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <TextBlock Text="{DynamicResource Nav.Exclusions}" Style="{StaticResource PageTitle}"/>
+          <TextBlock Grid.Row="1" Text="{DynamicResource Excl.Hint}" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,0,0,18"/>
+          <Border Grid.Row="2" Style="{StaticResource Card}"><ListBox x:Name="ExclusionsList" AutomationProperties.Name="{DynamicResource Excl.List}"/></Border>
+          <WrapPanel Grid.Row="3" Margin="0,14,0,16"><Button x:Name="AddExclusionButton" Content="{DynamicResource Excl.Add}" Click="AddExclusion" Margin="0,0,10,0"/><Button x:Name="RemoveExclusionButton" Content="{DynamicResource Excl.Remove}" Click="RemoveExclusion"/></WrapPanel>
+        </Grid>
+      </TabItem>
+    </TabControl>
+    <StackPanel Grid.RowSpan="2" VerticalAlignment="Top" Margin="22,28,14,0" IsHitTestVisible="False">
+      <StackPanel Orientation="Horizontal"><Image Source="{StaticResource Logo}" Width="34" Height="34" AutomationProperties.Name="{DynamicResource Sidebar.Logo}"/><TextBlock Text="Aeris" Foreground="#F3FAF5" FontSize="19" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,0"/></StackPanel>
+      <TextBlock Text="{DynamicResource Sidebar.Section}" Foreground="#9DB9A9" FontSize="10" FontWeight="SemiBold" Margin="3,44,0,0"/>
+    </StackPanel>
+    <StackPanel Grid.RowSpan="2" VerticalAlignment="Bottom" Margin="16,0,16,22">
+      <Button x:Name="DriveButton" Background="#203B2C" BorderBrush="Transparent" Padding="14" HorizontalContentAlignment="Stretch" Click="OpenDriveMenu" ToolTip="{DynamicResource Drive.Choose}" AutomationProperties.Name="{DynamicResource Drive.Choose}">
+        <StackPanel><DockPanel><Path DockPanel.Dock="Right" Data="M0 5 L4 1 L8 5" Stroke="#B4CDBD" StrokeThickness="1.5" Width="8" Height="5" VerticalAlignment="Center"/><TextBlock x:Name="DriveLabel" Foreground="#B4CDBD" FontSize="10" FontWeight="Normal"/></DockPanel><TextBlock x:Name="DiskSpace" Text="—" Foreground="#EEFAF3" FontSize="21" FontWeight="SemiBold" Margin="0,8,0,3"/><TextBlock Text="{DynamicResource Sidebar.Free}" Foreground="#B4CDBD" FontSize="12" FontWeight="Normal"/><ProgressBar x:Name="DiskBar" Height="4" Foreground="#A1E2BC" Background="#40604C" BorderThickness="0" Margin="0,14,0,10"/><TextBlock x:Name="DiskDetail" Foreground="#B4CDBD" FontSize="10" FontWeight="Normal" TextWrapping="Wrap"/></StackPanel>
+      </Button>
+    </StackPanel>
+    <Popup x:Name="DrivePopup" PlacementTarget="{Binding ElementName=DriveButton}" Placement="Top" VerticalOffset="-8" AllowsTransparency="True" StaysOpen="True" Closed="DriveMenuClosed">
+      <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="12" Padding="8" Width="300" PreviewKeyDown="DrivePopupKeyDown" KeyboardNavigation.TabNavigation="Cycle">
+        <StackPanel><TextBlock Text="{DynamicResource Drive.MenuTitle}" Foreground="{DynamicResource Ink}" FontSize="14" FontWeight="SemiBold" Margin="10,8,10,12"/><TextBlock x:Name="DriveLoading" Foreground="{DynamicResource Muted}" FontSize="12" Margin="10,0,10,10"/><ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="310"><ItemsControl x:Name="DriveChoices"><ItemsControl.ItemTemplate><DataTemplate>
+          <Button Tag="{Binding}" Click="SelectDrive" IsEnabled="{Binding Ready}" HorizontalContentAlignment="Stretch" Padding="12" Margin="0,0,0,5" BorderBrush="Transparent">
+            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="20"/></Grid.ColumnDefinitions><StackPanel Margin="0,0,8,0"><TextBlock Text="{Binding Label}" Foreground="{DynamicResource Ink}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Detail}" Foreground="{DynamicResource Muted}" FontSize="12" FontWeight="Normal" TextWrapping="Wrap" Margin="0,6,0,0"/><ProgressBar Value="{Binding Used, Mode=OneWay}" Maximum="100" Height="4" Foreground="{DynamicResource Accent}" Background="{DynamicResource Track}" BorderThickness="0" Margin="0,8,0,0"/></StackPanel><Path Grid.Column="1" Data="M2 8 L6 12 L14 3" Stroke="{DynamicResource Accent}" StrokeThickness="2" Width="16" Height="14" VerticalAlignment="Center"><Path.Style><Style TargetType="Path"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Selected}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Path.Style></Path></Grid>
+          </Button>
+        </DataTemplate></ItemsControl.ItemTemplate></ItemsControl></ScrollViewer></StackPanel>
+      </Border>
+    </Popup>
+    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,28,0">
+      <ComboBox x:Name="LanguagePicker" Width="100" Height="42" Margin="0,0,10,0" SelectionChanged="LanguageChanged" ToolTip="{DynamicResource Language.Label}" AutomationProperties.Name="{DynamicResource Language.Label}">
+        <ComboBox.ItemTemplate><DataTemplate>
+          <StackPanel Orientation="Horizontal">
+            <Path x:Name="Globe" Visibility="Collapsed" Data="M12 3 A9 9 0 1 0 12 21 A9 9 0 1 0 12 3 Z M3 12 H21 M12 3 Q6.5 12 12 21 M12 3 Q17.5 12 12 21" Stroke="{DynamicResource Ink}" StrokeThickness="1.5" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <TextBlock x:Name="Label" Text="{Binding Name}" VerticalAlignment="Center"/>
+          </StackPanel>
+          <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ComboBoxItem}}" Value="{x:Null}">
+              <Setter TargetName="Label" Property="Text" Value="{Binding Tag}"/><Setter TargetName="Label" Property="FontWeight" Value="SemiBold"/>
+              <Setter TargetName="Globe" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+          </DataTemplate.Triggers>
+        </DataTemplate></ComboBox.ItemTemplate>
+      </ComboBox>
+      <Button x:Name="ThemeButton" Width="42" Height="42" Padding="10" Click="SwitchTheme">
+        <Path x:Name="ThemeGlyph" Stroke="{DynamicResource Ink}" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="20" Height="20" Stretch="Uniform"/>
+      </Button>
+    </StackPanel>
+    <Border Grid.Row="1" Grid.Column="1" BorderBrush="{DynamicResource Line}" BorderThickness="0,1,0,0" Background="{DynamicResource Canvas}" Padding="28,10">
+      <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <StackPanel VerticalAlignment="Center"><ProgressBar x:Name="Activity" Height="2" Foreground="{DynamicResource Accent}" Background="{DynamicResource Track}" BorderThickness="0"/><TextBlock x:Name="Status" Foreground="{DynamicResource Muted}" FontSize="11" Margin="0,7,12,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/></StackPanel>
+        <Button x:Name="CancelButton" Grid.Column="1" Content="{DynamicResource Common.Cancel}" Click="CancelScan" Visibility="Collapsed" Margin="12,0,0,0"/>
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

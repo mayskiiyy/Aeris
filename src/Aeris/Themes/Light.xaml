@@ -1,0 +1,24 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <SolidColorBrush x:Key="Ink" Color="#192B23"/>
+  <SolidColorBrush x:Key="Muted" Color="#5E6F65"/>
+  <SolidColorBrush x:Key="Accent" Color="#147A50"/>
+  <SolidColorBrush x:Key="Line" Color="#DFE7E1"/>
+  <SolidColorBrush x:Key="Canvas" Color="#F4F7F4"/>
+  <SolidColorBrush x:Key="Surface" Color="White"/>
+  <SolidColorBrush x:Key="Field" Color="#F7F9F7"/>
+  <SolidColorBrush x:Key="FieldSoft" Color="#F6F8F6"/>
+  <SolidColorBrush x:Key="RowHover" Color="#F4F8F5"/>
+  <SolidColorBrush x:Key="Selected" Color="#EAF5EE"/>
+  <SolidColorBrush x:Key="SelectedLine" Color="#C5DDCC"/>
+  <SolidColorBrush x:Key="SelectedText" Color="#163E28"/>
+  <SolidColorBrush x:Key="FieldLine" Color="#D8E2DB"/>
+  <SolidColorBrush x:Key="CheckLine" Color="#91A99A"/>
+  <SolidColorBrush x:Key="Focus" Color="#125D3F"/>
+  <SolidColorBrush x:Key="ProgressSurface" Color="#E3F1E8"/>
+  <SolidColorBrush x:Key="ProgressTrack" Color="#CDE2D4"/>
+  <SolidColorBrush x:Key="Track" Color="#D9E6DC"/>
+  <SolidColorBrush x:Key="Header" Color="#F1F5F2"/>
+  <SolidColorBrush x:Key="SelectedCell" Color="#DDEFE3"/>
+  <SolidColorBrush x:Key="Arrow" Color="#51665A"/>
+  <SolidColorBrush x:Key="OnAccent" Color="White"/>
+</ResourceDictionary>
