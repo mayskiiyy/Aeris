@@ -54,6 +54,13 @@ public static class Schedule
     }
 
     public static bool Exists() => Run(["/Query", "/TN", TaskName]).Code == 0;
+
+    /// <summary>True when the task exists and still starts this copy of Aeris, not one that was moved or deleted.</summary>
+    public static bool PointsTo(string exe)
+    {
+        var (code, xml) = Run(["/Query", "/TN", TaskName, "/XML"]);
+        return code == 0 && xml.Contains(System.Security.SecurityElement.Escape(exe), StringComparison.OrdinalIgnoreCase);
+    }
 }
 
 /// <summary>Explorer context menu entries under HKCU, so no administrator rights are needed.</summary>
@@ -83,7 +90,8 @@ public static class ShellMenu
                 key.SetValue("MUIVerb", Loc.Get(label));
                 key.SetValue("Icon", $"\"{exe}\",0");
                 using var command = key.CreateSubKey("command");
-                command.SetValue("", $"\"{exe}\" {argument} \"%1\"");
+                // "%1\." keeps a drive root like C:\ from ending in \" , which argv parsing reads as an escaped quote.
+                command.SetValue("", $"\"{exe}\" {argument} \"%1\\.\"");
             }
     }
 
@@ -115,7 +123,9 @@ public record LaunchRequest(string? Folder, string? Tab, string? Action)
         }
         if (folder != null)
         {
-            try { folder = Path.GetFullPath(folder.Trim('"')); }
+            folder = folder.Trim('"');
+            if (folder.Length == 2 && folder[1] == ':') folder += Path.DirectorySeparatorChar;
+            try { folder = Path.GetFullPath(folder); }
             catch (Exception e) when (e is ArgumentException or NotSupportedException or PathTooLongException) { folder = null; action = null; }
         }
         return new(folder, tab, action);

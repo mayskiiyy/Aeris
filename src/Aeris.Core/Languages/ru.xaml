@@ -455,4 +455,5 @@
   <s:String x:Key="Shell.Duplicates">Найти дубликаты здесь (Aeris)</s:String>
   <s:String x:Key="Shell.Largest">Показать самые большие файлы (Aeris)</s:String>
   <s:String x:Key="History.Scheduled">{0} (по расписанию)</s:String>
+  <s:String x:Key="Schedule.Moved">Задание запускает Aeris.exe из другого места, вероятно, Aeris перемещали. Сохраните расписание ещё раз.</s:String>
 </ResourceDictionary>

@@ -29,7 +29,8 @@ public partial class App : Application
         MainWindow = window;
         window.Show();
         window.Launch(LaunchRequest.Parse(e.Args), false);
-        SingleInstance.Listen(args => Dispatcher.BeginInvoke(() => window.Launch(LaunchRequest.Parse(args), true)), listening.Token);
+        // A fallback second window (the first one didn't answer in time) must not fight over the pipe.
+        if (first) SingleInstance.Listen(args => Dispatcher.BeginInvoke(() => window.Launch(LaunchRequest.Parse(args), true)), listening.Token);
     }
 
     protected override void OnExit(ExitEventArgs e)

@@ -161,10 +161,11 @@ internal static class Wic
 {
     private static readonly Guid FactoryClass = new("cacaf262-9370-4615-a13b-9f5539da4c0a");
     private static readonly Guid Gray8 = new("6fddc324-4e03-4bfe-b185-3d77768dc908");
+    private static readonly Lazy<IWICImagingFactory> Factory = new(() => (IWICImagingFactory)Activator.CreateInstance(Type.GetTypeFromCLSID(FactoryClass)!)!);
 
     public static (ulong Hash, int Width, int Height) DifferenceHash(string path)
     {
-        var factory = (IWICImagingFactory)Activator.CreateInstance(Type.GetTypeFromCLSID(FactoryClass)!)!;
+        var factory = Factory.Value;
         IWICBitmapDecoder? decoder = null;
         IWICBitmapFrameDecode? frame = null;
         IWICBitmapScaler? scaler = null;
@@ -190,7 +191,7 @@ internal static class Wic
         }
         finally
         {
-            foreach (object? com in new object?[] { converter, scaler, frame, decoder, factory })
+            foreach (object? com in new object?[] { converter, scaler, frame, decoder })
                 if (com != null) Marshal.ReleaseComObject(com);
         }
     }

@@ -455,4 +455,5 @@
   <s:String x:Key="Shell.Duplicates">Find duplicates here (Aeris)</s:String>
   <s:String x:Key="Shell.Largest">Show largest files (Aeris)</s:String>
   <s:String x:Key="History.Scheduled">{0} (scheduled)</s:String>
+  <s:String x:Key="Schedule.Moved">The scheduled task starts an Aeris.exe in another place, probably from before Aeris was moved. Save the schedule again.</s:String>
 </ResourceDictionary>

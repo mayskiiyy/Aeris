@@ -455,4 +455,5 @@
   <s:String x:Key="Shell.Duplicates">Znajdź tu duplikaty (Aeris)</s:String>
   <s:String x:Key="Shell.Largest">Pokaż największe pliki (Aeris)</s:String>
   <s:String x:Key="History.Scheduled">{0} (zaplanowane)</s:String>
+  <s:String x:Key="Schedule.Moved">Zadanie uruchamia Aeris.exe z innego miejsca, prawdopodobnie sprzed przeniesienia Aeris. Zapisz harmonogram ponownie.</s:String>
 </ResourceDictionary>

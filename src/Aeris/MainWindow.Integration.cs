@@ -61,13 +61,15 @@ public partial class MainWindow
             ShellMenuEnabled.IsChecked = ShellMenu.IsEnabled();
         }
         finally { restoring = previous; }
-        RefreshScheduleStatus();
     }
 
+    /// <summary>Runs schtasks, so it is only called when Settings is shown or the schedule changes.</summary>
     private async void RefreshScheduleStatus()
     {
-        bool exists = await Task.Run(Schedule.Exists);
-        ScheduleStatus.Text = Loc.Get(exists ? (data.Schedule.Enabled ? "Schedule.Active" : "Schedule.Orphan") : data.Schedule.Enabled ? "Schedule.Missing" : "Schedule.Off");
+        string exe = Executable;
+        var (exists, current) = await Task.Run(() => Schedule.Exists() ? (true, Schedule.PointsTo(exe)) : (false, false));
+        ScheduleStatus.Text = Loc.Get(!exists ? (data.Schedule.Enabled ? "Schedule.Missing" : "Schedule.Off")
+            : !data.Schedule.Enabled ? "Schedule.Orphan" : current ? "Schedule.Active" : "Schedule.Moved");
     }
 
     private void ScheduleToggled(object sender, RoutedEventArgs e)

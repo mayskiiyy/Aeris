@@ -455,4 +455,5 @@
   <s:String x:Key="Shell.Duplicates">Procurar duplicatas aqui (Aeris)</s:String>
   <s:String x:Key="Shell.Largest">Mostrar os maiores arquivos (Aeris)</s:String>
   <s:String x:Key="History.Scheduled">{0} (agendado)</s:String>
+  <s:String x:Key="Schedule.Moved">A tarefa agendada abre um Aeris.exe de outro lugar, provavelmente de antes de o Aeris ser movido. Salve o agendamento de novo.</s:String>
 </ResourceDictionary>

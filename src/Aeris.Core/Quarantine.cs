@@ -26,8 +26,17 @@ public static class Quarantine
         return Path.Combine(operationFolder, drive, full[root.Length..]);
     }
 
-    public static bool SameVolume(string path) =>
-        string.Equals(Path.GetPathRoot(Path.GetFullPath(path)), Path.GetPathRoot(Path.GetFullPath(Folder)), StringComparison.OrdinalIgnoreCase);
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
+    private static extern bool GetVolumePathName(string path, System.Text.StringBuilder volume, int length);
+
+    /// <summary>The mount point a path lives on, so a volume mounted inside a folder counts as a different volume.</summary>
+    private static string VolumeOf(string path)
+    {
+        var buffer = new System.Text.StringBuilder(1024);
+        return GetVolumePathName(Path.GetFullPath(path), buffer, buffer.Capacity) ? buffer.ToString() : Path.GetPathRoot(Path.GetFullPath(path)) ?? path;
+    }
+
+    public static bool SameVolume(string path) => string.Equals(VolumeOf(path), VolumeOf(Folder), StringComparison.OrdinalIgnoreCase);
 
     public static IEnumerable<string> Operations() =>
         Directory.Exists(Folder) ? Directory.GetDirectories(Folder).Select(Path.GetFileName).OfType<string>().Order(StringComparer.Ordinal) : [];
@@ -57,6 +66,9 @@ public static class Quarantine
                 if (!PathGuard.IsInside(stored, folder) || !File.Exists(stored)) { missing++; continue; }
                 if (File.Exists(item.Path) || Directory.Exists(item.Path)) { conflicts++; continue; }
                 string parent = Path.GetDirectoryName(item.Path)!;
+                string existing = parent;
+                while (!Directory.Exists(existing) && Path.GetDirectoryName(existing) is { } up) existing = up;
+                if (!Storage.SafePath(existing)) { failed++; errors.Add($"{item.Path}: {Loc.Get("Error.Links")}"); continue; }
                 Directory.CreateDirectory(parent);
                 if (!Storage.SafePath(parent)) { failed++; errors.Add($"{item.Path}: {Loc.Get("Error.Links")}"); continue; }
                 File.Move(stored, item.Path);

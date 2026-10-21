@@ -16,7 +16,7 @@ public class TreemapControl : FrameworkElement
     private ScanResult? result;
     private int root;
     private bool onDisk;
-    private int hovered = -2;
+    private int hovered = -1;
     private readonly ToolTip tip = new() { Placement = System.Windows.Controls.Primitives.PlacementMode.Mouse, HorizontalOffset = 14, VerticalOffset = 14 };
 
     public event Action<int>? FolderOpened;
@@ -56,7 +56,7 @@ public class TreemapControl : FrameworkElement
     private void Relayout()
     {
         cells = result == null || ActualWidth < 4 || ActualHeight < 4 ? [] : Treemap.Layout(result.Nodes, root, new(0, 0, ActualWidth, ActualHeight), onDisk);
-        hovered = -2;
+        hovered = -1;
         InvalidateVisual();
     }
 
@@ -95,49 +95,46 @@ public class TreemapControl : FrameworkElement
             var empty = new FormattedText(Loc.Get("Map.Empty"), CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, typeface, 13, muted, dpi);
             dc.DrawText(empty, new Point((ActualWidth - empty.Width) / 2, (ActualHeight - empty.Height) / 2));
         }
-        DrawOutline(dc, Selected, Resource("Accent"), 2.5);
-        if (hovered != Selected) DrawOutline(dc, hovered, Resource("Focus"), 1.5);
+        int selected = Selected < 0 ? -1 : cells.FindIndex(c => c.Node == Selected);
+        DrawOutline(dc, selected, Resource("Accent"), 2.5);
+        if (hovered != selected) DrawOutline(dc, hovered, Resource("Focus"), 1.5);
     }
 
-    private void DrawOutline(DrawingContext dc, int node, Brush brush, double thickness)
+    private void DrawOutline(DrawingContext dc, int index, Brush brush, double thickness)
     {
-        if (node == -2) return;
-        foreach (var cell in cells)
-            if (cell.Node == node && (node >= 0 || cell.Rect.Area > 0))
-            {
-                var r = cell.Rect.Inset(thickness / 2);
-                dc.DrawRectangle(null, new Pen(brush, thickness), new Rect(r.X, r.Y, r.Width, r.Height));
-                return;
-            }
+        if (index < 0 || index >= cells.Count) return;
+        var r = cells[index].Rect.Inset(thickness / 2);
+        dc.DrawRectangle(null, new Pen(brush, thickness), new Rect(r.X, r.Y, r.Width, r.Height));
     }
 
-    /// <summary>The deepest cell under the point. Children come after their folder in the list.</summary>
-    private TreemapCell? HitTest(Point point)
+    /// <summary>Index of the deepest cell under the point, or -1. Children come after their folder in the list.</summary>
+    private int HitIndex(Point point)
     {
         for (int i = cells.Count - 1; i >= 0; i--)
-            if (cells[i].Rect.Contains(point.X, point.Y)) return cells[i];
-        return null;
+            if (cells[i].Rect.Contains(point.X, point.Y)) return i;
+        return -1;
     }
+
+    private TreemapCell? HitTest(Point point) => HitIndex(point) is var i and >= 0 ? cells[i] : null;
 
     protected override void OnMouseMove(MouseEventArgs e)
     {
         base.OnMouseMove(e);
         if (result == null) return;
-        var cell = HitTest(e.GetPosition(this));
-        int node = cell?.Node ?? -2;
-        if (node == hovered) return;
-        hovered = node;
+        int index = HitIndex(e.GetPosition(this));
+        if (index == hovered) return;
+        hovered = index;
         InvalidateVisual();
         tip.IsOpen = false;
-        if (cell is not { } c) return;
-        tip.Content = Describe(c);
+        if (index < 0) return;
+        tip.Content = Describe(cells[index]);
         tip.IsOpen = true;
     }
 
     protected override void OnMouseLeave(MouseEventArgs e)
     {
         base.OnMouseLeave(e);
-        hovered = -2;
+        hovered = -1;
         tip.IsOpen = false;
         InvalidateVisual();
     }

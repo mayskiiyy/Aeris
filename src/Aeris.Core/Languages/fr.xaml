@@ -455,4 +455,5 @@
   <s:String x:Key="Shell.Duplicates">Rechercher les doublons ici (Aeris)</s:String>
   <s:String x:Key="Shell.Largest">Afficher les plus gros fichiers (Aeris)</s:String>
   <s:String x:Key="History.Scheduled">{0} (planifié)</s:String>
+  <s:String x:Key="Schedule.Moved">La tâche planifiée lance un Aeris.exe situé ailleurs, sans doute d'avant un déplacement d'Aeris. Enregistrez à nouveau.</s:String>
 </ResourceDictionary>

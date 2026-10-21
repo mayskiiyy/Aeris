@@ -22,6 +22,13 @@ public class IntegrationTests
         Assert.Null(LaunchRequest.Parse(["--scan"]).Folder);
     }
 
+    [Theory]
+    [InlineData(@"D:\.")]
+    [InlineData("D:\"")]
+    [InlineData("D:")]
+    public void DriveRootsFromExplorerStayDriveRoots(string argument) =>
+        Assert.Equal(@"D:\", LaunchRequest.Parse(["--scan", argument]).Folder);
+
     [Fact]
     public void ScheduledTaskRunsTheSafeProfileWithoutAWindow()
     {

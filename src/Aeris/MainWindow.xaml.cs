@@ -133,6 +133,7 @@ public partial class MainWindow : Window
         if (!ReferenceEquals(e.Source, MainTabs) || !IsLoaded) return;
         if (ReferenceEquals(MainTabs.SelectedItem, HomeTab)) { RefreshDisk(); RefreshHome(); }
         if (ReferenceEquals(MainTabs.SelectedItem, HistoryTab) || ReferenceEquals(MainTabs.SelectedItem, HomeTab)) ImportJournals();
+        if (ReferenceEquals(MainTabs.SelectedItem, SettingsTab)) RefreshScheduleStatus();
         if (MainTabs.Template.FindName("PART_SelectedContentHost", MainTabs) is not ContentPresenter content) return;
         content.BeginAnimation(OpacityProperty, null);
         if (!SystemParameters.ClientAreaAnimation || InputManager.Current.MostRecentInputDevice is KeyboardDevice) return;
