@@ -49,7 +49,7 @@
       </TabItem>
       <TabItem x:Name="CacheTab"><TabItem.Header><DockPanel><Path Style="{StaticResource NavigationIcon}" Data="M3 6 H9 L11 8 H21 V20 H3 Z M3 6 V4 H9 L11 6"/><TextBlock Text="{DynamicResource Nav.Caches}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></TabItem.Header>
         <Grid TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal">
-          <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
           <TextBlock Text="{DynamicResource Home.Caches}" Style="{StaticResource PageTitle}"/>
           <Border Grid.Row="1" Style="{StaticResource Card}" Padding="16" Margin="0,0,0,18">
             <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
@@ -64,16 +64,25 @@
             <Border.Style><Style TargetType="Border"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding IsIndeterminate, ElementName=Activity}" Value="True"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></Border.Style>
             <StackPanel><TextBlock Text="{Binding Text, ElementName=Status}" TextWrapping="Wrap" FontSize="13" FontWeight="SemiBold"/><TextBlock x:Name="ScanLocation" FontFamily="Consolas" FontSize="12" Margin="0,8,0,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/><TextBlock x:Name="ScanFile" Foreground="{DynamicResource Muted}" FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/><ProgressBar Height="3" Margin="0,10,0,0" IsIndeterminate="{Binding IsIndeterminate, ElementName=Activity}" Foreground="{DynamicResource Accent}" Background="{DynamicResource ProgressTrack}" BorderThickness="0"/></StackPanel>
           </Border>
-          <Grid Grid.Row="3">
+          <Border x:Name="RuleNotice" Grid.Row="3" Style="{StaticResource Card}" Padding="16,12" Margin="0,0,0,14" Visibility="Collapsed"><DockPanel><Button Content="{DynamicResource Rules.OpenFolder}" Click="OpenRulesFolder" DockPanel.Dock="Right" Margin="12,0,0,0" VerticalAlignment="Center"/><StackPanel><TextBlock Text="{DynamicResource Rules.Skipped}" FontWeight="SemiBold" FontSize="13"/><TextBlock x:Name="RuleErrors" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,5,0,0" MaxHeight="72"/></StackPanel></DockPanel></Border>
+          <Grid Grid.Row="4">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="290"/></Grid.ColumnDefinitions>
             <Border Style="{StaticResource Card}">
               <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
                 <Grid Margin="20,18,20,12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="{DynamicResource Caches.Categories}" Style="{StaticResource Caption}"/><TextBlock Grid.Column="1" Text="{DynamicResource Caches.ToClean}" Style="{StaticResource Caption}"/></Grid>
-                <ListBox x:Name="CacheList" Grid.Row="1" SelectionMode="Single" AutomationProperties.Name="{DynamicResource Caches.List}" SelectionChanged="CacheDetailChanged" Padding="0,0,0,8">
+                <ListBox x:Name="CacheList" Grid.Row="1" SelectionMode="Single" AutomationProperties.Name="{DynamicResource Caches.List}" SelectionChanged="CacheDetailChanged" Padding="0,0,0,8" VirtualizingPanel.IsVirtualizingWhenGrouping="True">
+                  <ListBox.GroupStyle><GroupStyle><GroupStyle.HeaderTemplate><DataTemplate>
+                    <TextBlock Text="{Binding Name}" Style="{StaticResource Caption}" Margin="20,14,20,4"/>
+                  </DataTemplate></GroupStyle.HeaderTemplate></GroupStyle></ListBox.GroupStyle>
                   <ListBox.ItemTemplate><DataTemplate>
                     <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="30"/><ColumnDefinition Width="*"/><ColumnDefinition Width="120"/></Grid.ColumnDefinitions>
                       <CheckBox IsChecked="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CanClean}" AutomationProperties.Name="{Binding Name}" ToolTip="{DynamicResource Caches.SelectTip}" Checked="CacheSelectionChanged" Unchecked="CacheSelectionChanged" Margin="0,0,8,0"/>
-                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0"><TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" FontSize="13"/><TextBlock Text="{Binding Description}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,5,0,0"/></StackPanel>
+                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0"><TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" FontSize="13"/><TextBlock Text="{Binding Description}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,5,0,0"/>
+                        <Border HorizontalAlignment="Left" CornerRadius="5" Padding="7,2" Margin="0,7,0,0" BorderThickness="1" BorderBrush="{DynamicResource SelectedLine}" Background="{DynamicResource Selected}" ToolTip="{Binding RiskHint}">
+                          <Border.Style><Style TargetType="Border"><Style.Triggers><DataTrigger Binding="{Binding IsSafe}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers></Style></Border.Style>
+                          <TextBlock Text="{Binding RiskText}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SelectedText}"/>
+                        </Border>
+                      </StackPanel>
                       <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"><TextBlock Text="{Binding EligibleText}" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Right"/><TextBlock Text="{Binding TotalText}" FontSize="11" Foreground="{DynamicResource Muted}" HorizontalAlignment="Right" TextAlignment="Right" TextWrapping="Wrap" Margin="0,4,0,0"/></StackPanel>
                     </Grid>
                   </DataTemplate></ListBox.ItemTemplate>
@@ -91,13 +100,16 @@
                   <Expander x:Name="RootExpander" Header="{Binding RootsTitle}" Margin="0,12,0,0" FontSize="12" Foreground="{DynamicResource Ink}">
                     <TextBox Foreground="{DynamicResource Ink}" Text="{Binding RootsText, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas" FontSize="11" BorderThickness="0" Background="{DynamicResource FieldSoft}" Padding="8" Margin="0,8,0,0" MaxHeight="160" VerticalScrollBarVisibility="Auto" AutomationProperties.Name="{DynamicResource Caches.ExactFolders}"/>
                   </Expander>
+                  <TextBlock Text="{DynamicResource Caches.Risk}" Style="{StaticResource Caption}" Margin="0,18,0,8"/>
+                  <TextBlock FontSize="13" TextWrapping="Wrap" LineHeight="20"><Run Text="{Binding RiskText, Mode=OneWay}" FontWeight="SemiBold"/><Run Text=" · "/><Run Text="{Binding RiskHint, Mode=OneWay}" Foreground="{DynamicResource Muted}"/></TextBlock>
+                  <TextBlock Text="{Binding Source}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"/>
                   <TextBlock Text="{Binding ScanStatus}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,16,0,0"/>
                 </StackPanel>
               </ScrollViewer>
             </Border>
           </Grid>
-          <Grid Grid.Row="4" Margin="0,16,0,16"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-            <StackPanel VerticalAlignment="Center" Margin="0,0,12,0"><TextBlock x:Name="SelectionSummary" FontSize="16" FontWeight="SemiBold"/><TextBlock Text="{DynamicResource Caches.NoRecycle}" Foreground="{DynamicResource Muted}" FontSize="11" TextWrapping="Wrap" Margin="0,5,0,0"/></StackPanel>
+          <Grid Grid.Row="5" Margin="0,16,0,16"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Margin="0,0,12,0"><TextBlock x:Name="SelectionSummary" FontSize="16" FontWeight="SemiBold"/><TextBlock x:Name="CleanModeHint" Foreground="{DynamicResource Muted}" FontSize="11" TextWrapping="Wrap" Margin="0,5,0,0"/></StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"><Button x:Name="SelectAllButton" Click="SelectAllCaches" Margin="0,0,10,0" IsEnabled="False"/><Button x:Name="CleanButton" Content="{DynamicResource Caches.CleanSelected}" Style="{StaticResource PrimaryButton}" Click="CleanSelected" IsEnabled="False"/></StackPanel>
           </Grid>
         </Grid>
@@ -150,14 +162,47 @@
               </DataGrid.Columns>
             </DataGrid>
           </Border>
-          <StackPanel Grid.Row="3" Margin="0,12,0,16"><TextBlock Text="{DynamicResource Dup.Footer}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,10"/><WrapPanel><Button Content="{DynamicResource Common.ShowInExplorer}" Click="RevealDuplicate" Margin="0,0,10,0"/><Button x:Name="TrashDuplicatesButton" Content="{DynamicResource Common.MoveToRecycle}" Click="TrashSelected" IsEnabled="False"/></WrapPanel></StackPanel>
+          <StackPanel Grid.Row="3" Margin="0,12,0,16"><TextBlock Text="{DynamicResource Dup.Footer}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,10"/><WrapPanel>
+            <ComboBox x:Name="KeepRule" Width="250" Margin="0,0,10,4" SelectionChanged="KeepRuleChanged" AutomationProperties.Name="{DynamicResource Dup.KeepRule}" ToolTip="{DynamicResource Dup.KeepRule}">
+              <ComboBoxItem Tag="Oldest" Content="{DynamicResource Dup.Keep.Oldest}"/><ComboBoxItem Tag="Newest" Content="{DynamicResource Dup.Keep.Newest}"/><ComboBoxItem Tag="ShortestPath" Content="{DynamicResource Dup.Keep.ShortestPath}"/><ComboBoxItem Tag="ShortestName" Content="{DynamicResource Dup.Keep.ShortestName}"/>
+            </ComboBox>
+            <Button x:Name="SelectExtraButton" Content="{DynamicResource Dup.SelectExtra}" Click="SelectExtraCopies" IsEnabled="False" Margin="0,0,10,4"/>
+            <Button x:Name="ClearDuplicateSelectionButton" Content="{DynamicResource Caches.ClearSelection}" Click="ClearDuplicateSelection" IsEnabled="False" Margin="0,0,10,4"/>
+            <Button Content="{DynamicResource Common.ShowInExplorer}" Click="RevealDuplicate" Margin="0,0,10,4"/>
+            <Button x:Name="TrashDuplicatesButton" Content="{DynamicResource Common.MoveToRecycle}" Click="TrashSelected" IsEnabled="False" Margin="0,0,0,4"/>
+          </WrapPanel></StackPanel>
+        </Grid>
+      </TabItem>
+      <TabItem x:Name="JunkTab"><TabItem.Header><DockPanel><Path Style="{StaticResource NavigationIcon}" Data="M3 6 H9 L11 8 H21 V20 H3 Z M3 6 V4 H9 L11 6 M9 14 H15"/><TextBlock Text="{DynamicResource Nav.Junk}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></TabItem.Header>
+        <Grid TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <TextBlock Text="{DynamicResource Junk.Title}" Style="{StaticResource PageTitle}"/>
+          <Border Grid.Row="1" Style="{StaticResource Card}" Padding="14" Margin="0,0,0,18"><DockPanel>
+            <Button x:Name="JunkScanButton" DockPanel.Dock="Right" Content="{DynamicResource Dup.Find}" Click="FindJunk" Style="{StaticResource PrimaryButton}" Margin="10,0,0,0"/>
+            <Button x:Name="JunkChooseButton" DockPanel.Dock="Right" Content="{DynamicResource Common.Choose}" Click="ChooseFolder" Margin="10,0,0,0"/>
+            <CheckBox x:Name="IgnoreJunkFiles" DockPanel.Dock="Right" IsChecked="True" Content="{DynamicResource Junk.IgnoreSystemFiles}" Margin="10,0,0,0" ToolTip="{DynamicResource Junk.IgnoreSystemFilesTip}"/>
+            <TextBlock x:Name="JunkFolder" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+          </DockPanel></Border>
+          <Border Grid.Row="2" Style="{StaticResource Card}" Padding="8">
+            <DataGrid x:Name="JunkGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" SelectionMode="Extended" GridLinesVisibility="None" HeadersVisibility="Column" RowHeight="44" BorderThickness="0" Background="{DynamicResource Surface}" MouseDoubleClick="RevealJunk">
+              <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Kind}" Width="170"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Kind}"/></DataGridTextColumn.Header></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Name}" Width="2*"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Name}"/></DataGridTextColumn.Header></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Path}" Width="3*"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Path}"/></DataGridTextColumn.Header></DataGridTextColumn>
+              </DataGrid.Columns>
+            </DataGrid>
+          </Border>
+          <StackPanel Grid.Row="3" Margin="0,12,0,16"><TextBlock Text="{DynamicResource Junk.Footer}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,10"/><WrapPanel>
+            <Button Content="{DynamicResource Common.ShowInExplorer}" Click="RevealJunk" Margin="0,0,10,4"/>
+            <Button x:Name="SelectAllJunkButton" Content="{DynamicResource Caches.SelectAll}" Click="SelectAllJunk" IsEnabled="False" Margin="0,0,10,4"/>
+            <Button x:Name="TrashJunkButton" Content="{DynamicResource Common.MoveToRecycle}" Click="TrashJunk" IsEnabled="False" Margin="0,0,0,4"/>
+          </WrapPanel></StackPanel>
         </Grid>
       </TabItem>
       <TabItem x:Name="HistoryTab"><TabItem.Header><DockPanel><Path Style="{StaticResource NavigationIcon}" Data="M4 7 A9 9 0 1 1 3 14 M3 3 V8 H8 M12 7 V12 L16 14"/><TextBlock Text="{DynamicResource Nav.History}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></TabItem.Header>
-        <Grid TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <Grid TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
           <TextBlock Text="{DynamicResource History.Title}" Style="{StaticResource PageTitle}"/>
           <Border Grid.Row="1" Style="{StaticResource Card}" Padding="8">
-            <DataGrid x:Name="HistoryGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="None" HeadersVisibility="Column" RowHeight="44" BorderThickness="0" Background="{DynamicResource Surface}">
+            <DataGrid x:Name="HistoryGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="None" HeadersVisibility="Column" RowHeight="44" BorderThickness="0" Background="{DynamicResource Surface}" SelectionMode="Single" SelectionChanged="HistorySelectionChanged">
               <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding DisplayTime}" Width="150" SortMemberPath="Time"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.When}"/></DataGridTextColumn.Header></DataGridTextColumn>
                 <DataGridTextColumn Binding="{Binding DisplayAction}" Width="*"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Action}"/></DataGridTextColumn.Header></DataGridTextColumn>
@@ -165,18 +210,60 @@
                 <DataGridTextColumn Binding="{Binding DisplaySize}" Width="100" SortMemberPath="Bytes"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Volume}"/></DataGridTextColumn.Header></DataGridTextColumn>
                 <DataGridTextColumn Binding="{Binding Skipped}" Width="115"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Skipped}"/></DataGridTextColumn.Header></DataGridTextColumn>
                 <DataGridTextColumn Binding="{Binding DisplayResult}" Width="1.3*"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Result}"/></DataGridTextColumn.Header></DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Undo}" Width="1.2*"><DataGridTextColumn.Header><TextBlock Text="{DynamicResource Col.Undo}"/></DataGridTextColumn.Header></DataGridTextColumn>
               </DataGrid.Columns>
             </DataGrid>
           </Border>
-          <TextBox Grid.Row="2" Text="{Binding SelectedItem.Details, ElementName=HistoryGrid, Mode=OneWay}" IsReadOnly="True" MaxHeight="120" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Background="{DynamicResource Field}" Foreground="{DynamicResource Ink}" BorderThickness="0" Padding="12" Margin="0,12,0,16" AutomationProperties.Name="{DynamicResource History.Details}"/>
+          <TextBox Grid.Row="2" Text="{Binding SelectedItem.Details, ElementName=HistoryGrid, Mode=OneWay}" IsReadOnly="True" MaxHeight="120" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Background="{DynamicResource Field}" Foreground="{DynamicResource Ink}" BorderThickness="0" Padding="12" Margin="0,12,0,0" AutomationProperties.Name="{DynamicResource History.Details}"/>
+          <DockPanel Grid.Row="3" Margin="0,12,0,16">
+            <WrapPanel DockPanel.Dock="Right"><Button x:Name="RestoreButton" Content="{DynamicResource History.Restore}" Click="RestoreSelected" IsEnabled="False" Style="{StaticResource PrimaryButton}" Margin="10,0,0,4"/><Button Content="{DynamicResource History.OpenRecycleBin}" Click="OpenRecycleBin" Margin="10,0,0,4"/></WrapPanel>
+            <TextBlock x:Name="QuarantineInfo" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center"/>
+          </DockPanel>
         </Grid>
       </TabItem>
-      <TabItem x:Name="ExclusionsTab"><TabItem.Header><DockPanel><Path Style="{StaticResource NavigationIcon}" Data="M12 2 L21 6 V12 Q21 19 12 22 Q3 19 3 12 V6 Z M8 12 H16"/><TextBlock Text="{DynamicResource Nav.Exclusions}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></TabItem.Header>
-        <Grid TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-          <TextBlock Text="{DynamicResource Nav.Exclusions}" Style="{StaticResource PageTitle}"/>
-          <TextBlock Grid.Row="1" Text="{DynamicResource Excl.Hint}" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" Margin="0,0,0,18"/>
-          <Border Grid.Row="2" Style="{StaticResource Card}"><ListBox x:Name="ExclusionsList" AutomationProperties.Name="{DynamicResource Excl.List}"/></Border>
-          <WrapPanel Grid.Row="3" Margin="0,14,0,16"><Button x:Name="AddExclusionButton" Content="{DynamicResource Excl.Add}" Click="AddExclusion" Margin="0,0,10,0"/><Button x:Name="RemoveExclusionButton" Content="{DynamicResource Excl.Remove}" Click="RemoveExclusion"/></WrapPanel>
+      <TabItem x:Name="SettingsTab"><TabItem.Header><DockPanel><Path Style="{StaticResource NavigationIcon}" Data="M12 9 A3 3 0 1 0 12 15 A3 3 0 1 0 12 9 M12 2 V5 M12 19 V22 M2 12 H5 M19 12 H22 M4.9 4.9 L7 7 M17 17 L19.1 19.1 M4.9 19.1 L7 17 M17 7 L19.1 4.9"/><TextBlock Text="{DynamicResource Nav.Settings}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></TabItem.Header>
+        <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <TextBlock Text="{DynamicResource Nav.Settings}" Style="{StaticResource PageTitle}" Foreground="{DynamicResource Ink}"/>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal" Margin="0,0,0,16">
+            <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,18"><StackPanel>
+              <TextBlock Text="{DynamicResource Settings.Exclusions}" Style="{StaticResource Caption}"/>
+              <TextBlock Text="{DynamicResource Excl.Hint}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,10"/>
+              <Border Background="{DynamicResource Field}" CornerRadius="8" MinHeight="44" MaxHeight="180"><ListBox x:Name="ExclusionsList" AutomationProperties.Name="{DynamicResource Excl.List}"/></Border>
+              <WrapPanel Margin="0,10,0,0"><Button x:Name="AddExclusionButton" Content="{DynamicResource Excl.Add}" Click="AddExclusion" Margin="0,0,10,0"/><Button x:Name="RemoveExclusionButton" Content="{DynamicResource Excl.Remove}" Click="RemoveExclusion"/></WrapPanel>
+            </StackPanel></Border>
+            <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,18"><StackPanel>
+              <TextBlock Text="{DynamicResource Settings.Cleanup}" Style="{StaticResource Caption}"/>
+              <Grid Margin="0,12,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="12"/><RowDefinition Height="Auto"/><RowDefinition Height="12"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <StackPanel VerticalAlignment="Center" Margin="0,0,16,0"><TextBlock Text="{DynamicResource Settings.Mode}" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{DynamicResource Settings.ModeHint}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/></StackPanel>
+                <ComboBox x:Name="ModeSetting" Grid.Column="1" Width="220" SelectionChanged="CleanupSettingChanged" AutomationProperties.Name="{DynamicResource Settings.Mode}"><ComboBoxItem Tag="Permanent" Content="{DynamicResource Mode.Permanent}"/><ComboBoxItem Tag="Quarantine" Content="{DynamicResource Mode.Quarantine}"/></ComboBox>
+                <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="0,0,16,0"><TextBlock Text="{DynamicResource Settings.QuarantineDays}" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{DynamicResource Settings.QuarantineDaysHint}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/></StackPanel>
+                <ComboBox x:Name="QuarantineDaysSetting" Grid.Row="2" Grid.Column="1" Width="220" SelectionChanged="CleanupSettingChanged" AutomationProperties.Name="{DynamicResource Settings.QuarantineDays}"><ComboBoxItem Tag="1"/><ComboBoxItem Tag="3"/><ComboBoxItem Tag="7"/><ComboBoxItem Tag="14"/><ComboBoxItem Tag="30"/></ComboBox>
+                <StackPanel Grid.Row="4" VerticalAlignment="Center" Margin="0,0,16,0"><TextBlock Text="{DynamicResource Settings.QuarantineLimit}" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock x:Name="QuarantineUsage" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"/></StackPanel>
+                <ComboBox x:Name="QuarantineLimitSetting" Grid.Row="4" Grid.Column="1" Width="220" SelectionChanged="CleanupSettingChanged" AutomationProperties.Name="{DynamicResource Settings.QuarantineLimit}"><ComboBoxItem Tag="1"/><ComboBoxItem Tag="2"/><ComboBoxItem Tag="5"/><ComboBoxItem Tag="10"/><ComboBoxItem Tag="20"/></ComboBox>
+              </Grid>
+              <WrapPanel Margin="0,14,0,0"><Button x:Name="EmptyQuarantineButton" Content="{DynamicResource Settings.EmptyQuarantine}" Click="EmptyQuarantine" Margin="0,0,10,0"/><Button Content="{DynamicResource Settings.OpenQuarantine}" Click="OpenQuarantine"/></WrapPanel>
+            </StackPanel></Border>
+            <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,18"><StackPanel>
+              <TextBlock Text="{DynamicResource Settings.Duplicates}" Style="{StaticResource Caption}"/>
+              <TextBlock Text="{DynamicResource Settings.Priority}" FontWeight="SemiBold" Margin="0,18,0,4"/>
+              <TextBlock Text="{DynamicResource Settings.PriorityHint}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,10"/>
+              <Border Background="{DynamicResource Field}" CornerRadius="8" MinHeight="44" MaxHeight="150"><ListBox x:Name="PriorityList" AutomationProperties.Name="{DynamicResource Settings.Priority}"/></Border>
+              <WrapPanel Margin="0,10,0,0"><Button x:Name="AddPriorityButton" Content="{DynamicResource Settings.AddFolder}" Click="AddFolderSetting" Tag="Priority" Margin="0,0,10,0"/><Button x:Name="RemovePriorityButton" Content="{DynamicResource Settings.RemoveFolder}" Click="RemoveFolderSetting" Tag="Priority"/></WrapPanel>
+              <TextBlock Text="{DynamicResource Settings.Protected}" FontWeight="SemiBold" Margin="0,18,0,4"/>
+              <TextBlock Text="{DynamicResource Settings.ProtectedHint}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,10"/>
+              <Border Background="{DynamicResource Field}" CornerRadius="8" MinHeight="44" MaxHeight="150"><ListBox x:Name="ProtectedList" AutomationProperties.Name="{DynamicResource Settings.Protected}"/></Border>
+              <WrapPanel Margin="0,10,0,0"><Button x:Name="AddProtectedButton" Content="{DynamicResource Settings.AddFolder}" Click="AddFolderSetting" Tag="Protected" Margin="0,0,10,0"/><Button x:Name="RemoveProtectedButton" Content="{DynamicResource Settings.RemoveFolder}" Click="RemoveFolderSetting" Tag="Protected"/></WrapPanel>
+              <CheckBox x:Name="SequentialSetting" Content="{DynamicResource Settings.Sequential}" Click="CleanupSettingChanged" Margin="0,16,0,0" ToolTip="{DynamicResource Settings.SequentialHint}"/>
+              <DockPanel Margin="0,8,0,0"><Button x:Name="ClearHashCacheButton" Content="{DynamicResource Settings.ClearHashCache}" Click="ClearHashCache" DockPanel.Dock="Right" Margin="12,0,0,0"/><TextBlock x:Name="HashCacheInfo" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel>
+            </StackPanel></Border>
+            <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,18"><StackPanel>
+              <TextBlock Text="{DynamicResource Settings.Rules}" Style="{StaticResource Caption}"/>
+              <TextBlock Text="{DynamicResource Settings.RulesHint}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,10" LineHeight="18"/>
+              <DockPanel><Button Content="{DynamicResource Rules.OpenFolder}" Click="OpenRulesFolder" DockPanel.Dock="Right" Margin="12,0,0,0"/><TextBlock x:Name="RulesInfo" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="13"/></DockPanel>
+            </StackPanel></Border>
+          </StackPanel>
+        </ScrollViewer>
         </Grid>
       </TabItem>
     </TabControl>

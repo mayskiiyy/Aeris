@@ -9,6 +9,7 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Languages\*.xaml" LogicalName="Aeris.Languages.%(Filename).xaml" />
+    <EmbeddedResource Include="Cleaners/builtin.json" LogicalName="Aeris.Cleaners.builtin.json" />
     <InternalsVisibleTo Include="Aeris.Tests" />
   </ItemGroup>
 </Project>

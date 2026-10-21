@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Markup;
@@ -25,6 +26,7 @@ public partial class MainWindow : Window
     private bool scanningCaches;
     private DateTime cacheCutoff;
     private bool choosingCustom;
+    private List<RuleError> ruleErrors = [];
     private Func<string> filesHint = () => Loc.Get("Files.Hint");
     private record ScanProgress(string Summary, string Directory = "", string File = "");
 
@@ -37,6 +39,7 @@ public partial class MainWindow : Window
         RestoreSettings();
         ResetCaches();
         LocalizeView();
+        StartMaintenance();
         Closing += (_, e) =>
         {
             if (cleaning) { e.Cancel = true; Status.Text = Loc.Get("Status.WaitForCleanup"); }
@@ -101,6 +104,10 @@ public partial class MainWindow : Window
         MapList.Items.Refresh();
         DuplicatesGrid.Items.Refresh();
         RefreshHistory();
+        RestoreCleanupSettings();
+        RefreshRulesInfo();
+        RefreshQuarantine();
+        JunkGrid.Items.Refresh();
         FilesHint.Text = filesHint();
         CacheScanButton.Content = Loc.Get(busy && scanningCaches && !cleaning ? "Caches.Checking" : "Caches.Check");
         UpdateSelection();
@@ -219,23 +226,41 @@ public partial class MainWindow : Window
     private void SelectAllCaches(object sender, RoutedEventArgs e)
     {
         if (busy) return;
-        bool select = caches.Any(c => c.CanClean && !c.Selected);
-        foreach (var group in caches) group.Selected = select && group.CanClean;
+        bool select = caches.Any(c => c.CanClean && !c.IsAdvanced && !c.Selected);
+        foreach (var group in caches) group.Selected = select && group.CanClean && (!group.IsAdvanced || group.Selected);
         CacheList.Items.Refresh();
         UpdateSelection();
     }
 
     private void CacheSelectionChanged(object sender, RoutedEventArgs e)
     {
-        if (sender is CheckBox { IsChecked: true, DataContext: CacheGroup group }) CacheList.SelectedItem = group;
+        if (sender is CheckBox { IsChecked: true, DataContext: CacheGroup group } box)
+        {
+            CacheList.SelectedItem = group;
+            if (group.IsAdvanced && !restoring && (box.IsKeyboardFocusWithin || box.IsMouseOver)
+                && MessageBox.Show(this, Loc.Format("Risk.Advanced.Confirm", group.Name, group.RiskHint), group.RiskText, MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) != MessageBoxResult.Yes)
+                box.IsChecked = false;
+        }
         if (CleanButton != null) UpdateSelection();
     }
 
     private void ResetCaches()
     {
-        caches = Storage.CacheRoots();
-        CacheList.ItemsSource = caches;
+        var errors = new List<RuleError>();
+        caches = Cleaners.Groups(errors);
+        ShowCaches(errors);
+    }
+
+    private void ShowCaches(IReadOnlyCollection<RuleError> errors)
+    {
+        ruleErrors = errors.ToList();
+        var view = new ListCollectionView(caches);
+        view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(CacheGroup.GroupName)));
+        CacheList.ItemsSource = view;
         CacheList.SelectedIndex = 0;
+        RuleNotice.Visibility = ruleErrors.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        RuleErrors.Text = string.Join("\n", ruleErrors.Select(e => $"{e.Source}: {e.Message}"));
+        RefreshRulesInfo();
         UpdateSelection();
     }
 
@@ -249,10 +274,11 @@ public partial class MainWindow : Window
         var selected = caches.Where(c => c.Selected && c.Eligible > 0).ToArray();
         CleanButton.IsEnabled = !busy && selected.Length > 0;
         SelectAllButton.IsEnabled = !busy && caches.Any(c => c.CanClean);
-        SelectAllButton.Content = Loc.Get(selected.Length == 0 || caches.Any(c => c.CanClean && !c.Selected) ? "Caches.SelectAll" : "Caches.ClearSelection");
+        SelectAllButton.Content = Loc.Get(selected.Length == 0 || caches.Any(c => c.CanClean && !c.IsAdvanced && !c.Selected) ? "Caches.SelectAll" : "Caches.ClearSelection");
         SelectionSummary.Text = selected.Length == 0
             ? Loc.Get("Caches.NothingSelected")
             : Loc.Format("Caches.SelectedSummary", Storage.Format(selected.Sum(c => c.Eligible)), selected.Length);
+        CleanModeHint.Text = data.CleanupMode == CleanupMode.Quarantine ? Loc.Plural("Caches.ReviewQuarantine", data.QuarantineDays) : Loc.Get("Caches.ReviewPermanent");
         RefreshHome();
     }
 
@@ -263,12 +289,17 @@ public partial class MainWindow : Window
         if (value) DrivePopup.IsOpen = false;
         ChooseButton.IsEnabled = ScanButton.IsEnabled = CacheScanButton.IsEnabled = Threshold.IsEnabled = Retention.IsEnabled = !value;
         FileType.IsEnabled = MapScanButton.IsEnabled = MapChooseButton.IsEnabled = DuplicateScanButton.IsEnabled = DuplicateChooseButton.IsEnabled = AddExclusionButton.IsEnabled = RemoveExclusionButton.IsEnabled = !value;
+        JunkScanButton.IsEnabled = JunkChooseButton.IsEnabled = IgnoreJunkFiles.IsEnabled = KeepRule.IsEnabled = !value;
+        AddPriorityButton.IsEnabled = RemovePriorityButton.IsEnabled = AddProtectedButton.IsEnabled = RemoveProtectedButton.IsEnabled = !value;
+        EmptyQuarantineButton.IsEnabled = ClearHashCacheButton.IsEnabled = ModeSetting.IsEnabled = !value;
+        RestoreButton.IsEnabled = !value && HistoryGrid.SelectedItem is HistoryEntry { CanRestore: true };
         HomeCacheAction.IsEnabled = LanguagePicker.IsEnabled = !value;
         UpdateSelection();
         CacheList.IsEnabled = !value;
         ExportButton.IsEnabled = !value && FilesGrid.Items.Count > 0;
         TrashFilesButton.IsEnabled = !value && FilesGrid.Items.Count > 0;
-        TrashDuplicatesButton.IsEnabled = !value && DuplicatesGrid.Items.Count > 0;
+        TrashDuplicatesButton.IsEnabled = SelectExtraButton.IsEnabled = ClearDuplicateSelectionButton.IsEnabled = !value && DuplicatesGrid.Items.Count > 0;
+        TrashJunkButton.IsEnabled = SelectAllJunkButton.IsEnabled = !value && JunkGrid.Items.Count > 0;
         CancelButton.Visibility = value && !cleaning ? Visibility.Visible : Visibility.Collapsed;
         Activity.IsIndeterminate = value;
         if (value) { ScanLocation.Text = ""; ScanFile.Text = ""; }
@@ -327,7 +358,8 @@ public partial class MainWindow : Window
                     if (watch.ElapsedMilliseconds > 250)
                     { report.Report(new(Loc.Format("Status.FilesChecked", count, Storage.Format(total), f.DirectoryName ?? ""), f.DirectoryName ?? "", f.Name)); watch.Restart(); }
                 }
-                var foundCaches = cachesOnly ? Storage.CacheRoots() : [];
+                var ruleProblems = new List<RuleError>();
+                var foundCaches = cachesOnly ? Cleaners.Groups(ruleProblems) : [];
                 long cacheFiles = 0, cacheBytes = 0;
                 int category = 0;
                 string CacheProgress(CacheGroup group) => Loc.Format("Status.CacheProgress", category, foundCaches.Count, group.Name, cacheFiles, Storage.Format(cacheBytes));
@@ -336,38 +368,26 @@ public partial class MainWindow : Window
                     category++;
                     report.Report(new(CacheProgress(group)));
                     watch.Restart();
-                    foreach (string root in group.Roots)
+                    group.Scan(cutoff, exclusions, token, (root, file) =>
                     {
-                        report.Report(new(CacheProgress(group), root));
-                        foreach (var f in Storage.Walk(root, token, () => { skipped++; group.Skipped++; }, exclusions))
-                        {
-                            try
-                            {
-                                long size = f.Length;
-                                group.Total += size;
-                                cacheBytes += size;
-                                cacheFiles++;
-                                if (Storage.Eligible(f, cutoff)) group.Eligible += size;
-                            }
-                            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { skipped++; group.Skipped++; }
-                            if (watch.ElapsedMilliseconds >= 250)
-                            {
-                                report.Report(new(CacheProgress(group), f.DirectoryName ?? root, f.Name));
-                                watch.Restart();
-                            }
-                        }
-                    }
-                    group.Scanned = true;
+                        if (file == null) { report.Report(new(CacheProgress(group), root)); return; }
+                        cacheFiles++;
+                        cacheBytes += file.Length;
+                        if (watch.ElapsedMilliseconds < 250) return;
+                        report.Report(new(CacheProgress(group), file.DirectoryName ?? root, file.Name));
+                        watch.Restart();
+                    });
+                    skipped += group.Skipped;
+                    if (group.IsSafe && group.Rule.Enabled && group.Eligible > 0) group.Selected = true;
                 }
-                return (files: largest.UnorderedItems.Select(i => i.Element).OrderByDescending(f => f.Size).ToList(), map: Analysis.FolderMap(folder, folderSizes), foundCaches, count, total, matches, skipped);
+                return (files: largest.UnorderedItems.Select(i => i.Element).OrderByDescending(f => f.Size).ToList(), map: Analysis.FolderMap(folder, folderSizes), foundCaches, ruleProblems, count, total, matches, skipped);
             }, token);
             token.ThrowIfCancellationRequested();
             if (cachesOnly)
             {
                 caches = result.foundCaches;
                 cacheCutoff = cutoff;
-                CacheList.ItemsSource = caches;
-                CacheList.SelectedIndex = 0;
+                ShowCaches(result.ruleProblems);
                 Status.Text = Loc.Format("Status.CachesChecked", Storage.Format(caches.Sum(c => c.Eligible)), result.skipped);
             }
             else
@@ -407,28 +427,50 @@ public partial class MainWindow : Window
         if (busy) return;
         var selected = caches.Where(c => c.Selected && c.Eligible > 0).ToArray();
         if (selected.Length == 0) { Status.Text = Loc.Get("Clean.SelectCategories"); return; }
-        string names = string.Join("\n", selected.Select(c => $"• {c.Name}: {c.EligibleText}"));
+        var plan = Cleanup.CachePlan(selected, cacheCutoff, data.CleanupMode);
+        if (!Preview(plan)) return;
+        if (plan.Mode != data.CleanupMode) { data.CleanupMode = plan.Mode; RestoreCleanupSettings(); SaveSettings(); }
         string cutoffText = cacheCutoff.ToLocalTime().ToString("g", Loc.Culture);
-        string message = Loc.Format("Clean.Confirm", names, cutoffText, Storage.Format(selected.Sum(c => c.Eligible)));
-        if (MessageBox.Show(this, message, Loc.Get("Clean.ConfirmTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) != MessageBoxResult.Yes) return;
+        string details = string.Join("\n", plan.Categories.Where(c => c.IncludedCount > 0).Select(c => c.Name)) + "\n" + Loc.Format("History.Before", cutoffText);
         HistoryEntry history;
-        try { history = BeginHistory(HistoryAction.Cleanup, string.Join("\n", selected.Select(g => g.Name)) + "\n" + Loc.Format("History.Before", cutoffText)); }
+        Journal journal;
+        try
+        {
+            string id = Cleanup.NewId();
+            journal = Journal.Begin(id, HistoryAction.Cleanup, plan.Mode, details);
+            history = BeginHistory(HistoryAction.Cleanup, details, id, plan.Mode);
+        }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Status.Text = Loc.Get("Clean.HistoryFailed"); return; }
         cleaning = true;
         SetBusy(true);
+        int total = plan.Count;
         Status.Text = Loc.Get("Clean.Running");
+        var progress = new Progress<int>(n => { if (cleaning) Status.Text = Loc.Format("Clean.Progress", n, total); });
         try
         {
             var exclusions = data.Exclusions.ToArray();
-            var result = await Task.Run(() => Storage.Clean(selected, cacheCutoff, CancellationToken.None, exclusions));
-            Status.Text = Loc.Format("Clean.Done", result.files, Storage.Format(result.bytes), result.skipped);
-            FinishHistory(history, result.files, result.bytes, result.skipped, HistoryResult.Completed);
+            var current = caches.ToArray();
+            var result = await Task.Run(() =>
+            {
+                using (journal) return Cleanup.ExecuteCache(plan, exclusions, journal, CancellationToken.None, progress, Cleaners.Groups());
+            });
+            Status.Text = result.Summary;
+            FinishHistory(history, result.Done, result.Bytes, result.Skipped, result.Result);
+            if (plan.Mode == CleanupMode.Quarantine) _ = Task.Run(() => Quarantine.Purge(data.QuarantineDays, data.QuarantineLimitGb * 1024L * 1024 * 1024));
+            if (result.Errors.Count > 0 && result.Failed > 0) MessageBox.Show(this, string.Join("\n", result.Errors.Take(8)), Loc.Get("Recycle.Skipped"));
         }
         catch (Exception ex)
         {
+            journal.Dispose();
             Status.Text = Loc.Format("Clean.Stopped", ex.Message);
             FinishHistory(history, 0, 0, 0, HistoryResult.Interrupted);
         }
-        finally { cleaning = false; ResetCaches(); SetBusy(false); RefreshDisk(); }
+        finally { cleaning = false; ResetCaches(); SetBusy(false); RefreshDisk(); RefreshQuarantine(); }
+    }
+
+    private bool Preview(CleanupPlan plan, IEnumerable<string>? warnings = null)
+    {
+        var window = new PreviewWindow(plan, warnings ?? [], data.LargeOperationFiles, data.LargeOperationGb * 1024L * 1024 * 1024, data.QuarantineDays) { Owner = this };
+        return window.ShowDialog() == true;
     }
 }

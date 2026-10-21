@@ -36,21 +36,36 @@ public static class Recycle
 
     public static void Send(LargeFile file, IReadOnlyCollection<string> exclusions, IntPtr owner)
     {
-        if (!Analysis.Unchanged(file) || Storage.IsExcluded(file.Path, exclusions)) throw new IOException(Loc.Get("Error.FileChanged"));
-        if (new DriveInfo(Path.GetPathRoot(file.Path)!).DriveType != DriveType.Fixed) throw new IOException(Loc.Get("Error.LocalOnly"));
+        if (!Analysis.Unchanged(file) || Storage.IsExcluded(file.Path, exclusions)) throw new ChangedException(Loc.Get("Error.FileChanged"));
+        Shell(file.Path, owner);
+        if (File.Exists(file.Path)) throw new IOException(Loc.Get("Error.NotRecycled"));
+    }
+
+    /// <summary>Recycles a folder that is still empty apart from the junk files the empty-folder search ignores.</summary>
+    public static void SendFolder(string path, bool ignoreJunk, IReadOnlyCollection<string> exclusions, IntPtr owner)
+    {
+        if (!Directory.Exists(path) || !Storage.SafePath(path) || Storage.IsExcluded(path, exclusions) || !EmptyFolders.IsEmpty(path, ignoreJunk))
+            throw new ChangedException(Loc.Get("Error.FolderChanged"));
+        Shell(path, owner);
+        if (Directory.Exists(path)) throw new IOException(Loc.Get("Error.NotRecycled"));
+    }
+
+    private static void Shell(string path, IntPtr owner)
+    {
+        if (new DriveInfo(Path.GetPathRoot(path)!).DriveType != DriveType.Fixed) throw new IOException(Loc.Get("Error.LocalOnly"));
         IShellItem? item = null;
         IFileOperation? operation = null;
         try
         {
             var iid = typeof(IShellItem).GUID;
-            SHCreateItemFromParsingName(file.Path, IntPtr.Zero, ref iid, out item);
+            SHCreateItemFromParsingName(path, IntPtr.Zero, ref iid, out item);
             operation = (IFileOperation)Activator.CreateInstance(Type.GetTypeFromCLSID(new Guid("3AD05575-8857-4850-9277-11B85BDB8E09"))!)!;
             operation.SetOwnerWindow(owner);
             operation.SetOperationFlags(0x00080000 | 0x00100000 | 0x20000000 | 0x00000400 | 0x00000004 | 0x00000010);
             operation.DeleteItem(item, IntPtr.Zero);
             operation.PerformOperations();
             operation.GetAnyOperationsAborted(out bool aborted);
-            if (aborted || File.Exists(file.Path)) throw new IOException(Loc.Get("Error.NotRecycled"));
+            if (aborted) throw new IOException(Loc.Get("Error.NotRecycled"));
         }
         finally
         {
@@ -58,4 +73,42 @@ public static class Recycle
             if (operation != null) Marshal.FinalReleaseComObject(operation);
         }
     }
+
+    /// <summary>
+    /// Moves the plan's included files and folders to the Recycle Bin, one by one. Must run on an STA thread.
+    /// Duplicate copies are hashed again together with the copy that stays.
+    /// </summary>
+    public static CleanupResult Execute(CleanupPlan plan, IReadOnlyCollection<string> exclusions, IntPtr owner, Journal journal, CancellationToken token, IProgress<int>? progress = null, bool ignoreJunk = true)
+    {
+        if (!Duplicates.KeepsOne(plan)) throw new InvalidOperationException(Loc.Get("Recycle.KeepOne"));
+        var result = new CleanupResult { Id = journal.Id };
+        int index = 0;
+        foreach (var item in plan.Included.ToList())
+        {
+            token.ThrowIfCancellationRequested();
+            progress?.Report(++index);
+            string outcome = Outcome.Recycled;
+            string? error = null;
+            try
+            {
+                if (item.IsFolder) SendFolder(item.Path, ignoreJunk, exclusions, owner);
+                else
+                {
+                    Duplicates.Verify(item);
+                    Send(new LargeFile(item.Path, item.Size, item.Modified, item.Created), exclusions, owner);
+                }
+            }
+            catch (ChangedException e) { outcome = Outcome.Changed; error = e.Message; }
+            catch (IOException e) when (Cleanup.IsLocked(e)) { outcome = Outcome.InUse; error = e.Message; }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or COMException) { outcome = Outcome.Failed; error = e.Message; }
+            result.Count(item, outcome, error);
+            journal.Write(item, outcome, null, error);
+        }
+        return result;
+    }
+
+    /// <summary>Opens the Recycle Bin in File Explorer.</summary>
+    public static void Open() => System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("explorer.exe", "shell:RecycleBinFolder") { UseShellExecute = true });
 }
+
+public class ChangedException(string message) : IOException(message);

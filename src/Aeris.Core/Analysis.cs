@@ -78,50 +78,122 @@ public static class Analysis
         return Convert.ToHexString(hash.GetHashAndReset());
     }
 
-    public static List<DuplicateFile> FindDuplicates(string root, IReadOnlyCollection<string> exclusions, CancellationToken token, Action<string> report, Action skipped)
+    public const int PrefixBytes = 64 * 1024;
+
+    /// <summary>SHA-256 of the first and last 64 KB together with the size, or of the whole file when it is small enough.</summary>
+    public static string PartialHash(FileStream stream, long size, CancellationToken token)
     {
+        if (size <= 2L * PrefixBytes) return Hash(stream, token);
+        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        byte[] buffer = new byte[PrefixBytes];
+        stream.ReadExactly(buffer);
+        hash.AppendData(buffer);
+        stream.Seek(-PrefixBytes, SeekOrigin.End);
+        stream.ReadExactly(buffer);
+        hash.AppendData(buffer);
+        stream.Seek(0, SeekOrigin.Begin);
+        return "P" + Convert.ToHexString(hash.GetHashAndReset());
+    }
+
+    public static List<DuplicateFile> FindDuplicates(string root, IReadOnlyCollection<string> exclusions, CancellationToken token, Action<string> report, Action skipped, DuplicateOptions? options = null) =>
+        FindDuplicates([root], exclusions, token, report, skipped, options);
+
+    /// <summary>
+    /// Groups files by size, then by a hash of their first and last 64 KB, then by full SHA-256. Hard links to the same
+    /// file count once. Full hashes are reused from <see cref="DuplicateOptions.Cache"/> while a file stays unchanged.
+    /// </summary>
+    public static List<DuplicateFile> FindDuplicates(IEnumerable<string> roots, IReadOnlyCollection<string> exclusions, CancellationToken token, Action<string> report, Action skipped, DuplicateOptions? options = null)
+    {
+        options ??= new();
         var sizes = new Dictionary<long, List<LargeFile>>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         int count = 0;
-        foreach (var info in Storage.Walk(root, token, skipped, exclusions))
-        {
-            try
+        foreach (string root in roots)
+            foreach (var info in Storage.Walk(root, token, skipped, exclusions))
             {
-                var file = Snapshot(info);
-                if (file.Size == 0) continue;
-                if (!sizes.TryGetValue(file.Size, out var group)) sizes[file.Size] = group = [];
-                group.Add(file);
-                if (++count % 500 == 0) report(Loc.Format("Dup.GroupingProgress", count));
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { skipped(); }
-        }
-        var identities = new HashSet<string>();
-        var hashes = new Dictionary<(long Size, string Hash), List<(LargeFile File, string Identity)>>();
-        var watch = System.Diagnostics.Stopwatch.StartNew();
-        foreach (var candidates in sizes.Values.Where(g => g.Count > 1))
-            foreach (var file in candidates)
-            {
-                token.ThrowIfCancellationRequested();
                 try
                 {
-                    if (!Unchanged(file)) { skipped(); continue; }
-                    if (watch.ElapsedMilliseconds >= 200) { report(Loc.Format("Dup.Hashing", file.Path)); watch.Restart(); }
-                    using var stream = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    string identity = Identity(stream);
-                    if (!identities.Add(identity)) continue;
-                    string hash = Hash(stream, token);
-                    if (!Unchanged(file)) { skipped(); continue; }
-                    if (!hashes.TryGetValue((file.Size, hash), out var group)) hashes[(file.Size, hash)] = group = [];
-                    group.Add((file, identity));
+                    var file = Snapshot(info);
+                    if (file.Size == 0 || file.Size < options.MinSize || options.Filter?.Invoke(file.Path) == false || !seen.Add(file.Path)) continue;
+                    if (!sizes.TryGetValue(file.Size, out var group)) sizes[file.Size] = group = [];
+                    group.Add(file);
+                    if (++count % 500 == 0) report(Loc.Format("Dup.GroupingProgress", count));
                 }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { skipped(); }
             }
+
+        var skipGate = new object();
+        void Skip() { lock (skipGate) skipped(); }
+        var parallel = new ParallelOptions { CancellationToken = token, MaxDegreeOfParallelism = options.Sequential ? 1 : Math.Clamp(Environment.ProcessorCount, 2, 4) };
+        var candidates = sizes.Values.Where(g => g.Count > 1).SelectMany(g => g).ToList();
+        long totalBytes = candidates.Sum(f => Math.Min(f.Size, 2L * PrefixBytes)), doneBytes = 0;
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        var identities = new System.Collections.Concurrent.ConcurrentDictionary<string, byte>();
+        var partial = new System.Collections.Concurrent.ConcurrentBag<(LargeFile File, string Identity, string Hash)>();
+        void Progress(string key, string path, long bytes)
+        {
+            long done = Interlocked.Add(ref doneBytes, bytes);
+            lock (watch)
+            {
+                if (watch.ElapsedMilliseconds < 200) return;
+                report(Loc.Format(key, Storage.Format(done), Storage.Format(Math.Max(totalBytes, done)), path));
+                watch.Restart();
+            }
+        }
+
+        Parallel.ForEach(candidates, parallel, file =>
+        {
+            try
+            {
+                if (!Unchanged(file)) { Skip(); return; }
+                using var stream = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read, 1, FileOptions.SequentialScan);
+                string identity = Identity(stream);
+                if (!identities.TryAdd(identity, 0)) return;
+                string hash = PartialHash(stream, file.Size, token);
+                partial.Add((file, identity, hash));
+                Progress("Dup.Prefiltering", file.Path, Math.Min(file.Size, 2L * PrefixBytes));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Skip(); }
+        });
+
+        var full = partial.GroupBy(p => (p.File.Size, p.Hash)).Where(g => g.Count() > 1).SelectMany(g => g).ToList();
+        totalBytes = full.Where(p => p.Hash.StartsWith('P')).Sum(p => p.File.Size);
+        doneBytes = 0;
+        var hashes = new System.Collections.Concurrent.ConcurrentBag<(LargeFile File, string Identity, string Hash)>();
+        Parallel.ForEach(full, parallel, item =>
+        {
+            var (file, identity, hash) = item;
+            try
+            {
+                if (hash.StartsWith('P'))
+                {
+                    if (options.Cache?.Get(file, identity) is { } cached) hash = cached;
+                    else
+                    {
+                        using var stream = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read, 1, FileOptions.SequentialScan);
+                        if (Identity(stream) != identity) { Skip(); return; }
+                        hash = Hash(stream, token);
+                        if (!Unchanged(file)) { Skip(); return; }
+                        options.Cache?.Set(file, identity, hash);
+                        Progress("Dup.Hashing", file.Path, file.Size);
+                    }
+                }
+                hashes.Add((file, identity, hash));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Skip(); }
+        });
+        token.ThrowIfCancellationRequested();
+        options.Cache?.Save();
+
         int number = 0;
         var result = new List<DuplicateFile>();
-        foreach (var group in hashes.Where(p => p.Value.Count > 1).OrderByDescending(p => p.Key.Size * (p.Value.Count - 1)))
+        foreach (var group in hashes.GroupBy(h => (h.File.Size, h.Hash)).Where(g => g.Count() > 1).OrderByDescending(g => g.Key.Size * (g.Count() - 1)).ThenBy(g => g.Key.Hash, StringComparer.Ordinal))
         {
             number++;
-            result.AddRange(group.Value.Select(f => new DuplicateFile(f.File, group.Key.Hash, f.Identity, number)));
+            result.AddRange(group.OrderBy(f => f.File.Path, StringComparer.OrdinalIgnoreCase).Select(f => new DuplicateFile(f.File, group.Key.Hash, f.Identity, number)));
         }
         return result;
     }
 }
+
+public record DuplicateOptions(long MinSize = 1, bool Sequential = false, HashCache? Cache = null, Func<string, bool>? Filter = null);

@@ -1,0 +1,942 @@
+[
+  {
+    "id": "user-temp",
+    "nameKey": "Cache.UserTemp.Name",
+    "descriptionKey": "Cache.UserTemp.Description",
+    "locationKey": "Cache.UserTemp.Location",
+    "group": "Windows",
+    "risk": "Safe",
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Temp"
+      }
+    ]
+  },
+  {
+    "id": "windows-temp",
+    "nameKey": "Cache.WindowsTemp.Name",
+    "descriptionKey": "Cache.WindowsTemp.Description",
+    "locationKey": "Cache.WindowsTemp.Location",
+    "group": "Windows",
+    "risk": "Safe",
+    "targets": [
+      {
+        "root": "%WINDIR%\\Temp"
+      }
+    ]
+  },
+  {
+    "id": "crash-dumps",
+    "nameKey": "Cache.CrashDumps.Name",
+    "descriptionKey": "Cache.CrashDumps.Description",
+    "locationKey": "Cache.CrashDumps.Location",
+    "group": "Windows",
+    "risk": "Safe",
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\CrashDumps"
+      },
+      {
+        "root": "%LOCALAPPDATA%\\Microsoft\\Windows\\WER\\ReportArchive"
+      },
+      {
+        "root": "%LOCALAPPDATA%\\Microsoft\\Windows\\WER\\ReportQueue"
+      }
+    ]
+  },
+  {
+    "id": "chrome",
+    "name": "Google Chrome",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "chrome"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Google\\Chrome\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "chrome-beta",
+    "name": "Google Chrome Beta",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "chrome"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "chrome-dev",
+    "name": "Google Chrome Dev",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "chrome"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "chrome-canary",
+    "name": "Google Chrome Canary",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "chrome"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Google\\Chrome SxS\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "edge",
+    "name": "Microsoft Edge",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "msedge"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "edge-beta",
+    "name": "Microsoft Edge Beta",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "msedge"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Microsoft\\Edge Beta\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "edge-dev",
+    "name": "Microsoft Edge Dev",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "msedge"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Microsoft\\Edge Dev\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "edge-canary",
+    "name": "Microsoft Edge Canary",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "msedge"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Microsoft\\Edge SxS\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "brave",
+    "name": "Brave",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "brave"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "brave-beta",
+    "name": "Brave Beta",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "brave"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser-Beta\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "brave-nightly",
+    "name": "Brave Nightly",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "brave"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser-Nightly\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "opera",
+    "name": "Opera",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "opera"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Opera Software\\Opera Stable",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "opera-gx",
+    "name": "Opera GX",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "opera"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Opera Software\\Opera GX Stable",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "vivaldi",
+    "name": "Vivaldi",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "vivaldi"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Vivaldi\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "yandex",
+    "name": "Yandex Browser",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "browser"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Yandex\\YandexBrowser\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "chromium",
+    "name": "Chromium",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "chrome"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Chromium\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "thorium",
+    "name": "Thorium",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "thorium"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Thorium\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "cent",
+    "name": "Cent Browser",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "chrome"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\CentBrowser\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "comodo-dragon",
+    "name": "Comodo Dragon",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "dragon"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Comodo\\Dragon\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "epic",
+    "name": "Epic Privacy Browser",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "epic"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Epic Privacy Browser\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "iridium",
+    "name": "Iridium",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "iridium"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Iridium\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "slimjet",
+    "name": "Slimjet",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "slimjet"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Slimjet\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "avast-browser",
+    "name": "Avast Secure Browser",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "AvastBrowser"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\AVAST Software\\Browser\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "avg-browser",
+    "name": "AVG Secure Browser",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "AVGBrowser"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\AVG\\Browser\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "ccleaner-browser",
+    "name": "CCleaner Browser",
+    "descriptionKey": "Cache.Chromium.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "CCleanerBrowser"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\CCleaner Browser\\User Data",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "firefox",
+    "name": "Mozilla Firefox",
+    "descriptionKey": "Cache.Gecko.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "firefox"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Mozilla\\Firefox\\Profiles",
+        "each": "subfolders",
+        "folders": [
+          "cache2"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "waterfox",
+    "name": "Waterfox",
+    "descriptionKey": "Cache.Gecko.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "waterfox"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Waterfox\\Profiles",
+        "each": "subfolders",
+        "folders": [
+          "cache2"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "librewolf",
+    "name": "LibreWolf",
+    "descriptionKey": "Cache.Gecko.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "librewolf"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\librewolf\\Profiles",
+        "each": "subfolders",
+        "folders": [
+          "cache2"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "floorp",
+    "name": "Floorp",
+    "descriptionKey": "Cache.Gecko.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "floorp"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Floorp\\Profiles",
+        "each": "subfolders",
+        "folders": [
+          "cache2"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "zen",
+    "name": "Zen Browser",
+    "descriptionKey": "Cache.Gecko.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "zen"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\zen\\Profiles",
+        "each": "subfolders",
+        "folders": [
+          "cache2"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pale-moon",
+    "name": "Pale Moon",
+    "descriptionKey": "Cache.Gecko.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "palemoon"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Moonchild Productions\\Pale Moon\\Profiles",
+        "each": "subfolders",
+        "folders": [
+          "cache2"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "basilisk",
+    "name": "Basilisk",
+    "descriptionKey": "Cache.Gecko.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "basilisk"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Moonchild Productions\\Basilisk\\Profiles",
+        "each": "subfolders",
+        "folders": [
+          "cache2"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "seamonkey",
+    "name": "SeaMonkey",
+    "descriptionKey": "Cache.Gecko.Description",
+    "locationKey": "Cache.Browser.Location",
+    "group": "Browsers",
+    "risk": "Safe",
+    "closeAppsHint": [
+      "seamonkey"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Mozilla\\SeaMonkey\\Profiles",
+        "each": "subfolders",
+        "folders": [
+          "cache2"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "directx-shader-cache",
+    "nameKey": "Cache.D3D.Name",
+    "descriptionKey": "Cache.Shader.Description",
+    "locationKey": "Cache.Gpu.Location",
+    "group": "GamesAndGpu",
+    "risk": "Safe",
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\D3DSCache"
+      }
+    ]
+  },
+  {
+    "id": "nvidia-shader-cache",
+    "nameKey": "Cache.Nvidia.Name",
+    "descriptionKey": "Cache.Shader.Description",
+    "locationKey": "Cache.Gpu.Location",
+    "group": "GamesAndGpu",
+    "risk": "Safe",
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\NVIDIA\\DXCache"
+      },
+      {
+        "root": "%LOCALAPPDATA%\\NVIDIA\\GLCache"
+      },
+      {
+        "root": "%USERPROFILE%\\AppData\\LocalLow\\NVIDIA\\PerDriverVersion\\DXCache"
+      },
+      {
+        "root": "%USERPROFILE%\\AppData\\LocalLow\\NVIDIA\\PerDriverVersion\\GLCache"
+      }
+    ]
+  },
+  {
+    "id": "amd-shader-cache",
+    "nameKey": "Cache.Amd.Name",
+    "descriptionKey": "Cache.Shader.Description",
+    "locationKey": "Cache.Gpu.Location",
+    "group": "GamesAndGpu",
+    "risk": "Safe",
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\AMD\\DxCache"
+      },
+      {
+        "root": "%LOCALAPPDATA%\\AMD\\DxcCache"
+      },
+      {
+        "root": "%LOCALAPPDATA%\\AMD\\GLCache"
+      },
+      {
+        "root": "%LOCALAPPDATA%\\AMD\\VkCache"
+      }
+    ]
+  },
+  {
+    "id": "steam-web-cache",
+    "nameKey": "Cache.SteamWeb.Name",
+    "descriptionKey": "Cache.SteamWeb.Description",
+    "locationKey": "Cache.Steam.Location",
+    "group": "GamesAndGpu",
+    "risk": "Normal",
+    "closeAppsHint": [
+      "steam",
+      "steamwebhelper"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Steam\\htmlcache",
+        "each": "chromium-profiles"
+      }
+    ]
+  },
+  {
+    "id": "steam-shader-cache",
+    "nameKey": "Cache.SteamShader.Name",
+    "descriptionKey": "Cache.SteamShader.Description",
+    "locationKey": "Cache.Steam.Location",
+    "group": "GamesAndGpu",
+    "risk": "Normal",
+    "closeAppsHint": [
+      "steam"
+    ],
+    "allowProgramFiles": true,
+    "targets": [
+      {
+        "root": "{reg:HKCU\\Software\\Valve\\Steam:SteamPath}\\steamapps\\shadercache"
+      }
+    ]
+  },
+  {
+    "id": "npm-cache",
+    "nameKey": "Cache.Npm.Name",
+    "descriptionKey": "Cache.Packages.Description",
+    "locationKey": "Cache.Dev.Location",
+    "group": "Developer",
+    "risk": "Normal",
+    "closeAppsHint": [
+      "node"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\npm-cache\\_cacache"
+      },
+      {
+        "root": "%LOCALAPPDATA%\\npm-cache\\_logs"
+      }
+    ]
+  },
+  {
+    "id": "yarn-cache",
+    "nameKey": "Cache.Yarn.Name",
+    "descriptionKey": "Cache.Packages.Description",
+    "locationKey": "Cache.Dev.Location",
+    "group": "Developer",
+    "risk": "Normal",
+    "closeAppsHint": [
+      "node"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\Yarn\\Cache"
+      }
+    ]
+  },
+  {
+    "id": "pip-cache",
+    "nameKey": "Cache.Pip.Name",
+    "descriptionKey": "Cache.Packages.Description",
+    "locationKey": "Cache.Dev.Location",
+    "group": "Developer",
+    "risk": "Normal",
+    "closeAppsHint": [
+      "python",
+      "pip"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\pip\\Cache"
+      }
+    ]
+  },
+  {
+    "id": "nuget-http-cache",
+    "nameKey": "Cache.NuGet.Name",
+    "descriptionKey": "Cache.NuGet.Description",
+    "locationKey": "Cache.Dev.Location",
+    "group": "Developer",
+    "risk": "Normal",
+    "closeAppsHint": [
+      "dotnet",
+      "devenv",
+      "MSBuild"
+    ],
+    "targets": [
+      {
+        "root": "%LOCALAPPDATA%\\NuGet\\v3-cache"
+      },
+      {
+        "root": "%LOCALAPPDATA%\\NuGet\\plugins-cache"
+      }
+    ]
+  },
+  {
+    "id": "gradle-caches",
+    "nameKey": "Cache.Gradle.Name",
+    "descriptionKey": "Cache.Gradle.Description",
+    "locationKey": "Cache.Dev.Location",
+    "group": "Developer",
+    "risk": "Advanced",
+    "closeAppsHint": [
+      "java",
+      "studio64",
+      "idea64"
+    ],
+    "targets": [
+      {
+        "root": "%USERPROFILE%\\.gradle\\caches"
+      }
+    ]
+  },
+  {
+    "id": "discord",
+    "name": "Discord",
+    "descriptionKey": "Cache.App.Description",
+    "locationKey": "Cache.App.Location",
+    "group": "Apps",
+    "risk": "Normal",
+    "closeAppsHint": [
+      "Discord"
+    ],
+    "targets": [
+      {
+        "root": "%APPDATA%\\discord",
+        "folders": [
+          "Cache",
+          "Code Cache",
+          "GPUCache"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "discord-ptb",
+    "name": "Discord PTB",
+    "descriptionKey": "Cache.App.Description",
+    "locationKey": "Cache.App.Location",
+    "group": "Apps",
+    "risk": "Normal",
+    "closeAppsHint": [
+      "DiscordPTB"
+    ],
+    "targets": [
+      {
+        "root": "%APPDATA%\\discordptb",
+        "folders": [
+          "Cache",
+          "Code Cache",
+          "GPUCache"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "discord-canary",
+    "name": "Discord Canary",
+    "descriptionKey": "Cache.App.Description",
+    "locationKey": "Cache.App.Location",
+    "group": "Apps",
+    "risk": "Normal",
+    "closeAppsHint": [
+      "DiscordCanary"
+    ],
+    "targets": [
+      {
+        "root": "%APPDATA%\\discordcanary",
+        "folders": [
+          "Cache",
+          "Code Cache",
+          "GPUCache"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "slack",
+    "name": "Slack",
+    "descriptionKey": "Cache.App.Description",
+    "locationKey": "Cache.App.Location",
+    "group": "Apps",
+    "risk": "Normal",
+    "closeAppsHint": [
+      "slack"
+    ],
+    "targets": [
+      {
+        "root": "%APPDATA%\\Slack",
+        "folders": [
+          "Cache",
+          "Code Cache",
+          "GPUCache"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "teams-classic",
+    "name": "Microsoft Teams (classic)",
+    "descriptionKey": "Cache.App.Description",
+    "locationKey": "Cache.App.Location",
+    "group": "Apps",
+    "risk": "Normal",
+    "closeAppsHint": [
+      "Teams"
+    ],
+    "targets": [
+      {
+        "root": "%APPDATA%\\Microsoft\\Teams",
+        "folders": [
+          "Cache",
+          "Code Cache",
+          "GPUCache"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "vscode",
+    "name": "Visual Studio Code",
+    "descriptionKey": "Cache.App.Description",
+    "locationKey": "Cache.App.Location",
+    "group": "Apps",
+    "risk": "Normal",
+    "closeAppsHint": [
+      "Code"
+    ],
+    "targets": [
+      {
+        "root": "%APPDATA%\\Code",
+        "folders": [
+          "Cache",
+          "Code Cache",
+          "GPUCache",
+          "CachedData"
+        ]
+      }
+    ]
+  }
+]

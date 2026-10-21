@@ -119,12 +119,13 @@
       <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="CheckBox">
         <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="22"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
           <Border x:Name="CheckSurface" Width="20" Height="20" CornerRadius="5" Background="{DynamicResource Surface}" BorderBrush="{DynamicResource CheckLine}" BorderThickness="1" VerticalAlignment="Center">
-            <Path x:Name="Tick" Visibility="Collapsed" Data="M 4,9 L 8,13 L 15,5" Stroke="{DynamicResource OnAccent}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+            <Grid><Path x:Name="Tick" Visibility="Collapsed" Data="M 4,9 L 8,13 L 15,5" Stroke="{DynamicResource OnAccent}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/><Path x:Name="Dash" Visibility="Collapsed" Data="M 5,9.5 L 14,9.5" Stroke="{DynamicResource OnAccent}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/></Grid>
           </Border>
           <ContentPresenter Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center"/>
         </Grid>
         <ControlTemplate.Triggers>
           <Trigger Property="IsChecked" Value="True"><Setter TargetName="CheckSurface" Property="Background" Value="{DynamicResource Accent}"/><Setter TargetName="CheckSurface" Property="BorderBrush" Value="{DynamicResource Accent}"/><Setter TargetName="Tick" Property="Visibility" Value="Visible"/></Trigger>
+          <Trigger Property="IsChecked" Value="{x:Null}"><Setter TargetName="CheckSurface" Property="Background" Value="{DynamicResource Accent}"/><Setter TargetName="CheckSurface" Property="BorderBrush" Value="{DynamicResource Accent}"/><Setter TargetName="Dash" Property="Visibility" Value="Visible"/></Trigger>
           <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="CheckSurface" Property="BorderBrush" Value="{DynamicResource Focus}"/><Setter TargetName="CheckSurface" Property="BorderThickness" Value="2"/></Trigger>
           <Trigger Property="IsEnabled" Value="False"><Setter TargetName="CheckSurface" Property="Opacity" Value="0.45"/></Trigger>
         </ControlTemplate.Triggers>

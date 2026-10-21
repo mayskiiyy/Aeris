@@ -4,9 +4,15 @@ namespace Aeris.Tests;
 
 public sealed class TempDir : IDisposable
 {
-    public string Path { get; } = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "aeris-tests", Guid.NewGuid().ToString("N"));
+    public string Path { get; }
 
-    public TempDir() => Directory.CreateDirectory(Path);
+    /// <summary>A fresh folder in %TEMP%, or in the user profile when the test needs a place outside AppData.</summary>
+    public TempDir(bool outsideAppData = false)
+    {
+        string parent = outsideAppData ? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) : System.IO.Path.GetTempPath();
+        Path = System.IO.Path.Combine(parent, ".aeris-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(Path);
+    }
 
     public string File(string relative, string content = "x", DateTime? time = null)
     {
@@ -21,6 +27,13 @@ public sealed class TempDir : IDisposable
 
     public void Dispose()
     {
-        try { Directory.Delete(Path, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+        try
+        {
+            Directory.Delete(Path, true);
+            string parent = System.IO.Path.GetDirectoryName(Path)!;
+            if (!Directory.EnumerateFileSystemEntries(parent).Any()) Directory.Delete(parent);
+        }
+        catch (IOException) { }
+        catch (UnauthorizedAccessException) { }
     }
 }
