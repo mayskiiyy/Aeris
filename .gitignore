@@ -7,4 +7,5 @@ artifacts/
 *.user
 *.suo
 .codebase-memory/
-/docs
+/docs/*
+!/docs/benchmarks.md

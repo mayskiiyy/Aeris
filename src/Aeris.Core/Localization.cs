@@ -1,0 +1,112 @@
+using System.Globalization;
+using System.IO;
+using System.Xml.Linq;
+
+namespace Aeris;
+
+public record Language(string Code, string Tag, string Name);
+
+public static class Loc
+{
+    public const string Fallback = "en";
+    private static readonly XNamespace Xaml = "http://schemas.microsoft.com/winfx/2006/xaml";
+
+    public static IReadOnlyList<Language> Languages { get; } =
+    [
+        new("en", "EN", "English"),
+        new("de", "DE", "Deutsch"),
+        new("ru", "RU", "Русский"),
+        new("uk", "UA", "Українська"),
+        new("fr", "FR", "Français"),
+        new("es", "ES", "Español"),
+        new("pt-BR", "PT", "Português (Brasil)"),
+        new("pl", "PL", "Polski"),
+    ];
+
+    private static IReadOnlyDictionary<string, string> strings = new Dictionary<string, string>();
+
+    public static IReadOnlyDictionary<string, string> Strings => strings;
+    public static Language Current { get; private set; } = Languages[0];
+    public static CultureInfo Culture { get; private set; } = CultureInfo.GetCultureInfo(Fallback);
+    public static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aeris", "language.txt");
+
+    public static string Preferred()
+    {
+        try
+        {
+            if (File.Exists(FilePath))
+            {
+                string saved = File.ReadAllText(FilePath).Trim();
+                if (Find(saved) is { } language) return language.Code;
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        return System();
+    }
+
+    public static string System()
+    {
+        var system = CultureInfo.CurrentUICulture;
+        return (Find(system.Name) ?? Find(system.TwoLetterISOLanguageName) ?? Languages[0]).Code;
+    }
+
+    public static void Save()
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
+        File.WriteAllText(FilePath, Current.Code);
+    }
+
+    public static void Load(string code)
+    {
+        var language = Find(code) ?? Languages[0];
+        var table = new Dictionary<string, string>(Dictionary(Fallback));
+        if (language.Code != Fallback)
+            foreach (var (key, text) in Dictionary(language.Code)) table[key] = text;
+        strings = table;
+        Current = language;
+        Culture = CultureInfo.GetCultureInfo(language.Code);
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = Culture;
+        CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = Culture;
+    }
+
+    public static Dictionary<string, string> Dictionary(string code)
+    {
+        using var stream = typeof(Loc).Assembly.GetManifestResourceStream($"Aeris.Languages.{code}.xaml")
+            ?? throw new FileNotFoundException(code);
+        return Parse(stream);
+    }
+
+    public static Dictionary<string, string> Parse(Stream stream)
+    {
+        var table = new Dictionary<string, string>();
+        foreach (var element in XDocument.Load(stream).Root!.Elements())
+            if (element.Attribute(Xaml + "Key")?.Value is { } key) table[key] = element.Value;
+        return table;
+    }
+
+    public static string Get(string key) => strings.TryGetValue(key, out var text) ? text : key;
+
+    public static string Format(string key, params object[] args) => string.Format(Culture, Get(key), args);
+
+    public static string Plural(string key, long count)
+    {
+        string[] forms = Get(key).Split('|');
+        return string.Format(Culture, forms[Math.Min(PluralForm(count), forms.Length - 1)], count);
+    }
+
+    public static int PluralForm(long count)
+    {
+        long ones = count % 10, tens = count % 100;
+        return Current.Code switch
+        {
+            "ru" or "uk" => ones == 1 && tens != 11 ? 0 : ones is >= 2 and <= 4 && tens is < 12 or > 14 ? 1 : 2,
+            "pl" => count == 1 ? 0 : ones is >= 2 and <= 4 && tens is < 12 or > 14 ? 1 : 2,
+            "fr" or "pt-BR" => count is 0 or 1 ? 0 : 1,
+            _ => count == 1 ? 0 : 1,
+        };
+    }
+
+    public static Language? Find(string code) =>
+        Languages.FirstOrDefault(l => string.Equals(l.Code, code, StringComparison.OrdinalIgnoreCase))
+        ?? Languages.FirstOrDefault(l => string.Equals(l.Code.Split('-')[0], code, StringComparison.OrdinalIgnoreCase));
+}

@@ -21,4 +21,14 @@
   <SolidColorBrush x:Key="SelectedCell" Color="#DDEFE3"/>
   <SolidColorBrush x:Key="Arrow" Color="#51665A"/>
   <SolidColorBrush x:Key="OnAccent" Color="White"/>
+  <SolidColorBrush x:Key="Kind.Video" Color="#2A78D6"/>
+  <SolidColorBrush x:Key="Kind.Archive" Color="#EB6834"/>
+  <SolidColorBrush x:Key="Kind.Installer" Color="#1BAF7A"/>
+  <SolidColorBrush x:Key="Kind.Document" Color="#EDA100"/>
+  <SolidColorBrush x:Key="Kind.Image" Color="#E87BA4"/>
+  <SolidColorBrush x:Key="Kind.Code" Color="#008300"/>
+  <SolidColorBrush x:Key="Kind.Audio" Color="#6250D6"/>
+  <SolidColorBrush x:Key="Kind.Other" Color="#A9AFAA"/>
+  <SolidColorBrush x:Key="Kind.Folder" Color="#E7EEE9"/>
+  <SolidColorBrush x:Key="Kind.FolderLine" Color="#C8D6CC"/>
 </ResourceDictionary>

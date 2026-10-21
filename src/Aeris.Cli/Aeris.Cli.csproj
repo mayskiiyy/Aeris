@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>aeris-cli</AssemblyName>
+    <RootNamespace>Aeris.Cli</RootNamespace>
+    <ApplicationIcon>..\Aeris\Assets\aeris.ico</ApplicationIcon>
+    <Description>Command-line interface for Aeris.</Description>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <!-- Published as one small file next to Aeris.exe. Only framework assemblies are trimmed; COM and
+         reflection-based JSON in Aeris.Core stay intact, which build.ps1 verifies with a smoke test. -->
+    <TrimMode>partial</TrimMode>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+    <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aeris.Core\Aeris.Core.csproj" />
+  </ItemGroup>
+</Project>

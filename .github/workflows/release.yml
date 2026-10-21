@@ -36,7 +36,7 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          $version = ([xml](Get-Content src/Aeris/Aeris.csproj -Raw)).Project.PropertyGroup.Version | Select-Object -First 1
+          $version = ([xml](Get-Content Directory.Build.props -Raw)).Project.PropertyGroup.Version | Select-Object -First 1
           if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "Invalid version: $version" }
           if (-not (Select-String -Path CHANGELOG.md -Pattern "^## $([regex]::Escape($version))\b" -Quiet)) { throw "CHANGELOG.md has no section for $version" }
           "version=$version" >> $env:GITHUB_OUTPUT
@@ -57,6 +57,7 @@ jobs:
           path: |
             artifacts/Aeris-*-win-x64.zip
             artifacts/Aeris-*-Setup-x64.exe
+            artifacts/aeris-cli-*-win-x64.exe
             artifacts/SHA256SUMS.txt
 
   publish:
@@ -82,7 +83,7 @@ jobs:
         run: |
           tag="v$VERSION"
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-            echo "::error::Release $tag already exists. Bump the version in src/Aeris/Aeris.csproj first."
+            echo "::error::Release $tag already exists. Bump the version in Directory.Build.props first."
             exit 1
           fi
           awk -v v="$VERSION" '$0 ~ "^## " v "([^0-9.]|$)" {found=1; next} found && /^## / {exit} found {print}' CHANGELOG.md > notes.md

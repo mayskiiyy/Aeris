@@ -96,7 +96,8 @@ public partial class MainWindow
     {
         folder = path;
         UpdateFolderLabels(); ResetFileResults();
-        MapList.ItemsSource = null; duplicates = []; DuplicatesGrid.ItemsSource = null;
+        ShowMap(); duplicates = []; DuplicatesGrid.ItemsSource = null; JunkGrid.ItemsSource = null;
+        similar = []; SimilarGrid.ItemsSource = null; SimilarPreviews.ItemsSource = null; SimilarStrip.Visibility = Visibility.Collapsed;
         SetBusy(false); SaveSettings(); RefreshDisk();
     }
 
@@ -112,6 +113,11 @@ public partial class MainWindow
             Threshold.SelectedItem = OptionItem(Threshold, data.MinimumMb);
             FileType.SelectedIndex = data.FileType;
             ExclusionsList.ItemsSource = data.Exclusions;
+            PriorityList.ItemsSource = data.PriorityFolders;
+            ProtectedList.ItemsSource = data.ProtectedFolders;
+            SequentialSetting.IsChecked = data.SequentialHashing;
+            KeepRule.SelectedItem = KeepRule.Items.OfType<ComboBoxItem>().FirstOrDefault(i => Equals(i.Tag, data.KeepRule)) ?? KeepRule.Items[0];
+            RestoreCleanupSettings();
             RefreshHistory();
         }
         finally { restoring = false; }
@@ -131,7 +137,7 @@ public partial class MainWindow
 
     private void UpdateFolderLabels()
     {
-        FolderLabel.Text = MapFolder.Text = DuplicateFolder.Text = folder;
+        FolderLabel.Text = MapFolder.Text = DuplicateFolder.Text = JunkFolder.Text = folder;
     }
 
     private void TypeChanged(object sender, SelectionChangedEventArgs e)
@@ -170,10 +176,11 @@ public partial class MainWindow
         }
     }
 
-    private HistoryEntry BeginHistory(string action, string details)
+    private HistoryEntry BeginHistory(string action, string details, string id = "", CleanupMode? mode = null)
     {
-        var entry = new HistoryEntry { Action = action, Details = details };
+        var entry = new HistoryEntry { Action = action, Details = details, Id = id, Mode = mode?.ToString() ?? "" };
         data.History.Add(entry);
+        if (data.History.Count > UserData.MaxHistory) data.History.RemoveRange(0, data.History.Count - UserData.MaxHistory);
         try { data.Save(); }
         catch { data.History.Remove(entry); throw; }
         RefreshHistory();
@@ -208,24 +215,20 @@ public partial class MainWindow
         ExclusionsList.Items.Refresh();
         ResetCaches();
         FilesGrid.ItemsSource = null;
-        MapList.ItemsSource = null;
+        lastScan = null;
+        ShowMap();
         duplicates = [];
         DuplicatesGrid.ItemsSource = null;
+        JunkGrid.ItemsSource = null;
         SetBusy(false);
         SaveSettings();
         Status.Text = Loc.Get("Status.ExclusionsChanged");
     }
 
-    private void OpenMapFolder(object sender, RoutedEventArgs e)
-    {
-        if (MapList.SelectedItem is not FolderUsage usage) return;
-        try { Process.Start(new ProcessStartInfo("explorer.exe", $"\"{usage.Path}\"") { UseShellExecute = true }); }
-        catch (Exception ex) { Status.Text = ex.Message; }
-    }
-
     private async void FindDuplicates(object sender, RoutedEventArgs e)
     {
         if (busy) return;
+        if (SimilarMode) { await FindSimilar(); return; }
         if (!Storage.SafePath(folder)) { Status.Text = Loc.Get("Dup.ChooseFolder"); return; }
         SaveSettings();
         cancellation?.Dispose(); cancellation = new();
@@ -237,7 +240,8 @@ public partial class MainWindow
         var progress = new Progress<string>(text => { if (busy && token == cancellation?.Token && !token.IsCancellationRequested) Status.Text = text; });
         try
         {
-            var result = await Task.Run(() => Analysis.FindDuplicates(folder, exclusions, token, text => ((IProgress<string>)progress).Report(text), () => skipped++), token);
+            var options = new DuplicateOptions(Sequential: data.SequentialHashing);
+            var result = await Task.Run(() => Analysis.FindDuplicates(folder, exclusions, token, text => ((IProgress<string>)progress).Report(text), () => skipped++, options with { Cache = HashCache.Load() }), token);
             token.ThrowIfCancellationRequested();
             duplicates = result;
             DuplicatesGrid.ItemsSource = duplicates;
@@ -251,6 +255,7 @@ public partial class MainWindow
 
     private void RevealDuplicate(object sender, RoutedEventArgs e)
     {
+        if (SimilarMode) { RevealSimilar(); return; }
         if (DuplicatesGrid.SelectedItem is not DuplicateFile file) return;
         try { Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{file.Path}\"") { UseShellExecute = true }); }
         catch (Exception ex) { Status.Text = ex.Message; }
@@ -260,64 +265,85 @@ public partial class MainWindow
     {
         if (busy) return;
         bool duplicateMode = sender is Button { Name: "TrashDuplicatesButton" };
-        var selectedCopies = DuplicatesGrid.SelectedItems.OfType<DuplicateFile>().ToArray();
-        var files = duplicateMode ? selectedCopies.Select(f => f.File).ToArray() : FilesGrid.SelectedItems.OfType<LargeFile>().ToArray();
-        if (files.Length == 0) { Status.Text = Loc.Get("Recycle.SelectFiles"); return; }
-        if (duplicateMode && selectedCopies.GroupBy(f => f.Group).Any(g => duplicates.Where(d => d.Group == g.Key).All(selectedCopies.Contains)))
-        { Status.Text = Loc.Get("Recycle.KeepOne"); return; }
-        string preview = string.Join("\n", files.Take(8).Select(f => f.Path)) + (files.Length > 8 ? "\n…" : "");
-        string message = Loc.Format("Recycle.Confirm", files.Length, Storage.Format(files.Sum(f => f.Size)), preview);
-        if (MessageBox.Show(this, message, Loc.Get("Recycle.Title"), MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) != MessageBoxResult.Yes) return;
+        CleanupPlan plan;
+        if (duplicateMode && SimilarMode)
+        {
+            if (!TrySimilarPlan(out var similarPlan)) return;
+            plan = similarPlan!;
+        }
+        else if (duplicateMode)
+        {
+            var selectedCopies = DuplicatesGrid.SelectedItems.OfType<DuplicateFile>().ToArray();
+            if (selectedCopies.Length == 0) { Status.Text = Loc.Get("Recycle.SelectFiles"); return; }
+            try { plan = Duplicates.Plan(selectedCopies, duplicates); }
+            catch (InvalidOperationException) { Status.Text = Loc.Get("Recycle.KeepOne"); return; }
+        }
+        else
+        {
+            var files = FilesGrid.SelectedItems.OfType<LargeFile>().ToArray();
+            if (files.Length == 0) { Status.Text = Loc.Get("Recycle.SelectFiles"); return; }
+            plan = new(HistoryAction.Recycle, CleanupMode.Recycle, [new("large", Loc.Get("Nav.Files"), files.Select(f => PlanItem.From(f, "large")).ToList())])
+            { Details = string.Join("\n", files.Select(f => f.Path)) };
+        }
+        await RecyclePlan(plan);
+    }
+
+    /// <summary>Shows the plan, then moves what is still included to the Recycle Bin on an STA thread and logs every file.</summary>
+    private async Task RecyclePlan(CleanupPlan plan, bool ignoreJunk = true)
+    {
+        if (!Preview(plan)) return;
+        string details = string.Join("\n", plan.Included.Select(i => i.Path));
         HistoryEntry history;
-        try { history = BeginHistory(HistoryAction.Recycle, string.Join("\n", files.Select(f => f.Path))); }
+        Journal journal;
+        try
+        {
+            string id = Cleanup.NewId();
+            journal = Journal.Begin(id, HistoryAction.Recycle, CleanupMode.Recycle, details);
+            history = BeginHistory(HistoryAction.Recycle, details, id, CleanupMode.Recycle);
+        }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Status.Text = Loc.Get("Recycle.HistoryFailed"); return; }
         cleaning = true;
         SetBusy(true);
         var owner = new WindowInteropHelper(this).Handle;
         var exclusions = data.Exclusions.ToArray();
-        int count = 0, skipped = 0;
-        long bytes = 0;
-        var errors = new List<string>();
-        var completion = new TaskCompletionSource();
+        int total = plan.Count;
+        var progress = new Progress<int>(n => { if (cleaning) Status.Text = Loc.Format("Recycle.Progress", n, total); });
+        var completion = new TaskCompletionSource<CleanupResult>();
         var thread = new Thread(() =>
         {
             try
             {
-                foreach (var file in files)
+                using (journal)
                 {
-                    try
-                    {
-                        if (duplicateMode)
-                        {
-                            var copy = selectedCopies.First(c => c.File == file);
-                            var keeper = duplicates.FirstOrDefault(d => d.Group == copy.Group && !selectedCopies.Contains(d) && Analysis.Unchanged(d.File));
-                            if (keeper == null) throw new IOException(Loc.Get("Error.KeeperChanged"));
-                            using var original = new FileStream(keeper.Path, FileMode.Open, FileAccess.Read, FileShare.Read);
-                            using var candidate = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
-                            if (Analysis.Identity(original) == Analysis.Identity(candidate) || Analysis.Hash(original, CancellationToken.None) != copy.Hash || Analysis.Hash(candidate, CancellationToken.None) != copy.Hash) throw new IOException(Loc.Get("Error.ContentChanged"));
-                        }
-                        Recycle.Send(file, exclusions, owner);
-                        count++; bytes += file.Size;
-                    }
-                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or COMException)
-                    { skipped++; errors.Add($"{file.Name}: {ex.Message}"); }
+                    var outcome = Recycle.Execute(plan, exclusions, owner, journal, CancellationToken.None, progress, ignoreJunk);
+                    journal.Finish(outcome);
+                    completion.SetResult(outcome);
                 }
-                completion.SetResult();
             }
             catch (Exception ex) { completion.SetException(ex); }
         });
         thread.SetApartmentState(ApartmentState.STA);
         thread.IsBackground = true;
         thread.Start();
-        try { await completion.Task; Status.Text = Loc.Format("Recycle.Done", count, Storage.Format(bytes), skipped); if (errors.Count > 0) MessageBox.Show(this, string.Join("\n", errors.Take(8)), Loc.Get("Recycle.Skipped")); }
+        CleanupResult? result = null;
+        try
+        {
+            result = await completion.Task;
+            Status.Text = Loc.Format("Recycle.Done", result.Done, Storage.Format(result.Bytes), result.Skipped);
+            if (result.Errors.Count > 0) MessageBox.Show(this, string.Join("\n", result.Errors.Take(8)), Loc.Get("Recycle.Skipped"));
+        }
         catch (Exception ex) { Status.Text = Loc.Format("Recycle.Interrupted", ex.Message); }
         finally
         {
-            FinishHistory(history, count, bytes, skipped, count == files.Length ? HistoryResult.Completed : HistoryResult.Partial);
+            FinishHistory(history, result?.Done ?? 0, result?.Bytes ?? 0, result?.Skipped ?? 0, result?.Result ?? HistoryResult.Interrupted);
             FilesGrid.ItemsSource = FilesGrid.Items.OfType<LargeFile>().Where(f => File.Exists(f.Path)).ToList();
             duplicates = duplicates.Where(d => File.Exists(d.Path)).GroupBy(d => d.Group).Where(g => g.Count() > 1).SelectMany(g => g).ToList();
             DuplicatesGrid.ItemsSource = duplicates;
-            MapList.ItemsSource = null;
+            similar = similar.Where(i => File.Exists(i.Path)).GroupBy(i => i.Group).Where(g => g.Count() > 1).SelectMany(g => g).ToList();
+            SimilarGrid.ItemsSource = similar;
+            previewGroup = -1;
+            ShowPreviews(similar.FirstOrDefault()?.Group ?? 0);
+            if (JunkGrid.ItemsSource is IEnumerable<JunkEntry> junk) JunkGrid.ItemsSource = junk.Where(j => Path.Exists(j.Path)).ToList();
             cleaning = false; SetBusy(false); RefreshDisk();
         }
     }

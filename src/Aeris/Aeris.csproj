@@ -8,14 +8,14 @@
     <AssemblyName>Aeris</AssemblyName>
     <RootNamespace>Aeris</RootNamespace>
     <ApplicationIcon>Assets\aeris.ico</ApplicationIcon>
-    <Version>1.0.0</Version>
     <Description>Disk usage analysis and selective cache cleanup for Windows.</Description>
-    <Product>Aeris</Product>
-    <Copyright>Copyright (c) 2026 MAYSKIY</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
   <ItemGroup>
     <Resource Include="Assets\aeris.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aeris.Core\Aeris.Core.csproj" />
   </ItemGroup>
 </Project>

@@ -50,5 +50,17 @@ Source: "..\artifacts\Aeris-win-x64\*"; DestDir: "{app}"; Flags: ignoreversion r
 Name: "{group}\Aeris"; Filename: "{app}\Aeris.exe"
 Name: "{autodesktop}\Aeris"; Filename: "{app}\Aeris.exe"; Tasks: desktopicon
 
+[Registry]
+; Explorer menu entries are created by Aeris itself when the user turns them on. These lines only remove them on uninstall.
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\Aeris.Scan"; Flags: uninsdeletekey dontcreatekey
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\Aeris.Duplicates"; Flags: uninsdeletekey dontcreatekey
+Root: HKCU; Subkey: "Software\Classes\Directory\shell\Aeris.Largest"; Flags: uninsdeletekey dontcreatekey
+Root: HKCU; Subkey: "Software\Classes\Drive\shell\Aeris.Scan"; Flags: uninsdeletekey dontcreatekey
+Root: HKCU; Subkey: "Software\Classes\Drive\shell\Aeris.Duplicates"; Flags: uninsdeletekey dontcreatekey
+Root: HKCU; Subkey: "Software\Classes\Drive\shell\Aeris.Largest"; Flags: uninsdeletekey dontcreatekey
+
+[UninstallRun]
+Filename: "{sys}\schtasks.exe"; Parameters: "/Delete /TN ""Aeris automatic cleanup"" /F"; Flags: runhidden; RunOnceId: "DeleteScheduledCleanup"
+
 [Run]
 Filename: "{app}\Aeris.exe"; Description: "{cm:LaunchProgram,Aeris}"; Flags: nowait postinstall skipifsilent

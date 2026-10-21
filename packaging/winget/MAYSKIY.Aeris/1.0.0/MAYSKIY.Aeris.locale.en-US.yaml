@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+PackageIdentifier: MAYSKIY.Aeris
+PackageVersion: 1.0.0
+PackageLocale: en-US
+Publisher: MAYSKIY
+PublisherUrl: https://github.com/mayskiiyy
+PublisherSupportUrl: https://github.com/mayskiiyy/Aeris/issues
+PackageName: Aeris
+PackageUrl: https://github.com/mayskiiyy/Aeris
+License: MIT
+LicenseUrl: https://github.com/mayskiiyy/Aeris/blob/main/LICENSE
+ShortDescription: Shows where your disk space went and cleans old cache and temp files. Local only, no telemetry.
+Description: |-
+  Aeris is a small Windows app for disk cleanup. It removes old files from the Windows and user Temp folders and from the caches of installed browsers, lists the largest files in a folder, shows a folder map and finds duplicate files by SHA-256. Personal files only go to the Recycle Bin. Aeris makes no network requests and collects no telemetry.
+Moniker: aeris
+Tags:
+  - cleanup
+  - disk
+  - disk-space
+  - duplicates
+  - cache
+  - storage
+ReleaseNotesUrl: https://github.com/mayskiiyy/Aeris/releases/tag/v1.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
