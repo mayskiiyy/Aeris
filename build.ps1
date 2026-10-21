@@ -15,8 +15,9 @@ if (-not $IsccPath) {
 if (-not $IsccPath) { throw 'Install Inno Setup 6 (winget install JRSoftware.InnoSetup) or pass -IsccPath.' }
 
 $project = 'src/Aeris/Aeris.csproj'
-$version = ([xml](Get-Content -LiteralPath $project -Raw)).Project.PropertyGroup.Version | Select-Object -First 1
-if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "Invalid version in ${project}: $version" }
+$cli = 'src/Aeris.Cli/Aeris.Cli.csproj'
+$version = ([xml](Get-Content -LiteralPath 'Directory.Build.props' -Raw)).Project.PropertyGroup.Version | Select-Object -First 1
+if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "Invalid version in Directory.Build.props: $version" }
 
 $artifacts = Join-Path $PSScriptRoot 'artifacts'
 $portable = Join-Path $artifacts 'Aeris-win-x64'
@@ -27,6 +28,13 @@ New-Item -ItemType Directory -Path $portable | Out-Null
     -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true `
     -p:DebugType=None -p:DebugSymbols=false
 if ($LASTEXITCODE -ne 0) { throw 'dotnet publish failed.' }
+
+& dotnet publish $cli -c Release -r win-x64 --self-contained true -o $portable --nologo --source https://api.nuget.org/v3/index.json `
+    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:PublishTrimmed=true `
+    -p:DebugType=None -p:DebugSymbols=false
+if ($LASTEXITCODE -ne 0) { throw 'dotnet publish of aeris-cli failed.' }
+& (Join-Path $portable 'aeris-cli.exe') categories --json | Out-Null
+if ($LASTEXITCODE -gt 1) { throw "aeris-cli smoke test failed with exit code $LASTEXITCODE." }
 
 $assets = Get-Content -LiteralPath 'src/Aeris/obj/project.assets.json' -Raw | ConvertFrom-Json
 $packages = $assets.packageFolders.PSObject.Properties.Name | Select-Object -First 1
@@ -43,6 +51,7 @@ foreach ($runtime in $runtimes) {
 Copy-Item -LiteralPath LICENSE -Destination $portable
 
 Compress-Archive -Path "$portable\*" -DestinationPath (Join-Path $artifacts "Aeris-$version-win-x64.zip")
+Copy-Item -LiteralPath (Join-Path $portable 'aeris-cli.exe') -Destination (Join-Path $artifacts "aeris-cli-$version-win-x64.exe")
 & $IsccPath /Q "/DAppVersion=$version" packaging/Aeris.iss
 if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed.' }
 
