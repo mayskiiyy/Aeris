@@ -26,7 +26,15 @@ Download the latest build from [Releases](https://github.com/mayskiiyy/Aeris/rel
 - `Aeris-<version>-Setup-x64.exe` installs Aeris for the current user. It does not need administrator rights.
 - `Aeris-<version>-win-x64.zip` is the portable build: a single `Aeris.exe` with its license files. Unpack it anywhere and run it.
 
-Both builds include the .NET runtime, so nothing else needs to be installed. Aeris requires Windows 10 or 11 (x64). The builds are not code-signed yet, so SmartScreen may warn about an unknown publisher.
+Or install it with winget:
+
+```powershell
+winget install MAYSKIY.Aeris
+```
+
+Both builds include the .NET runtime, so nothing else needs to be installed. Aeris requires Windows 10 or 11 (x64).
+
+The builds are not code-signed yet, so SmartScreen may say that Windows protected your PC. Click **More info → Run anyway**. Before that you can check that the file is the one from the release: run `Get-FileHash .\Aeris-<version>-Setup-x64.exe` in PowerShell and compare the hash with `SHA256SUMS.txt` from the same release. Installing through winget doesn't show this warning.
 
 Settings, history and the selected language are stored in `%LOCALAPPDATA%\Aeris`. Uninstalling the app leaves that folder in place.
 
@@ -78,6 +86,7 @@ The results land in `artifacts/`: the single-file `Aeris.exe` in `Aeris-win-x64`
 | `src/Aeris/Themes/` | Light and dark color palettes |
 | `packaging/Aeris.iss` | Inno Setup script |
 | `build.ps1` | Release build: publish, zip, installer and checksums |
+| `packaging/winget/` | winget manifests, one folder per version |
 
 ## Translations
 
