@@ -2,7 +2,7 @@
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 
-if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) { throw 'Install the .NET 8 SDK: https://dotnet.microsoft.com/download/dotnet/8.0' }
+if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) { throw 'Install the .NET 10 SDK: https://dotnet.microsoft.com/download/dotnet/10.0' }
 if (-not $IsccPath) {
     $candidates = @(
         (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source,

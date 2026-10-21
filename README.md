@@ -98,7 +98,7 @@ Settings, history, quarantine and caches of hashes are stored in `%LOCALAPPDATA%
 
 ### Linux desktop and servers
 
-Linux packages start with version 1.1. Choose `linux-x64` for Intel/AMD or `linux-arm64` for ARM64. These are glibc builds for Ubuntu 22.04+, Debian 12+ and compatible systems; Alpine/musl is not supported. Ubuntu 24.04 x64 is the runtime validation environment.
+Linux packages start with version 1.1. Choose `linux-x64` for Intel/AMD or `linux-arm64` for ARM64. These are glibc builds for Ubuntu 22.04+, Debian 13+ and compatible systems supported by .NET 10; Alpine/musl is not supported. Ubuntu 24.04 x64 is the runtime validation environment.
 
 - `Aeris-<version>-linux-<arch>.tar.gz`: desktop app, CLI, desktop-menu installer and optional systemd user units.
 - `aeris-cli-<version>-linux-<arch>.tar.gz`: CLI and optional user units, with no desktop requirement.
@@ -214,9 +214,9 @@ dotnet build src/Aeris.Desktop -c Release -warnaserror
 bash build-linux.sh linux-x64  # or linux-arm64
 ```
 
-The Linux script requires Bash, the .NET 8 SDK, Python 3 (for bundled dependency notices), tar and sha256sum. It creates desktop and standalone CLI archives, without modifying existing Windows artifacts.
+The Linux script requires Bash, the .NET 10 SDK, Python 3 (for bundled dependency notices), tar and sha256sum. It creates desktop and standalone CLI archives, without modifying existing Windows artifacts.
 
-You need Windows 10 or 11 and the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0). Visual Studio is optional.
+You need Windows 10 or 11 and the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). Visual Studio is optional. `global.json` selects a stable .NET 10 SDK; release packages bundle the .NET 10 runtime.
 
 ```powershell
 dotnet run --project src/Aeris/Aeris.csproj -c Release

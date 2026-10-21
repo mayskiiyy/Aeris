@@ -1,6 +1,6 @@
 # Benchmarks
 
-Measured with `tools/Aeris.Bench` on 2026-10-21. Release build, .NET 8, nothing else heavy running.
+Measured with `tools/Aeris.Bench` on 2026-10-21. Release build, .NET 8, nothing else heavy running. These measurements predate the .NET 10 migration; rerun the benchmark before comparing the current build.
 
 Machine: Intel Core i7-8750H (6 cores, 12 threads), 16 GB RAM, Crucial MX500 1 TB SATA SSD, Windows 11 (build 26300).
 

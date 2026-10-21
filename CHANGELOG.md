@@ -8,7 +8,8 @@ Interface and performance
 - Simplified the folder map to one level with readable sizes and grouped small entries. File-type totals are calculated when opened. Home shows the last cache cleanup after results are invalidated; empty history details and idle status bars are hidden.
 - Reused SHA-256 buffers to reduce allocations during duplicate searches. Similar-image grouping indexes distinct hashes once, starts decoding during discovery and retains completed hashes on cancellation.
 - Added image input/dimension limits before expensive scaling. Native decoding remains in-process and cannot yet be forcibly interrupted by a timeout.
-- Updated the Linux interface to Avalonia 11.3.22. Builds still target .NET 8; migration is needed before its support ends on November 10, 2026.
+- Updated the Linux interface to Avalonia 11.3.22.
+- Migrated the core, Windows and Linux apps, CLI, tests, benchmark, CI and release packages to .NET 10.
 
 Updates and Linux
 

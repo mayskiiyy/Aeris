@@ -1,6 +1,6 @@
 # Contributing
 
-You need Windows and the .NET 8 SDK. Check that the project builds before you open a pull request:
+You need Windows and the .NET 10 SDK. Check that the project builds before you open a pull request:
 
 ```powershell
 dotnet build Aeris.sln -c Release -warnaserror
