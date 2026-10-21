@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1
+
+- Replaced the default Windows scrollbars with slim, rounded controls that follow the light and dark themes, including the sidebar, lists and review windows.
+
 ## 1.2.0
 
 - Added an offline Help tab to both desktop apps, available with F1 in all eight interface languages, plus a first-run guide and detailed user documentation.

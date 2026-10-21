@@ -1,7 +1,7 @@
 <Project>
   <!-- One version for Aeris.exe and aeris-cli.exe. build.ps1 and the release workflow read it from here. -->
   <PropertyGroup>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <Product>Aeris</Product>
     <Copyright>Copyright (c) 2026 MAYSKIY</Copyright>
   </PropertyGroup>
