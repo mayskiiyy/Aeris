@@ -96,7 +96,7 @@ public partial class MainWindow
     {
         folder = path;
         UpdateFolderLabels(); ResetFileResults();
-        MapList.ItemsSource = null; duplicates = []; DuplicatesGrid.ItemsSource = null; JunkGrid.ItemsSource = null;
+        ShowMap(); duplicates = []; DuplicatesGrid.ItemsSource = null; JunkGrid.ItemsSource = null;
         similar = []; SimilarGrid.ItemsSource = null; SimilarPreviews.ItemsSource = null; SimilarStrip.Visibility = Visibility.Collapsed;
         SetBusy(false); SaveSettings(); RefreshDisk();
     }
@@ -215,20 +215,14 @@ public partial class MainWindow
         ExclusionsList.Items.Refresh();
         ResetCaches();
         FilesGrid.ItemsSource = null;
-        MapList.ItemsSource = null;
+        lastScan = null;
+        ShowMap();
         duplicates = [];
         DuplicatesGrid.ItemsSource = null;
         JunkGrid.ItemsSource = null;
         SetBusy(false);
         SaveSettings();
         Status.Text = Loc.Get("Status.ExclusionsChanged");
-    }
-
-    private void OpenMapFolder(object sender, RoutedEventArgs e)
-    {
-        if (MapList.SelectedItem is not FolderUsage usage) return;
-        try { Process.Start(new ProcessStartInfo("explorer.exe", $"\"{usage.Path}\"") { UseShellExecute = true }); }
-        catch (Exception ex) { Status.Text = ex.Message; }
     }
 
     private async void FindDuplicates(object sender, RoutedEventArgs e)
@@ -350,7 +344,6 @@ public partial class MainWindow
             previewGroup = -1;
             ShowPreviews(similar.FirstOrDefault()?.Group ?? 0);
             if (JunkGrid.ItemsSource is IEnumerable<JunkEntry> junk) JunkGrid.ItemsSource = junk.Where(j => Path.Exists(j.Path)).ToList();
-            MapList.ItemsSource = null;
             cleaning = false; SetBusy(false); RefreshDisk();
         }
     }

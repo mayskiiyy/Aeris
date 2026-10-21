@@ -10,7 +10,6 @@
   <s:String x:Key="Nav.Map">Folder map</s:String>
   <s:String x:Key="Nav.Duplicates">Duplicates</s:String>
   <s:String x:Key="Nav.History">History</s:String>
-  <s:String x:Key="Nav.Exclusions">Exclusions</s:String>
   <s:String x:Key="Sidebar.Section">STORAGE</s:String>
   <s:String x:Key="Sidebar.Logo">Aeris logo</s:String>
   <s:String x:Key="Sidebar.Free">free</s:String>
@@ -62,7 +61,6 @@
   <s:String x:Key="Caches.ExactFolders">Exact folders checked</s:String>
   <s:String x:Key="Caches.NothingSelected">Nothing selected</s:String>
   <s:String x:Key="Caches.SelectedSummary">{0} · categories: {1}</s:String>
-  <s:String x:Key="Caches.NoRecycle">Files are deleted permanently, not moved to the Recycle Bin.</s:String>
   <s:String x:Key="Caches.SelectAll">Select all</s:String>
   <s:String x:Key="Caches.ClearSelection">Clear selection</s:String>
   <s:String x:Key="Caches.CleanSelected">Review and clean</s:String>
@@ -140,10 +138,7 @@
   <s:String x:Key="Common.MoveToRecycle">Move to Recycle Bin</s:String>
   <s:String x:Key="Common.Cancel">Cancel</s:String>
   <s:String x:Key="Map.List">Space used by folders</s:String>
-  <s:String x:Key="Map.Footer">All types and sizes · logical size</s:String>
   <s:String x:Key="Map.OpenFolder">Open folder</s:String>
-  <s:String x:Key="Map.RootFiles">Files in the root</s:String>
-  <s:String x:Key="Map.Detail">Files: {0:N0} · {1:0.#}%</s:String>
   <s:String x:Key="Dup.Find">Find</s:String>
   <s:String x:Key="Dup.Footer">Size → first and last 64 KB → SHA-256 · hard links excluded · one copy always stays</s:String>
   <s:String x:Key="Dup.ChooseFolder">Choose an accessible folder.</s:String>
@@ -406,4 +401,32 @@
   <s:String x:Key="Col.Resolution">RESOLUTION</s:String>
   <s:String x:Key="Col.Format">FORMAT</s:String>
   <s:String x:Key="Col.Match">MATCH</s:String>
+  <s:String x:Key="FileKind.Other">Other</s:String>
+  <s:String x:Key="FileKind.Video">Videos</s:String>
+  <s:String x:Key="FileKind.Archive">Archives</s:String>
+  <s:String x:Key="FileKind.Installer">Installers and disk images</s:String>
+  <s:String x:Key="FileKind.Document">Documents</s:String>
+  <s:String x:Key="FileKind.Image">Images</s:String>
+  <s:String x:Key="FileKind.Code">Code and libraries</s:String>
+  <s:String x:Key="FileKind.Audio">Audio</s:String>
+  <s:String x:Key="Map.Treemap">Space map</s:String>
+  <s:String x:Key="Map.Empty">Nothing to show</s:String>
+  <s:String x:Key="Map.SmallTip">{0:N0} small items · {1}</s:String>
+  <s:String x:Key="Map.FolderTip" xml:space="preserve">{0}&#10;{1} · {2:0.#}% of the parent folder · files: {3:N0}&#10;Click to open</s:String>
+  <s:String x:Key="Map.FileTip" xml:space="preserve">{0}&#10;{1} · {2:0.#}% of the folder · {3}&#10;Double-click to show in Explorer</s:String>
+  <s:String x:Key="Map.SizeMode">Size to show</s:String>
+  <s:String x:Key="Map.SizeModeHint">Size on disk can differ from the logical size because of compression, sparse files and cluster rounding</s:String>
+  <s:String x:Key="Map.Logical">Logical size</s:String>
+  <s:String x:Key="Map.OnDisk">Size on disk</s:String>
+  <s:String x:Key="Map.Up">Up one level</s:String>
+  <s:String x:Key="Map.CopyPath">Copy path</s:String>
+  <s:String x:Key="Map.Exclude">Exclude from scans</s:String>
+  <s:String x:Key="Map.ExcludeConfirm" xml:space="preserve">Exclude this folder from all scans and cleanups?&#10;&#10;{0}</s:String>
+  <s:String x:Key="Map.Rescan">Rescan</s:String>
+  <s:String x:Key="Map.ScanFirst">Scan the folder to see the map. The result stays in memory until you close Aeris.</s:String>
+  <s:String x:Key="Map.FooterLogical">Files: {0:N0} · {1} · logical size. Hard links count once.</s:String>
+  <s:String x:Key="Map.FooterDisk">Files: {0:N0} · {1} · size on disk. It can differ from the logical size because of compression and sparse files.</s:String>
+  <s:String x:Key="Map.PathCopied">Path copied.</s:String>
+  <s:String x:Key="Map.RecycleFilesOnly">Only single files can be moved to the Recycle Bin from the map. Open the folder to pick files.</s:String>
+  <s:String x:Key="Status.ScanDoneTimed">Done · files: {0:N0} · {1} · skipped: {2} · {3:0.#} s</s:String>
 </ResourceDictionary>

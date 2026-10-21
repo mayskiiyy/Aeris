@@ -28,7 +28,7 @@ public partial class MainWindow : Window
     private bool choosingCustom;
     private List<RuleError> ruleErrors = [];
     private Func<string> filesHint = () => Loc.Get("Files.Hint");
-    private record ScanProgress(string Summary, string Directory = "", string File = "");
+    private record StatusProgress(string Summary, string Directory = "", string File = "");
 
     public MainWindow()
     {
@@ -37,6 +37,7 @@ public partial class MainWindow : Window
         SourceInitialized += (_, _) => UpdateTheme();
         Deactivated += (_, _) => DrivePopup.IsOpen = false;
         RestoreSettings();
+        InitializeMap();
         ResetCaches();
         LocalizeView();
         StartMaintenance();
@@ -66,6 +67,8 @@ public partial class MainWindow : Window
         var app = (App)Application.Current;
         app.SetTheme(!app.DarkTheme, true);
         UpdateTheme();
+        Treemap.Restyle();
+        ShowMap();
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(App.ThemeFile)!);
@@ -101,7 +104,7 @@ public partial class MainWindow : Window
         foreach (var group in caches) group.Refresh();
         CacheList.Items.Refresh();
         FilesGrid.Items.Refresh();
-        MapList.Items.Refresh();
+        ShowMap();
         DuplicatesGrid.Items.Refresh();
         SimilarGrid.Items.Refresh();
         RefreshSimilarityLabel();
@@ -170,6 +173,7 @@ public partial class MainWindow : Window
 
     private void ResetFileResults()
     {
+        if (lastScan != null && SameFolder(lastScan.RootPath, folder)) { _ = RefreshLargeFiles(); return; }
         FilesGrid.ItemsSource = null;
         ExportButton.IsEnabled = false;
         TrashFilesButton.IsEnabled = false;
@@ -292,6 +296,8 @@ public partial class MainWindow : Window
         DriveButton.IsEnabled = !value;
         if (value) DrivePopup.IsOpen = false;
         ChooseButton.IsEnabled = ScanButton.IsEnabled = CacheScanButton.IsEnabled = Threshold.IsEnabled = Retention.IsEnabled = !value;
+        SizeMode.IsEnabled = !value;
+        MapUpButton.IsEnabled = !value && lastScan != null && mapNode != 0;
         FileType.IsEnabled = MapScanButton.IsEnabled = MapChooseButton.IsEnabled = DuplicateScanButton.IsEnabled = DuplicateChooseButton.IsEnabled = AddExclusionButton.IsEnabled = RemoveExclusionButton.IsEnabled = !value;
         JunkScanButton.IsEnabled = JunkChooseButton.IsEnabled = IgnoreJunkFiles.IsEnabled = KeepRule.IsEnabled = !value;
         AddPriorityButton.IsEnabled = RemovePriorityButton.IsEnabled = AddProtectedButton.IsEnabled = RemoveProtectedButton.IsEnabled = !value;
@@ -319,52 +325,32 @@ public partial class MainWindow : Window
     private async Task Scan(bool cachesOnly)
     {
         if (busy) return;
-        if (!cachesOnly && !Storage.SafePath(folder)) { MessageBox.Show(this, Loc.Get("Scan.FolderUnavailable"), Loc.Get("Scan.CannotStart")); return; }
+        if (!cachesOnly) { await ScanFolder(); return; }
         SaveSettings();
         cancellation?.Dispose();
         cancellation = new();
         var token = cancellation.Token;
-        long minimum = long.Parse((string)((ComboBoxItem)Threshold.SelectedItem).Tag) * 1024 * 1024;
         DateTime cutoff = DateTime.UtcNow.AddDays(-int.Parse((string)((ComboBoxItem)Retention.SelectedItem).Tag));
         var exclusions = data.Exclusions.ToArray();
-        int fileType = FileType.SelectedIndex;
-        scanningCaches = cachesOnly;
+        scanningCaches = true;
         SetBusy(true);
-        Status.Text = Loc.Get(cachesOnly ? "Status.FindingCaches" : "Status.AnalyzingFolder");
-        var progress = new Progress<ScanProgress>(s =>
+        Status.Text = Loc.Get("Status.FindingCaches");
+        var progress = new Progress<StatusProgress>(s =>
         {
             if (!busy || token != cancellation?.Token || token.IsCancellationRequested) return;
             Status.Text = s.Summary;
             ScanLocation.Text = s.Directory;
             ScanFile.Text = s.File;
         });
-        IProgress<ScanProgress> report = progress;
+        IProgress<StatusProgress> report = progress;
         try
         {
             var result = await Task.Run(() =>
             {
-                long total = 0, count = 0, matches = 0;
                 int skipped = 0;
-                var largest = new PriorityQueue<LargeFile, long>();
-                var folderSizes = new Dictionary<string, (long Bytes, long Files)>(StringComparer.OrdinalIgnoreCase);
                 var watch = Stopwatch.StartNew();
-                foreach (var f in cachesOnly ? Enumerable.Empty<FileInfo>() : Storage.Walk(folder, token, () => skipped++, exclusions))
-                {
-                    try
-                    {
-                        long size = f.Length;
-                        total += size; count++;
-                        string key = Analysis.FolderKey(folder, f.FullName);
-                        folderSizes.TryGetValue(key, out var usage);
-                        folderSizes[key] = (usage.Bytes + size, usage.Files + 1);
-                        if (size >= minimum && Analysis.Matches(f.FullName, fileType)) { matches++; largest.Enqueue(Analysis.Snapshot(f), size); if (largest.Count > 200) largest.Dequeue(); }
-                    }
-                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { skipped++; }
-                    if (watch.ElapsedMilliseconds > 250)
-                    { report.Report(new(Loc.Format("Status.FilesChecked", count, Storage.Format(total), f.DirectoryName ?? ""), f.DirectoryName ?? "", f.Name)); watch.Restart(); }
-                }
                 var ruleProblems = new List<RuleError>();
-                var foundCaches = cachesOnly ? Cleaners.Groups(ruleProblems) : [];
+                var foundCaches = Cleaners.Groups(ruleProblems);
                 long cacheFiles = 0, cacheBytes = 0;
                 int category = 0;
                 string CacheProgress(CacheGroup group) => Loc.Format("Status.CacheProgress", category, foundCaches.Count, group.Name, cacheFiles, Storage.Format(cacheBytes));
@@ -385,25 +371,13 @@ public partial class MainWindow : Window
                     skipped += group.Skipped;
                     if (group.IsSafe && group.Rule.Enabled && group.Eligible > 0) group.Selected = true;
                 }
-                return (files: largest.UnorderedItems.Select(i => i.Element).OrderByDescending(f => f.Size).ToList(), map: Analysis.FolderMap(folder, folderSizes), foundCaches, ruleProblems, count, total, matches, skipped);
+                return (foundCaches, ruleProblems, skipped);
             }, token);
             token.ThrowIfCancellationRequested();
-            if (cachesOnly)
-            {
-                caches = result.foundCaches;
-                cacheCutoff = cutoff;
-                ShowCaches(result.ruleProblems);
-                Status.Text = Loc.Format("Status.CachesChecked", Storage.Format(caches.Sum(c => c.Eligible)), result.skipped);
-            }
-            else
-            {
-                FilesGrid.ItemsSource = result.files;
-                MapList.ItemsSource = result.map;
-                long found = result.matches;
-                int shown = result.files.Count;
-                SetFilesHint(() => found == 0 ? Loc.Get("Files.NoneFound") : Loc.Format("Files.Found", found, shown));
-                Status.Text = Loc.Format("Status.ScanDone", result.count, Storage.Format(result.total), result.skipped);
-            }
+            caches = result.foundCaches;
+            cacheCutoff = cutoff;
+            ShowCaches(result.ruleProblems);
+            Status.Text = Loc.Format("Status.CachesChecked", Storage.Format(caches.Sum(c => c.Eligible)), result.skipped);
         }
         catch (OperationCanceledException) { Status.Text = Loc.Get("Status.ScanCancelled"); }
         catch (Exception ex) { Status.Text = Loc.Format("Status.ScanError", ex.Message); }

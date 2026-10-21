@@ -10,7 +10,6 @@
   <s:String x:Key="Nav.Map">Mapa folderów</s:String>
   <s:String x:Key="Nav.Duplicates">Duplikaty</s:String>
   <s:String x:Key="Nav.History">Historia</s:String>
-  <s:String x:Key="Nav.Exclusions">Wykluczenia</s:String>
   <s:String x:Key="Sidebar.Section">MAGAZYN</s:String>
   <s:String x:Key="Sidebar.Logo">Logo Aeris</s:String>
   <s:String x:Key="Sidebar.Free">wolne</s:String>
@@ -62,7 +61,6 @@
   <s:String x:Key="Caches.ExactFolders">Sprawdzane foldery</s:String>
   <s:String x:Key="Caches.NothingSelected">Nic nie zaznaczono</s:String>
   <s:String x:Key="Caches.SelectedSummary">{0} · kategorie: {1}</s:String>
-  <s:String x:Key="Caches.NoRecycle">Pliki są usuwane trwale, z pominięciem kosza.</s:String>
   <s:String x:Key="Caches.SelectAll">Zaznacz wszystko</s:String>
   <s:String x:Key="Caches.ClearSelection">Odznacz wszystko</s:String>
   <s:String x:Key="Caches.CleanSelected">Sprawdź i wyczyść</s:String>
@@ -140,10 +138,7 @@
   <s:String x:Key="Common.MoveToRecycle">Przenieś do kosza</s:String>
   <s:String x:Key="Common.Cancel">Anuluj</s:String>
   <s:String x:Key="Map.List">Zajęte miejsce według folderów</s:String>
-  <s:String x:Key="Map.Footer">Wszystkie typy i rozmiary · rozmiar logiczny</s:String>
   <s:String x:Key="Map.OpenFolder">Otwórz folder</s:String>
-  <s:String x:Key="Map.RootFiles">Pliki w katalogu głównym</s:String>
-  <s:String x:Key="Map.Detail">Pliki: {0:N0} · {1:0.#}%</s:String>
   <s:String x:Key="Dup.Find">Szukaj</s:String>
   <s:String x:Key="Dup.Footer">Rozmiar → pierwsze i ostatnie 64 KB → SHA-256 · bez dowiązań twardych · jedna kopia zawsze zostaje</s:String>
   <s:String x:Key="Dup.ChooseFolder">Wybierz dostępny folder.</s:String>
@@ -406,4 +401,32 @@
   <s:String x:Key="Col.Resolution">ROZDZIELCZOŚĆ</s:String>
   <s:String x:Key="Col.Format">FORMAT</s:String>
   <s:String x:Key="Col.Match">DOPASOWANIE</s:String>
+  <s:String x:Key="FileKind.Other">Inne</s:String>
+  <s:String x:Key="FileKind.Video">Wideo</s:String>
+  <s:String x:Key="FileKind.Archive">Archiwa</s:String>
+  <s:String x:Key="FileKind.Installer">Instalatory i obrazy dysków</s:String>
+  <s:String x:Key="FileKind.Document">Dokumenty</s:String>
+  <s:String x:Key="FileKind.Image">Obrazy</s:String>
+  <s:String x:Key="FileKind.Code">Kod i biblioteki</s:String>
+  <s:String x:Key="FileKind.Audio">Audio</s:String>
+  <s:String x:Key="Map.Treemap">Mapa miejsca</s:String>
+  <s:String x:Key="Map.Empty">Nic do pokazania</s:String>
+  <s:String x:Key="Map.SmallTip">Małe elementy: {0:N0} · {1}</s:String>
+  <s:String x:Key="Map.FolderTip" xml:space="preserve">{0}&#10;{1} · {2:0.#}% folderu nadrzędnego · pliki: {3:N0}&#10;Kliknij, aby otworzyć</s:String>
+  <s:String x:Key="Map.FileTip" xml:space="preserve">{0}&#10;{1} · {2:0.#}% folderu · {3}&#10;Kliknij dwukrotnie, aby pokazać w Eksploratorze</s:String>
+  <s:String x:Key="Map.SizeMode">Pokazywany rozmiar</s:String>
+  <s:String x:Key="Map.SizeModeHint">Rozmiar na dysku może się różnić z powodu kompresji, plików rozrzedzonych i zaokrąglania do klastrów</s:String>
+  <s:String x:Key="Map.Logical">Rozmiar logiczny</s:String>
+  <s:String x:Key="Map.OnDisk">Rozmiar na dysku</s:String>
+  <s:String x:Key="Map.Up">Poziom wyżej</s:String>
+  <s:String x:Key="Map.CopyPath">Kopiuj ścieżkę</s:String>
+  <s:String x:Key="Map.Exclude">Wyklucz ze skanowania</s:String>
+  <s:String x:Key="Map.ExcludeConfirm" xml:space="preserve">Wykluczyć ten folder ze wszystkich skanów i czyszczeń?&#10;&#10;{0}</s:String>
+  <s:String x:Key="Map.Rescan">Skanuj ponownie</s:String>
+  <s:String x:Key="Map.ScanFirst">Zeskanuj folder, aby zobaczyć mapę. Wynik pozostaje w pamięci do zamknięcia Aeris.</s:String>
+  <s:String x:Key="Map.FooterLogical">Pliki: {0:N0} · {1} · rozmiar logiczny. Dowiązania twarde liczą się raz.</s:String>
+  <s:String x:Key="Map.FooterDisk">Pliki: {0:N0} · {1} · rozmiar na dysku. Może różnić się od logicznego z powodu kompresji i plików rozrzedzonych.</s:String>
+  <s:String x:Key="Map.PathCopied">Skopiowano ścieżkę.</s:String>
+  <s:String x:Key="Map.RecycleFilesOnly">Z mapy do kosza można przenieść tylko pojedyncze pliki. Otwórz folder, aby wybrać pliki.</s:String>
+  <s:String x:Key="Status.ScanDoneTimed">Gotowe · pliki: {0:N0} · {1} · pominięte: {2} · {3:0.#} s</s:String>
 </ResourceDictionary>

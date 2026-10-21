@@ -10,7 +10,6 @@
   <s:String x:Key="Nav.Map">Carte des dossiers</s:String>
   <s:String x:Key="Nav.Duplicates">Doublons</s:String>
   <s:String x:Key="Nav.History">Historique</s:String>
-  <s:String x:Key="Nav.Exclusions">Exclusions</s:String>
   <s:String x:Key="Sidebar.Section">STOCKAGE</s:String>
   <s:String x:Key="Sidebar.Logo">Logo Aeris</s:String>
   <s:String x:Key="Sidebar.Free">libre</s:String>
@@ -62,7 +61,6 @@
   <s:String x:Key="Caches.ExactFolders">Dossiers vérifiés</s:String>
   <s:String x:Key="Caches.NothingSelected">Rien de sélectionné</s:String>
   <s:String x:Key="Caches.SelectedSummary">{0} · catégories : {1}</s:String>
-  <s:String x:Key="Caches.NoRecycle">Les fichiers sont supprimés définitivement, sans passer par la corbeille.</s:String>
   <s:String x:Key="Caches.SelectAll">Tout sélectionner</s:String>
   <s:String x:Key="Caches.ClearSelection">Tout désélectionner</s:String>
   <s:String x:Key="Caches.CleanSelected">Vérifier et nettoyer</s:String>
@@ -140,10 +138,7 @@
   <s:String x:Key="Common.MoveToRecycle">Mettre à la corbeille</s:String>
   <s:String x:Key="Common.Cancel">Annuler</s:String>
   <s:String x:Key="Map.List">Espace occupé par dossier</s:String>
-  <s:String x:Key="Map.Footer">Tous types et tailles · taille logique</s:String>
   <s:String x:Key="Map.OpenFolder">Ouvrir le dossier</s:String>
-  <s:String x:Key="Map.RootFiles">Fichiers à la racine</s:String>
-  <s:String x:Key="Map.Detail">Fichiers : {0:N0} · {1:0.#} %</s:String>
   <s:String x:Key="Dup.Find">Rechercher</s:String>
   <s:String x:Key="Dup.Footer">Taille → premiers et derniers 64 Ko → SHA-256 · liens physiques exclus · une copie reste toujours</s:String>
   <s:String x:Key="Dup.ChooseFolder">Choisissez un dossier accessible.</s:String>
@@ -406,4 +401,32 @@
   <s:String x:Key="Col.Resolution">RÉSOLUTION</s:String>
   <s:String x:Key="Col.Format">FORMAT</s:String>
   <s:String x:Key="Col.Match">CORRESPONDANCE</s:String>
+  <s:String x:Key="FileKind.Other">Autres</s:String>
+  <s:String x:Key="FileKind.Video">Vidéos</s:String>
+  <s:String x:Key="FileKind.Archive">Archives</s:String>
+  <s:String x:Key="FileKind.Installer">Installateurs et images disque</s:String>
+  <s:String x:Key="FileKind.Document">Documents</s:String>
+  <s:String x:Key="FileKind.Image">Images</s:String>
+  <s:String x:Key="FileKind.Code">Code et bibliothèques</s:String>
+  <s:String x:Key="FileKind.Audio">Audio</s:String>
+  <s:String x:Key="Map.Treemap">Carte de l'espace</s:String>
+  <s:String x:Key="Map.Empty">Rien à afficher</s:String>
+  <s:String x:Key="Map.SmallTip">{0:N0} petits éléments · {1}</s:String>
+  <s:String x:Key="Map.FolderTip" xml:space="preserve">{0}&#10;{1} · {2:0.#} % du dossier parent · fichiers : {3:N0}&#10;Cliquez pour ouvrir</s:String>
+  <s:String x:Key="Map.FileTip" xml:space="preserve">{0}&#10;{1} · {2:0.#} % du dossier · {3}&#10;Double-cliquez pour l'afficher dans l'Explorateur</s:String>
+  <s:String x:Key="Map.SizeMode">Taille affichée</s:String>
+  <s:String x:Key="Map.SizeModeHint">La taille sur disque peut différer à cause de la compression, des fichiers fragmentés et de l'arrondi aux clusters</s:String>
+  <s:String x:Key="Map.Logical">Taille logique</s:String>
+  <s:String x:Key="Map.OnDisk">Taille sur disque</s:String>
+  <s:String x:Key="Map.Up">Niveau supérieur</s:String>
+  <s:String x:Key="Map.CopyPath">Copier le chemin</s:String>
+  <s:String x:Key="Map.Exclude">Exclure des analyses</s:String>
+  <s:String x:Key="Map.ExcludeConfirm" xml:space="preserve">Exclure ce dossier de toutes les analyses et nettoyages ?&#10;&#10;{0}</s:String>
+  <s:String x:Key="Map.Rescan">Réanalyser</s:String>
+  <s:String x:Key="Map.ScanFirst">Analysez le dossier pour voir la carte. Le résultat reste en mémoire jusqu'à la fermeture d'Aeris.</s:String>
+  <s:String x:Key="Map.FooterLogical">Fichiers : {0:N0} · {1} · taille logique. Les liens physiques comptent une fois.</s:String>
+  <s:String x:Key="Map.FooterDisk">Fichiers : {0:N0} · {1} · taille sur disque. Elle peut différer de la taille logique à cause de la compression et des fichiers fragmentés.</s:String>
+  <s:String x:Key="Map.PathCopied">Chemin copié.</s:String>
+  <s:String x:Key="Map.RecycleFilesOnly">Depuis la carte, seuls des fichiers isolés peuvent aller à la Corbeille. Ouvrez le dossier pour choisir des fichiers.</s:String>
+  <s:String x:Key="Status.ScanDoneTimed">Terminé · fichiers : {0:N0} · {1} · ignorés : {2} · {3:0.#} s</s:String>
 </ResourceDictionary>

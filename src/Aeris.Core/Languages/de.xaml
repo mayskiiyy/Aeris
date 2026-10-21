@@ -10,7 +10,6 @@
   <s:String x:Key="Nav.Map">Ordnerkarte</s:String>
   <s:String x:Key="Nav.Duplicates">Duplikate</s:String>
   <s:String x:Key="Nav.History">Verlauf</s:String>
-  <s:String x:Key="Nav.Exclusions">Ausnahmen</s:String>
   <s:String x:Key="Sidebar.Section">SPEICHER</s:String>
   <s:String x:Key="Sidebar.Logo">Aeris-Logo</s:String>
   <s:String x:Key="Sidebar.Free">frei</s:String>
@@ -62,7 +61,6 @@
   <s:String x:Key="Caches.ExactFolders">Genau geprüfte Ordner</s:String>
   <s:String x:Key="Caches.NothingSelected">Nichts ausgewählt</s:String>
   <s:String x:Key="Caches.SelectedSummary">{0} · Kategorien: {1}</s:String>
-  <s:String x:Key="Caches.NoRecycle">Dateien werden endgültig gelöscht, nicht in den Papierkorb verschoben.</s:String>
   <s:String x:Key="Caches.SelectAll">Alle auswählen</s:String>
   <s:String x:Key="Caches.ClearSelection">Auswahl aufheben</s:String>
   <s:String x:Key="Caches.CleanSelected">Prüfen und bereinigen</s:String>
@@ -140,10 +138,7 @@
   <s:String x:Key="Common.MoveToRecycle">In den Papierkorb</s:String>
   <s:String x:Key="Common.Cancel">Abbrechen</s:String>
   <s:String x:Key="Map.List">Belegter Speicher nach Ordnern</s:String>
-  <s:String x:Key="Map.Footer">Alle Typen und Größen · logische Größe</s:String>
   <s:String x:Key="Map.OpenFolder">Ordner öffnen</s:String>
-  <s:String x:Key="Map.RootFiles">Dateien im Stammordner</s:String>
-  <s:String x:Key="Map.Detail">Dateien: {0:N0} · {1:0.#} %</s:String>
   <s:String x:Key="Dup.Find">Suchen</s:String>
   <s:String x:Key="Dup.Footer">Größe → erste und letzte 64 KB → SHA-256 · harte Links ausgenommen · eine Kopie bleibt immer</s:String>
   <s:String x:Key="Dup.ChooseFolder">Wählen Sie einen zugänglichen Ordner.</s:String>
@@ -406,4 +401,32 @@
   <s:String x:Key="Col.Resolution">AUFLÖSUNG</s:String>
   <s:String x:Key="Col.Format">FORMAT</s:String>
   <s:String x:Key="Col.Match">ÜBEREINSTIMMUNG</s:String>
+  <s:String x:Key="FileKind.Other">Sonstiges</s:String>
+  <s:String x:Key="FileKind.Video">Videos</s:String>
+  <s:String x:Key="FileKind.Archive">Archive</s:String>
+  <s:String x:Key="FileKind.Installer">Installer und Datenträgerabbilder</s:String>
+  <s:String x:Key="FileKind.Document">Dokumente</s:String>
+  <s:String x:Key="FileKind.Image">Bilder</s:String>
+  <s:String x:Key="FileKind.Code">Code und Bibliotheken</s:String>
+  <s:String x:Key="FileKind.Audio">Audio</s:String>
+  <s:String x:Key="Map.Treemap">Platzkarte</s:String>
+  <s:String x:Key="Map.Empty">Nichts anzuzeigen</s:String>
+  <s:String x:Key="Map.SmallTip">{0:N0} kleine Einträge · {1}</s:String>
+  <s:String x:Key="Map.FolderTip" xml:space="preserve">{0}&#10;{1} · {2:0.#} % des übergeordneten Ordners · Dateien: {3:N0}&#10;Klicken zum Öffnen</s:String>
+  <s:String x:Key="Map.FileTip" xml:space="preserve">{0}&#10;{1} · {2:0.#} % des Ordners · {3}&#10;Doppelklick zeigt die Datei im Explorer</s:String>
+  <s:String x:Key="Map.SizeMode">Angezeigte Größe</s:String>
+  <s:String x:Key="Map.SizeModeHint">Die Größe auf dem Datenträger kann wegen Komprimierung, Sparse-Dateien und Clusterrundung abweichen</s:String>
+  <s:String x:Key="Map.Logical">Logische Größe</s:String>
+  <s:String x:Key="Map.OnDisk">Größe auf Datenträger</s:String>
+  <s:String x:Key="Map.Up">Eine Ebene höher</s:String>
+  <s:String x:Key="Map.CopyPath">Pfad kopieren</s:String>
+  <s:String x:Key="Map.Exclude">Von Scans ausschließen</s:String>
+  <s:String x:Key="Map.ExcludeConfirm" xml:space="preserve">Diesen Ordner von allen Scans und Bereinigungen ausschließen?&#10;&#10;{0}</s:String>
+  <s:String x:Key="Map.Rescan">Neu scannen</s:String>
+  <s:String x:Key="Map.ScanFirst">Scannen Sie den Ordner, um die Karte zu sehen. Das Ergebnis bleibt bis zum Schließen von Aeris im Speicher.</s:String>
+  <s:String x:Key="Map.FooterLogical">Dateien: {0:N0} · {1} · logische Größe. Harte Links zählen einmal.</s:String>
+  <s:String x:Key="Map.FooterDisk">Dateien: {0:N0} · {1} · Größe auf Datenträger. Sie kann wegen Komprimierung und Sparse-Dateien abweichen.</s:String>
+  <s:String x:Key="Map.PathCopied">Pfad kopiert.</s:String>
+  <s:String x:Key="Map.RecycleFilesOnly">Von der Karte lassen sich nur einzelne Dateien in den Papierkorb verschieben. Öffnen Sie den Ordner, um Dateien auszuwählen.</s:String>
+  <s:String x:Key="Status.ScanDoneTimed">Fertig · Dateien: {0:N0} · {1} · übersprungen: {2} · {3:0.#} s</s:String>
 </ResourceDictionary>

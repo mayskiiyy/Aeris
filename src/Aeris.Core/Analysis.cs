@@ -5,12 +5,6 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Aeris;
 
-public record FolderUsage(string Path, string Name, long Bytes, long Files, double Share)
-{
-    public string DisplaySize => Storage.Format(Bytes);
-    public string Detail => Loc.Format("Map.Detail", Files, Share);
-}
-
 public class DuplicateFile(LargeFile file, string hash, string identity, int group)
 {
     public LargeFile File { get; } = file;
@@ -42,14 +36,6 @@ public static class Analysis
         string relative = System.IO.Path.GetRelativePath(root, file);
         int separator = relative.IndexOf(System.IO.Path.DirectorySeparatorChar);
         return separator < 0 ? root : System.IO.Path.Combine(root, relative[..separator]);
-    }
-
-    public static List<FolderUsage> FolderMap(string root, Dictionary<string, (long Bytes, long Files)> sizes)
-    {
-        long total = sizes.Values.Sum(v => v.Bytes);
-        return sizes.OrderByDescending(p => p.Value.Bytes).Select(p => new FolderUsage(p.Key,
-            p.Key == root ? Loc.Get("Map.RootFiles") : System.IO.Path.GetFileName(p.Key), p.Value.Bytes, p.Value.Files,
-            total == 0 ? 0 : 100d * p.Value.Bytes / total)).ToList();
     }
 
     [StructLayout(LayoutKind.Sequential)]

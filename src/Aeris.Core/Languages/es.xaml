@@ -10,7 +10,6 @@
   <s:String x:Key="Nav.Map">Mapa de carpetas</s:String>
   <s:String x:Key="Nav.Duplicates">Duplicados</s:String>
   <s:String x:Key="Nav.History">Historial</s:String>
-  <s:String x:Key="Nav.Exclusions">Exclusiones</s:String>
   <s:String x:Key="Sidebar.Section">ALMACENAMIENTO</s:String>
   <s:String x:Key="Sidebar.Logo">Logotipo de Aeris</s:String>
   <s:String x:Key="Sidebar.Free">libre</s:String>
@@ -62,7 +61,6 @@
   <s:String x:Key="Caches.ExactFolders">Carpetas comprobadas</s:String>
   <s:String x:Key="Caches.NothingSelected">Nada seleccionado</s:String>
   <s:String x:Key="Caches.SelectedSummary">{0} · categorías: {1}</s:String>
-  <s:String x:Key="Caches.NoRecycle">Los archivos se eliminan de forma permanente, sin pasar por la papelera.</s:String>
   <s:String x:Key="Caches.SelectAll">Seleccionar todo</s:String>
   <s:String x:Key="Caches.ClearSelection">Quitar selección</s:String>
   <s:String x:Key="Caches.CleanSelected">Revisar y limpiar</s:String>
@@ -140,10 +138,7 @@
   <s:String x:Key="Common.MoveToRecycle">Mover a la papelera</s:String>
   <s:String x:Key="Common.Cancel">Cancelar</s:String>
   <s:String x:Key="Map.List">Espacio ocupado por carpeta</s:String>
-  <s:String x:Key="Map.Footer">Todos los tipos y tamaños · tamaño lógico</s:String>
   <s:String x:Key="Map.OpenFolder">Abrir carpeta</s:String>
-  <s:String x:Key="Map.RootFiles">Archivos en la raíz</s:String>
-  <s:String x:Key="Map.Detail">Archivos: {0:N0} · {1:0.#} %</s:String>
   <s:String x:Key="Dup.Find">Buscar</s:String>
   <s:String x:Key="Dup.Footer">Tamaño → primeros y últimos 64 KB → SHA-256 · sin enlaces duros · siempre queda una copia</s:String>
   <s:String x:Key="Dup.ChooseFolder">Elija una carpeta accesible.</s:String>
@@ -406,4 +401,32 @@
   <s:String x:Key="Col.Resolution">RESOLUCIÓN</s:String>
   <s:String x:Key="Col.Format">FORMATO</s:String>
   <s:String x:Key="Col.Match">COINCIDENCIA</s:String>
+  <s:String x:Key="FileKind.Other">Otros</s:String>
+  <s:String x:Key="FileKind.Video">Vídeos</s:String>
+  <s:String x:Key="FileKind.Archive">Archivos comprimidos</s:String>
+  <s:String x:Key="FileKind.Installer">Instaladores e imágenes de disco</s:String>
+  <s:String x:Key="FileKind.Document">Documentos</s:String>
+  <s:String x:Key="FileKind.Image">Imágenes</s:String>
+  <s:String x:Key="FileKind.Code">Código y bibliotecas</s:String>
+  <s:String x:Key="FileKind.Audio">Audio</s:String>
+  <s:String x:Key="Map.Treemap">Mapa del espacio</s:String>
+  <s:String x:Key="Map.Empty">Nada que mostrar</s:String>
+  <s:String x:Key="Map.SmallTip">{0:N0} elementos pequeños · {1}</s:String>
+  <s:String x:Key="Map.FolderTip" xml:space="preserve">{0}&#10;{1} · {2:0.#} % de la carpeta superior · archivos: {3:N0}&#10;Haz clic para abrir</s:String>
+  <s:String x:Key="Map.FileTip" xml:space="preserve">{0}&#10;{1} · {2:0.#} % de la carpeta · {3}&#10;Doble clic para mostrarlo en el Explorador</s:String>
+  <s:String x:Key="Map.SizeMode">Tamaño que mostrar</s:String>
+  <s:String x:Key="Map.SizeModeHint">El tamaño en disco puede variar por la compresión, los archivos dispersos y el redondeo a clústeres</s:String>
+  <s:String x:Key="Map.Logical">Tamaño lógico</s:String>
+  <s:String x:Key="Map.OnDisk">Tamaño en disco</s:String>
+  <s:String x:Key="Map.Up">Subir un nivel</s:String>
+  <s:String x:Key="Map.CopyPath">Copiar ruta</s:String>
+  <s:String x:Key="Map.Exclude">Excluir de los análisis</s:String>
+  <s:String x:Key="Map.ExcludeConfirm" xml:space="preserve">¿Excluir esta carpeta de todos los análisis y limpiezas?&#10;&#10;{0}</s:String>
+  <s:String x:Key="Map.Rescan">Volver a analizar</s:String>
+  <s:String x:Key="Map.ScanFirst">Analiza la carpeta para ver el mapa. El resultado se guarda en memoria hasta que cierres Aeris.</s:String>
+  <s:String x:Key="Map.FooterLogical">Archivos: {0:N0} · {1} · tamaño lógico. Los enlaces duros cuentan una vez.</s:String>
+  <s:String x:Key="Map.FooterDisk">Archivos: {0:N0} · {1} · tamaño en disco. Puede diferir del lógico por la compresión y los archivos dispersos.</s:String>
+  <s:String x:Key="Map.PathCopied">Ruta copiada.</s:String>
+  <s:String x:Key="Map.RecycleFilesOnly">Desde el mapa solo se pueden mover archivos sueltos a la Papelera. Abre la carpeta para elegir archivos.</s:String>
+  <s:String x:Key="Status.ScanDoneTimed">Listo · archivos: {0:N0} · {1} · omitidos: {2} · {3:0.#} s</s:String>
 </ResourceDictionary>

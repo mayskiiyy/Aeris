@@ -10,7 +10,6 @@
   <s:String x:Key="Nav.Map">Mapa de pastas</s:String>
   <s:String x:Key="Nav.Duplicates">Duplicados</s:String>
   <s:String x:Key="Nav.History">Histórico</s:String>
-  <s:String x:Key="Nav.Exclusions">Exclusões</s:String>
   <s:String x:Key="Sidebar.Section">ARMAZENAMENTO</s:String>
   <s:String x:Key="Sidebar.Logo">Logotipo do Aeris</s:String>
   <s:String x:Key="Sidebar.Free">livre</s:String>
@@ -62,7 +61,6 @@
   <s:String x:Key="Caches.ExactFolders">Pastas verificadas</s:String>
   <s:String x:Key="Caches.NothingSelected">Nada selecionado</s:String>
   <s:String x:Key="Caches.SelectedSummary">{0} · categorias: {1}</s:String>
-  <s:String x:Key="Caches.NoRecycle">Os arquivos são excluídos permanentemente, sem passar pela lixeira.</s:String>
   <s:String x:Key="Caches.SelectAll">Selecionar tudo</s:String>
   <s:String x:Key="Caches.ClearSelection">Limpar seleção</s:String>
   <s:String x:Key="Caches.CleanSelected">Revisar e limpar</s:String>
@@ -140,10 +138,7 @@
   <s:String x:Key="Common.MoveToRecycle">Mover para a lixeira</s:String>
   <s:String x:Key="Common.Cancel">Cancelar</s:String>
   <s:String x:Key="Map.List">Espaço ocupado por pasta</s:String>
-  <s:String x:Key="Map.Footer">Todos os tipos e tamanhos · tamanho lógico</s:String>
   <s:String x:Key="Map.OpenFolder">Abrir pasta</s:String>
-  <s:String x:Key="Map.RootFiles">Arquivos na raiz</s:String>
-  <s:String x:Key="Map.Detail">Arquivos: {0:N0} · {1:0.#}%</s:String>
   <s:String x:Key="Dup.Find">Procurar</s:String>
   <s:String x:Key="Dup.Footer">Tamanho → primeiros e últimos 64 KB → SHA-256 · links físicos excluídos · uma cópia sempre fica</s:String>
   <s:String x:Key="Dup.ChooseFolder">Escolha uma pasta acessível.</s:String>
@@ -406,4 +401,32 @@
   <s:String x:Key="Col.Resolution">RESOLUÇÃO</s:String>
   <s:String x:Key="Col.Format">FORMATO</s:String>
   <s:String x:Key="Col.Match">CORRESPONDÊNCIA</s:String>
+  <s:String x:Key="FileKind.Other">Outros</s:String>
+  <s:String x:Key="FileKind.Video">Vídeos</s:String>
+  <s:String x:Key="FileKind.Archive">Arquivos compactados</s:String>
+  <s:String x:Key="FileKind.Installer">Instaladores e imagens de disco</s:String>
+  <s:String x:Key="FileKind.Document">Documentos</s:String>
+  <s:String x:Key="FileKind.Image">Imagens</s:String>
+  <s:String x:Key="FileKind.Code">Código e bibliotecas</s:String>
+  <s:String x:Key="FileKind.Audio">Áudio</s:String>
+  <s:String x:Key="Map.Treemap">Mapa do espaço</s:String>
+  <s:String x:Key="Map.Empty">Nada para mostrar</s:String>
+  <s:String x:Key="Map.SmallTip">{0:N0} itens pequenos · {1}</s:String>
+  <s:String x:Key="Map.FolderTip" xml:space="preserve">{0}&#10;{1} · {2:0.#}% da pasta superior · arquivos: {3:N0}&#10;Clique para abrir</s:String>
+  <s:String x:Key="Map.FileTip" xml:space="preserve">{0}&#10;{1} · {2:0.#}% da pasta · {3}&#10;Clique duas vezes para mostrar no Explorador</s:String>
+  <s:String x:Key="Map.SizeMode">Tamanho exibido</s:String>
+  <s:String x:Key="Map.SizeModeHint">O tamanho em disco pode variar por compressão, arquivos esparsos e arredondamento de cluster</s:String>
+  <s:String x:Key="Map.Logical">Tamanho lógico</s:String>
+  <s:String x:Key="Map.OnDisk">Tamanho em disco</s:String>
+  <s:String x:Key="Map.Up">Subir um nível</s:String>
+  <s:String x:Key="Map.CopyPath">Copiar caminho</s:String>
+  <s:String x:Key="Map.Exclude">Excluir das análises</s:String>
+  <s:String x:Key="Map.ExcludeConfirm" xml:space="preserve">Excluir esta pasta de todas as análises e limpezas?&#10;&#10;{0}</s:String>
+  <s:String x:Key="Map.Rescan">Analisar de novo</s:String>
+  <s:String x:Key="Map.ScanFirst">Analise a pasta para ver o mapa. O resultado fica na memória até você fechar o Aeris.</s:String>
+  <s:String x:Key="Map.FooterLogical">Arquivos: {0:N0} · {1} · tamanho lógico. Links físicos contam uma vez.</s:String>
+  <s:String x:Key="Map.FooterDisk">Arquivos: {0:N0} · {1} · tamanho em disco. Pode diferir do lógico por compressão e arquivos esparsos.</s:String>
+  <s:String x:Key="Map.PathCopied">Caminho copiado.</s:String>
+  <s:String x:Key="Map.RecycleFilesOnly">Pelo mapa, só arquivos avulsos podem ir para a Lixeira. Abra a pasta para escolher arquivos.</s:String>
+  <s:String x:Key="Status.ScanDoneTimed">Concluído · arquivos: {0:N0} · {1} · ignorados: {2} · {3:0.#} s</s:String>
 </ResourceDictionary>

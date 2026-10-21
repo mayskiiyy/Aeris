@@ -10,7 +10,6 @@
   <s:String x:Key="Nav.Map">Карта папок</s:String>
   <s:String x:Key="Nav.Duplicates">Дублікати</s:String>
   <s:String x:Key="Nav.History">Історія</s:String>
-  <s:String x:Key="Nav.Exclusions">Винятки</s:String>
   <s:String x:Key="Sidebar.Section">СХОВИЩЕ</s:String>
   <s:String x:Key="Sidebar.Logo">Логотип Aeris</s:String>
   <s:String x:Key="Sidebar.Free">вільно</s:String>
@@ -62,7 +61,6 @@
   <s:String x:Key="Caches.ExactFolders">Точні папки перевірки</s:String>
   <s:String x:Key="Caches.NothingSelected">Нічого не вибрано</s:String>
   <s:String x:Key="Caches.SelectedSummary">{0} · категорій: {1}</s:String>
-  <s:String x:Key="Caches.NoRecycle">Файли видаляються без кошика.</s:String>
   <s:String x:Key="Caches.SelectAll">Вибрати все</s:String>
   <s:String x:Key="Caches.ClearSelection">Зняти вибір</s:String>
   <s:String x:Key="Caches.CleanSelected">Перевірити й очистити</s:String>
@@ -140,10 +138,7 @@
   <s:String x:Key="Common.MoveToRecycle">У кошик</s:String>
   <s:String x:Key="Common.Cancel">Скасувати</s:String>
   <s:String x:Key="Map.List">Зайняте місце за папками</s:String>
-  <s:String x:Key="Map.Footer">Усі типи й розміри · логічний обсяг</s:String>
   <s:String x:Key="Map.OpenFolder">Відкрити папку</s:String>
-  <s:String x:Key="Map.RootFiles">Файли в корені</s:String>
-  <s:String x:Key="Map.Detail">Файлів: {0:N0} · {1:0.#}%</s:String>
   <s:String x:Key="Dup.Find">Знайти</s:String>
   <s:String x:Key="Dup.Footer">Розмір → перші й останні 64 КБ → SHA-256 · жорсткі посилання не враховуються · одна копія завжди залишається</s:String>
   <s:String x:Key="Dup.ChooseFolder">Виберіть доступну папку.</s:String>
@@ -406,4 +401,32 @@
   <s:String x:Key="Col.Resolution">РОЗДІЛЬНІСТЬ</s:String>
   <s:String x:Key="Col.Format">ФОРМАТ</s:String>
   <s:String x:Key="Col.Match">ЗБІГ</s:String>
+  <s:String x:Key="FileKind.Other">Інше</s:String>
+  <s:String x:Key="FileKind.Video">Відео</s:String>
+  <s:String x:Key="FileKind.Archive">Архіви</s:String>
+  <s:String x:Key="FileKind.Installer">Інсталятори й образи дисків</s:String>
+  <s:String x:Key="FileKind.Document">Документи</s:String>
+  <s:String x:Key="FileKind.Image">Зображення</s:String>
+  <s:String x:Key="FileKind.Code">Код і бібліотеки</s:String>
+  <s:String x:Key="FileKind.Audio">Аудіо</s:String>
+  <s:String x:Key="Map.Treemap">Карта місця</s:String>
+  <s:String x:Key="Map.Empty">Нічого показати</s:String>
+  <s:String x:Key="Map.SmallTip">Дрібні елементи: {0:N0} · {1}</s:String>
+  <s:String x:Key="Map.FolderTip" xml:space="preserve">{0}&#10;{1} · {2:0.#}% батьківської папки · файлів: {3:N0}&#10;Натисніть, щоб відкрити</s:String>
+  <s:String x:Key="Map.FileTip" xml:space="preserve">{0}&#10;{1} · {2:0.#}% папки · {3}&#10;Подвійний клік — показати в Провіднику</s:String>
+  <s:String x:Key="Map.SizeMode">Який розмір показувати</s:String>
+  <s:String x:Key="Map.SizeModeHint">Розмір на диску може відрізнятися через стиснення, розріджені файли й округлення до кластера</s:String>
+  <s:String x:Key="Map.Logical">Логічний розмір</s:String>
+  <s:String x:Key="Map.OnDisk">Розмір на диску</s:String>
+  <s:String x:Key="Map.Up">На рівень вище</s:String>
+  <s:String x:Key="Map.CopyPath">Копіювати шлях</s:String>
+  <s:String x:Key="Map.Exclude">Виключити зі сканування</s:String>
+  <s:String x:Key="Map.ExcludeConfirm" xml:space="preserve">Виключити цю папку з усіх перевірок і очищень?&#10;&#10;{0}</s:String>
+  <s:String x:Key="Map.Rescan">Пересканувати</s:String>
+  <s:String x:Key="Map.ScanFirst">Проскануйте папку, щоб побачити карту. Результат зберігається в пам'яті до закриття Aeris.</s:String>
+  <s:String x:Key="Map.FooterLogical">Файлів: {0:N0} · {1} · логічний розмір. Жорсткі посилання враховуються один раз.</s:String>
+  <s:String x:Key="Map.FooterDisk">Файлів: {0:N0} · {1} · розмір на диску. Він може відрізнятися від логічного через стиснення й розріджені файли.</s:String>
+  <s:String x:Key="Map.PathCopied">Шлях скопійовано.</s:String>
+  <s:String x:Key="Map.RecycleFilesOnly">З карти до кошика можна надіслати лише окремі файли. Відкрийте папку й виберіть файли.</s:String>
+  <s:String x:Key="Status.ScanDoneTimed">Готово · файлів: {0:N0} · {1} · пропущено: {2} · {3:0.#} с</s:String>
 </ResourceDictionary>
