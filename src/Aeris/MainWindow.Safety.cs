@@ -28,7 +28,22 @@ public partial class MainWindow
                 Journal.Rotate(pinned: Quarantine.Operations().ToHashSet());
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
-        }).ContinueWith(_ => Dispatcher.BeginInvoke(() => { RefreshQuarantine(); RefreshHistory(); }));
+        }).ContinueWith(_ => Dispatcher.BeginInvoke(() => { ImportJournals(); RefreshQuarantine(); }));
+    }
+
+    /// <summary>Adds operations that only exist as journals (run by aeris-cli or the scheduler) to the history.</summary>
+    private void ImportJournals()
+    {
+        if (busy) return;
+        List<HistoryEntry> missing;
+        try { missing = Journal.Missing(data.History); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return; }
+        if (missing.Count == 0) return;
+        data.History.AddRange(missing);
+        data.History.Sort((a, b) => a.Time.CompareTo(b.Time));
+        if (data.History.Count > UserData.MaxHistory) data.History.RemoveRange(0, data.History.Count - UserData.MaxHistory);
+        SaveSettings();
+        RefreshHistory();
     }
 
     private void RestoreCleanupSettings()
@@ -190,7 +205,9 @@ public partial class MainWindow
 
     private void SelectExtraCopies(object sender, RoutedEventArgs e)
     {
-        if (busy || duplicates.Count == 0) return;
+        if (busy) return;
+        if (SimilarMode) { SelectNonBestImages(); return; }
+        if (duplicates.Count == 0) return;
         var extra = DuplicateRules.Extra(duplicates, data.KeepRule, data.PriorityFolders, data.ProtectedFolders).ToHashSet();
         DuplicatesGrid.SelectedItems.Clear();
         foreach (var item in duplicates.Where(extra.Contains)) DuplicatesGrid.SelectedItems.Add(item);
@@ -198,7 +215,7 @@ public partial class MainWindow
         DuplicatesGrid.Focus();
     }
 
-    private void ClearDuplicateSelection(object sender, RoutedEventArgs e) => DuplicatesGrid.UnselectAll();
+    private void ClearDuplicateSelection(object sender, RoutedEventArgs e) => ActiveDuplicateGrid.UnselectAll();
 
     private async void FindJunk(object sender, RoutedEventArgs e)
     {

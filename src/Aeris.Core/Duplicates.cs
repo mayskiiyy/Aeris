@@ -60,16 +60,36 @@ public static class Duplicates
         return new(HistoryAction.Recycle, CleanupMode.Recycle, categories) { Details = string.Join("\n", selected.Select(f => f.Path)) };
     }
 
+    /// <summary>The same guarantee for similar images: each group keeps at least one picture, the best one if it isn't selected.</summary>
+    public static CleanupPlan Plan(IReadOnlyCollection<SimilarImage> selected, IReadOnlyCollection<SimilarImage> all)
+    {
+        var chosen = selected.ToHashSet();
+        var categories = new List<PlanCategory>();
+        foreach (var group in selected.GroupBy(f => f.Group).OrderBy(g => g.Key))
+        {
+            var keeper = all.Where(i => i.Group == group.Key && !chosen.Contains(i)).OrderByDescending(i => i.Best).FirstOrDefault()
+                ?? throw new InvalidOperationException(Loc.Get("Recycle.KeepOne"));
+            var items = group.Select(i => new PlanItem(i.Path, i.Size, i.Modified, new FileInfo(i.Path) is { Exists: true } f ? f.CreationTimeUtc.Ticks : 0, $"img-{group.Key}") { Keeper = keeper.Path }).ToList();
+            categories.Add(new($"img-{group.Key}", Loc.Format("Preview.DuplicateGroup", group.Key, keeper.Path), items));
+        }
+        return new(HistoryAction.Recycle, CleanupMode.Recycle, categories) { Details = string.Join("\n", selected.Select(f => f.Path)) };
+    }
+
     /// <summary>True when, after the user's choices in the preview, every group still keeps at least one file on disk.</summary>
     public static bool KeepsOne(CleanupPlan plan) =>
         plan.Included.Where(i => i.Keeper != null).All(i => !plan.Included.Any(o => string.Equals(o.Path, i.Keeper, StringComparison.OrdinalIgnoreCase)));
 
-    /// <summary>The copy and its keeper are still two different files with the hash found during the search.</summary>
+    /// <summary>
+    /// The copy that stays still exists. For exact duplicates both files must also still be two different files
+    /// with the hash found during the search.
+    /// </summary>
     public static void Verify(PlanItem copy)
     {
-        if (copy.Keeper == null || copy.Hash == null) return;
+        if (copy.Keeper == null) return;
         var keeperInfo = new FileInfo(copy.Keeper);
-        if (!keeperInfo.Exists || keeperInfo.Length != copy.Size || !Storage.SafePath(keeperInfo.DirectoryName!)) throw new ChangedException(Loc.Get("Error.KeeperChanged"));
+        if (!keeperInfo.Exists || !Storage.SafePath(keeperInfo.DirectoryName!) || (copy.Hash != null && keeperInfo.Length != copy.Size))
+            throw new ChangedException(Loc.Get("Error.KeeperChanged"));
+        if (copy.Hash == null) return;
         using var original = new FileStream(copy.Keeper, FileMode.Open, FileAccess.Read, FileShare.Read);
         using var candidate = new FileStream(copy.Path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
         if (Analysis.Identity(original) == Analysis.Identity(candidate) || Analysis.Hash(original, CancellationToken.None) != copy.Hash || Analysis.Hash(candidate, CancellationToken.None) != copy.Hash)

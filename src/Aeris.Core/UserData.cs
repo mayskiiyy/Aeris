@@ -50,6 +50,14 @@ public class HistoryEntry
     }
 }
 
+public class CleanupProfile
+{
+    public string Name { get; set; } = "";
+    public List<string> Categories { get; set; } = [];
+    public int OlderThanDays { get; set; } = 2;
+    public CleanupMode Mode { get; set; } = CleanupMode.Permanent;
+}
+
 public class UserData
 {
     public const int CurrentSchema = 2;
@@ -70,6 +78,7 @@ public class UserData
     public List<string> PriorityFolders { get; set; } = [];
     public List<string> ProtectedFolders { get; set; } = [];
     public bool SequentialHashing { get; set; }
+    public List<CleanupProfile> Profiles { get; set; } = [];
     public static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aeris", "settings.json");
 
     public static UserData Load(string? path = null)
@@ -97,6 +106,13 @@ public class UserData
         data.LargeOperationFiles = Math.Clamp(data.LargeOperationFiles, 10, 10000000);
         data.LargeOperationGb = Math.Clamp(data.LargeOperationGb, 1, 100000);
         if (!DuplicateRules.Names.Contains(data.KeepRule)) data.KeepRule = DuplicateRules.Names[0];
+        data.Profiles = (data.Profiles ?? []).Where(p => p != null && !string.IsNullOrWhiteSpace(p.Name)).GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase).Select(g => g.Last()).ToList();
+        foreach (var profile in data.Profiles)
+        {
+            profile.Categories = (profile.Categories ?? []).Where(c => !string.IsNullOrWhiteSpace(c)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            profile.OlderThanDays = Math.Clamp(profile.OlderThanDays, 2, 36500);
+            if (profile.Mode is not (CleanupMode.Permanent or CleanupMode.Quarantine)) profile.Mode = CleanupMode.Permanent;
+        }
         data.History = (data.History ?? []).Where(h => h != null).ToList();
         foreach (var entry in data.History) entry.Normalize();
         if (data.History.Count > MaxHistory) data.History = data.History.OrderByDescending(h => h.Time).Take(MaxHistory).OrderBy(h => h.Time).ToList();

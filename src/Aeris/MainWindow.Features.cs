@@ -97,6 +97,7 @@ public partial class MainWindow
         folder = path;
         UpdateFolderLabels(); ResetFileResults();
         MapList.ItemsSource = null; duplicates = []; DuplicatesGrid.ItemsSource = null; JunkGrid.ItemsSource = null;
+        similar = []; SimilarGrid.ItemsSource = null; SimilarPreviews.ItemsSource = null; SimilarStrip.Visibility = Visibility.Collapsed;
         SetBusy(false); SaveSettings(); RefreshDisk();
     }
 
@@ -233,6 +234,7 @@ public partial class MainWindow
     private async void FindDuplicates(object sender, RoutedEventArgs e)
     {
         if (busy) return;
+        if (SimilarMode) { await FindSimilar(); return; }
         if (!Storage.SafePath(folder)) { Status.Text = Loc.Get("Dup.ChooseFolder"); return; }
         SaveSettings();
         cancellation?.Dispose(); cancellation = new();
@@ -259,6 +261,7 @@ public partial class MainWindow
 
     private void RevealDuplicate(object sender, RoutedEventArgs e)
     {
+        if (SimilarMode) { RevealSimilar(); return; }
         if (DuplicatesGrid.SelectedItem is not DuplicateFile file) return;
         try { Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{file.Path}\"") { UseShellExecute = true }); }
         catch (Exception ex) { Status.Text = ex.Message; }
@@ -269,7 +272,12 @@ public partial class MainWindow
         if (busy) return;
         bool duplicateMode = sender is Button { Name: "TrashDuplicatesButton" };
         CleanupPlan plan;
-        if (duplicateMode)
+        if (duplicateMode && SimilarMode)
+        {
+            if (!TrySimilarPlan(out var similarPlan)) return;
+            plan = similarPlan!;
+        }
+        else if (duplicateMode)
         {
             var selectedCopies = DuplicatesGrid.SelectedItems.OfType<DuplicateFile>().ToArray();
             if (selectedCopies.Length == 0) { Status.Text = Loc.Get("Recycle.SelectFiles"); return; }
@@ -309,7 +317,15 @@ public partial class MainWindow
         var completion = new TaskCompletionSource<CleanupResult>();
         var thread = new Thread(() =>
         {
-            try { using (journal) completion.SetResult(Recycle.Execute(plan, exclusions, owner, journal, CancellationToken.None, progress, ignoreJunk)); }
+            try
+            {
+                using (journal)
+                {
+                    var outcome = Recycle.Execute(plan, exclusions, owner, journal, CancellationToken.None, progress, ignoreJunk);
+                    journal.Finish(outcome);
+                    completion.SetResult(outcome);
+                }
+            }
             catch (Exception ex) { completion.SetException(ex); }
         });
         thread.SetApartmentState(ApartmentState.STA);
@@ -329,6 +345,10 @@ public partial class MainWindow
             FilesGrid.ItemsSource = FilesGrid.Items.OfType<LargeFile>().Where(f => File.Exists(f.Path)).ToList();
             duplicates = duplicates.Where(d => File.Exists(d.Path)).GroupBy(d => d.Group).Where(g => g.Count() > 1).SelectMany(g => g).ToList();
             DuplicatesGrid.ItemsSource = duplicates;
+            similar = similar.Where(i => File.Exists(i.Path)).GroupBy(i => i.Group).Where(g => g.Count() > 1).SelectMany(g => g).ToList();
+            SimilarGrid.ItemsSource = similar;
+            previewGroup = -1;
+            ShowPreviews(similar.FirstOrDefault()?.Group ?? 0);
             if (JunkGrid.ItemsSource is IEnumerable<JunkEntry> junk) JunkGrid.ItemsSource = junk.Where(j => Path.Exists(j.Path)).ToList();
             MapList.ItemsSource = null;
             cleaning = false; SetBusy(false); RefreshDisk();

@@ -74,7 +74,8 @@ public static class Cleaners
     private static readonly Regex Token = new(@"%([A-Za-z0-9_()]+)%|\{reg:(HKCU|HKLM)\\([^:{}]+):([^{}]*)\}", RegexOptions.CultureInvariant);
     private static readonly string[] ChromiumFolders = ["Cache", "Code Cache", "GPUCache"];
 
-    public static string UserFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aeris", "cleaners");
+    public static string DefaultUserFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aeris", "cleaners");
+    public static string UserFolder { get; set; } = DefaultUserFolder;
 
     public static List<CleanerRule> Builtin()
     {

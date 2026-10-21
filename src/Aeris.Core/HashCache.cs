@@ -15,26 +15,30 @@ public sealed class HashCache
     private readonly HashSet<string> used = new(StringComparer.OrdinalIgnoreCase);
     private readonly object gate = new();
     private bool dirty;
+    private readonly string file;
+
+    private HashCache(string file) => this.file = file;
 
     private readonly record struct Entry(long Size, long Modified, string Identity, string Hash);
 
     public static string DefaultFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aeris", "hashcache");
     public static string Folder { get; set; } = DefaultFolder;
-    public static string FilePath => Path.Combine(Folder, "sha256.tsv");
+    public static string PathFor(string name) => Path.Combine(Folder, name + ".tsv");
     public int Hits { get; private set; }
 
-    public static HashCache Load()
+    /// <summary>Loads one kind of cached hash: "sha256" for duplicates, "dhash" for similar images.</summary>
+    public static HashCache Load(string name = "sha256")
     {
-        var cache = new HashCache();
+        var cache = new HashCache(PathFor(name));
         try
         {
-            if (!File.Exists(FilePath)) return cache;
-            using var reader = new StreamReader(FilePath, Encoding.UTF8);
+            if (!File.Exists(cache.file)) return cache;
+            using var reader = new StreamReader(cache.file, Encoding.UTF8);
             if (reader.ReadLine() != Header) return cache;
             while (reader.ReadLine() is { } line)
             {
                 string[] parts = line.Split('\t');
-                if (parts.Length != 5 || !long.TryParse(parts[0], out long size) || !long.TryParse(parts[1], out long modified) || parts[3].Length != 64) continue;
+                if (parts.Length != 5 || !long.TryParse(parts[0], out long size) || !long.TryParse(parts[1], out long modified) || parts[3].Length == 0) continue;
                 cache.entries[parts[4]] = new(size, modified, parts[2], parts[3]);
             }
         }
@@ -71,7 +75,7 @@ public sealed class HashCache
         {
             if (!dirty) return;
             Directory.CreateDirectory(Folder);
-            string temporary = FilePath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            string temporary = file + "." + Guid.NewGuid().ToString("N") + ".tmp";
             try
             {
                 using (var writer = new StreamWriter(temporary, false, new UTF8Encoding(false)))
@@ -80,7 +84,7 @@ public sealed class HashCache
                     foreach (var (path, entry) in entries.OrderByDescending(p => used.Contains(p.Key)).Take(MaxEntries))
                         writer.WriteLine($"{entry.Size}\t{entry.Modified}\t{entry.Identity}\t{entry.Hash}\t{path}");
                 }
-                File.Move(temporary, FilePath, true);
+                File.Move(temporary, file, true);
                 dirty = false;
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
@@ -90,12 +94,13 @@ public sealed class HashCache
 
     public static long Size()
     {
-        try { return File.Exists(FilePath) ? new FileInfo(FilePath).Length : 0; }
+        try { return Directory.Exists(Folder) ? new DirectoryInfo(Folder).GetFiles("*.tsv").Sum(f => f.Length) : 0; }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return 0; }
     }
 
     public static void Clear()
     {
-        if (File.Exists(FilePath)) File.Delete(FilePath);
+        if (!Directory.Exists(Folder)) return;
+        foreach (string path in Directory.GetFiles(Folder, "*.tsv")) File.Delete(path);
     }
 }

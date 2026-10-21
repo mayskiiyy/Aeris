@@ -93,7 +93,7 @@ public partial class MainWindow : Window
             LanguagePicker.SelectedItem = Loc.Current;
             LabelOptions(Retention);
             LabelOptions(Threshold);
-            foreach (var combo in new[] { Retention, Threshold, FileType }) RefreshSelectionBox(combo);
+            foreach (var combo in new[] { Retention, Threshold, FileType, DuplicateMode }) RefreshSelectionBox(combo);
         }
         finally { restoring = false; }
         UpdateTheme();
@@ -103,6 +103,9 @@ public partial class MainWindow : Window
         FilesGrid.Items.Refresh();
         MapList.Items.Refresh();
         DuplicatesGrid.Items.Refresh();
+        SimilarGrid.Items.Refresh();
+        RefreshSimilarityLabel();
+        DuplicateFooter.Text = Loc.Get(SimilarMode ? "Dup.SimilarFooter" : "Dup.Footer");
         RefreshHistory();
         RestoreCleanupSettings();
         RefreshRulesInfo();
@@ -125,6 +128,7 @@ public partial class MainWindow : Window
     {
         if (!ReferenceEquals(e.Source, MainTabs) || !IsLoaded) return;
         if (ReferenceEquals(MainTabs.SelectedItem, HomeTab)) { RefreshDisk(); RefreshHome(); }
+        if (ReferenceEquals(MainTabs.SelectedItem, HistoryTab) || ReferenceEquals(MainTabs.SelectedItem, HomeTab)) ImportJournals();
         if (MainTabs.Template.FindName("PART_SelectedContentHost", MainTabs) is not ContentPresenter content) return;
         content.BeginAnimation(OpacityProperty, null);
         if (!SystemParameters.ClientAreaAnimation || InputManager.Current.MostRecentInputDevice is KeyboardDevice) return;
@@ -298,7 +302,8 @@ public partial class MainWindow : Window
         CacheList.IsEnabled = !value;
         ExportButton.IsEnabled = !value && FilesGrid.Items.Count > 0;
         TrashFilesButton.IsEnabled = !value && FilesGrid.Items.Count > 0;
-        TrashDuplicatesButton.IsEnabled = SelectExtraButton.IsEnabled = ClearDuplicateSelectionButton.IsEnabled = !value && DuplicatesGrid.Items.Count > 0;
+        TrashDuplicatesButton.IsEnabled = SelectExtraButton.IsEnabled = ClearDuplicateSelectionButton.IsEnabled = !value && ActiveDuplicateGrid.Items.Count > 0;
+        DuplicateMode.IsEnabled = SimilaritySlider.IsEnabled = !value;
         TrashJunkButton.IsEnabled = SelectAllJunkButton.IsEnabled = !value && JunkGrid.Items.Count > 0;
         CancelButton.Visibility = value && !cleaning ? Visibility.Visible : Visibility.Collapsed;
         Activity.IsIndeterminate = value;
@@ -449,10 +454,14 @@ public partial class MainWindow : Window
         try
         {
             var exclusions = data.Exclusions.ToArray();
-            var current = caches.ToArray();
             var result = await Task.Run(() =>
             {
-                using (journal) return Cleanup.ExecuteCache(plan, exclusions, journal, CancellationToken.None, progress, Cleaners.Groups());
+                using (journal)
+                {
+                    var outcome = Cleanup.ExecuteCache(plan, exclusions, journal, CancellationToken.None, progress, Cleaners.Groups());
+                    journal.Finish(outcome);
+                    return outcome;
+                }
             });
             Status.Text = result.Summary;
             FinishHistory(history, result.Done, result.Bytes, result.Skipped, result.Result);

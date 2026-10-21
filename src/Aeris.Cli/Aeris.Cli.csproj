@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>aeris-cli</AssemblyName>
+    <RootNamespace>Aeris.Cli</RootNamespace>
+    <ApplicationIcon>..\Aeris\Assets\aeris.ico</ApplicationIcon>
+    <Description>Command-line interface for Aeris.</Description>
+    <Product>Aeris</Product>
+    <Copyright>Copyright (c) 2026 MAYSKIY</Copyright>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aeris.Core\Aeris.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Aeris.Tests" />
+  </ItemGroup>
+</Project>
