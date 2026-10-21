@@ -1,6 +1,8 @@
 # Aeris
 
-Aeris shows where your disk space went and helps you review old cache files before cleaning them. Windows has a WPF app; Linux has an Avalonia app and a standalone CLI for desktops and servers. File analysis stays local and Aeris collects no telemetry. Desktop apps check GitHub Releases once at startup and when you ask; downloads and installation require your confirmation.
+A disk space analyzer and cache cleaner for Windows and Linux. Find large files and duplicates, explore folder sizes, and review cache files before removing them.
+
+Windows and Linux have desktop apps. A standalone CLI is available for scripts and Linux servers. File analysis stays local; Aeris collects no telemetry.
 
 ![Aeris home screen](.github/screenshot.png)
 
@@ -8,7 +10,39 @@ Aeris shows where your disk space went and helps you review old cache files befo
 [![Latest release](https://img.shields.io/github/v/release/mayskiiyy/Aeris)](https://github.com/mayskiiyy/Aeris/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
+[Download](https://github.com/mayskiiyy/Aeris/releases/latest) · [Platform support](#platform-support) · [Install](#install) · [Command line](#command-line) · [Build from source](#build-from-source)
+
+## What you can do
+
+- **Find what takes up space.** Explore a folder map, inspect the largest files and export reports to CSV.
+- **Review caches before cleaning.** Search categories, choose an age limit and inspect individual files before confirming.
+- **Find duplicate files.** Exact matches are verified with SHA-256; hashes of unchanged files are cached for later scans.
+- **Keep a recovery option.** Move caches to quarantine and restore them from History. Permanent cache deletion is also available when explicitly selected.
+- **Automate routine cleanup.** Use the CLI, Windows Task Scheduler or optional Linux systemd user units.
+
+## Platform support
+
+| Feature | Windows GUI | Linux GUI | Linux CLI |
+| --- | --- | --- | --- |
+| Disk usage and largest files | Yes | Treemap, folder navigation, largest 500, CSV | Scan reports and CSV |
+| Exact duplicates | Review and recycle | Report and open location | Report; optional desktop trash |
+| Cache cleanup | Permanent or quarantine | Per-file review and quarantine | Dry run, permanent or quarantine |
+| History and quarantine restore | Yes | Yes | Yes |
+| Similar images | Yes | Not yet | Not yet |
+| Empty folders and zero-byte files | Yes | Not yet | Yes |
+| Scheduling | Task Scheduler settings | Optional systemd units | systemd or another scheduler |
+| Updates | Offer, verify and run installer; portable ZIP download | Offer and verify archive; manual install | Download a new release manually |
+
+### Linux limitations
+
+The Linux desktop app currently reports exact duplicates but does not delete them. Similar-image search and the empty-folder/zero-byte-file view are not implemented in the Linux GUI. Similar-image search is also unavailable in the Linux CLI. Linux desktop updates download a verified archive and require manual installation.
+
+Linux builds target glibc on x64 and ARM64. Alpine/musl is not supported; the desktop requires X11 or XWayland. See [Linux installation](#linux-desktop-and-servers) for dependencies and server setup.
+
 ## Windows features
+
+<details>
+<summary>Full Windows feature list</summary>
 
 - Cache cleanup for Windows, every installed browser Aeris knows, GPU shader caches, Steam, developer tools (npm, Yarn, pip, NuGet, Gradle) and a few Electron apps. Only files whose creation and modification dates are both older than the retention period you pick (2 days minimum) are touched. The full list is in [How cleanup works](#how-cleanup-works).
 - Cache categories can be filtered by purpose and searched by name, description or path. Choose categories before checking; the scan preserves that choice. Before anything is deleted you see every file in a review window, with search, sorting and per-file or per-category exclusion.
@@ -24,9 +58,15 @@ Aeris shows where your disk space went and helps you review old cache files befo
 - A history of every operation with a per-file log, folder exclusions that apply everywhere, light and dark themes.
 - Eight interface languages: English, Deutsch, Русский, Українська, Français, Español, Português (Brasil) and Polski. On first launch Aeris picks the Windows display language and falls back to English.
 
+</details>
+
 ## Install
 
-Download the latest build from [Releases](https://github.com/mayskiiyy/Aeris/releases/latest):
+All packages include the .NET runtime; you do not need to install it separately. Download a package from [Releases](https://github.com/mayskiiyy/Aeris/releases/latest).
+
+### Windows
+
+Requires Windows 10 or 11 (x64).
 
 - `Aeris-<version>-Setup-x64.exe` installs Aeris and `aeris-cli.exe` for the current user. It does not need administrator rights.
 - `Aeris-<version>-win-x64.zip` is the portable build: `Aeris.exe`, `aeris-cli.exe` and the license files. Unpack it anywhere and run it.
@@ -38,9 +78,7 @@ Or install it with winget:
 winget install MAYSKIY.Aeris
 ```
 
-All builds include the .NET runtime. The Windows app requires Windows 10 or 11 (x64). Linux desktop packages also need the system graphics libraries listed below.
-
-The builds are not code-signed yet, so SmartScreen may say that Windows protected your PC. Click **More info → Run anyway**. Before that you can check that the file is the one from the release: run `Get-FileHash .\Aeris-<version>-Setup-x64.exe` in PowerShell and compare the hash with `SHA256SUMS.txt` from the same release. Installing through winget doesn't show this warning.
+Release binaries are currently unsigned, so Windows may show a SmartScreen warning, including when installing through winget. To check a download's integrity, run `Get-FileHash .\Aeris-<version>-Setup-x64.exe -Algorithm SHA256` in PowerShell and compare the result with `SHA256SUMS.txt` from the same release. A matching checksum does not establish a trusted publisher identity.
 
 Settings, history, quarantine and caches of hashes are stored in `%LOCALAPPDATA%\Aeris`. Uninstalling the app leaves that folder in place, but removes the scheduled task and the Explorer menu entries.
 
@@ -54,17 +92,6 @@ Linux packages start with version 1.1. Choose `linux-x64` for Intel/AMD or `linu
 Check the archive against `SHA256SUMS.txt` from the same release, then extract it. For the desktop app, run `bash install.sh` as your own user. It installs into `~/.local/opt/aeris/<build>`, creates commands under `~/.local/bin`, and adds an application-menu entry. No sudo is needed. Run `Aeris.Desktop` directly if you prefer a portable installation. Close Aeris before installing an update; old release directories are kept until you remove them.
 
 On Debian/Ubuntu, the desktop needs `libx11-6 libice6 libsm6 libfontconfig1` and an X11 session or XWayland. The CLI needs no display server. `gio` (usually `libglib2.0-bin`) is required only for CLI operations that send files to the desktop trash; failure to reach the trash never falls back to permanent deletion.
-
-| Feature | Windows GUI | Linux GUI | Linux CLI |
-| --- | --- | --- | --- |
-| Disk usage and largest files | Yes | Treemap, folder navigation, largest 500, CSV | Scan reports and CSV |
-| Exact duplicates | Review and recycle | Report and open location | Report; optional desktop trash |
-| Cache cleanup | Permanent or quarantine | Per-file review and quarantine | Dry run, permanent or quarantine |
-| History and quarantine restore | Yes | Yes | Yes |
-| Similar images | Yes | Not yet | Not yet |
-| Empty folders and zero-byte files | Yes | Not yet | Yes |
-| Scheduling | Task Scheduler settings | Optional systemd units | systemd or another scheduler |
-| Updates | Offer, verify and run installer; portable ZIP download | Offer and verify archive; manual install | Download a new release manually |
 
 Linux rules cover thumbnails, pip, npm, Gradle, Chrome, Chromium, Firefox and Mesa shader caches. Browser profiles, passwords, cookies, installed dependencies and system package caches are not targets. Cache roots respect `XDG_CACHE_HOME`; app data uses .NET's local application-data location (normally `~/.local/share/Aeris`). System folders are blocked, path comparisons are case-sensitive, and symlinks and special files are skipped. Retention uses the filesystem birth time where available, otherwise the metadata-change time, as well as modification time. Quarantine only moves files on the same filesystem as app data.
 
@@ -200,6 +227,7 @@ The results land in `artifacts/`: `Aeris.exe` and `aeris-cli.exe` in `Aeris-win-
 | `src/Aeris.Core/Cleaners/builtin.json` | Built-in cleanup categories |
 | `src/Aeris.Core/Languages/` | One string dictionary per language |
 | `src/Aeris/` | The WPF app: main window, review window, treemap control, themes |
+| `src/Aeris.Desktop/` | The Avalonia desktop app for Linux |
 | `src/Aeris.Cli/` | Entry point of `aeris-cli.exe` |
 | `tests/Aeris.Tests/` | xUnit tests; file tests run in temporary folders |
 | `tools/Aeris.Bench/` | Scanner and treemap benchmark |
