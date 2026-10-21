@@ -24,6 +24,7 @@ public partial class App : Application
         try { if (File.Exists(ThemeFile)) dark = File.ReadAllText(ThemeFile).Trim() == "dark"; }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
         SetTheme(dark);
+        MiddleButtonScroll.Register();
         base.OnStartup(e);
         var window = new MainWindow();
         MainWindow = window;

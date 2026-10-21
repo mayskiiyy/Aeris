@@ -526,4 +526,27 @@
   <s:String x:Key="Similar.StreamProgress">Processadas: {0} · Imagens encontradas: {1} · {2}</s:String>
   <s:String x:Key="Similar.Enumerating">Buscando imagens e verificando o cache…</s:String>
   <s:String x:Key="Similar.Grouping">Agrupando imagens semelhantes…</s:String>
+  <s:String x:Key="Nav.Help">Ajuda</s:String>
+  <s:String x:Key="Help.Intro">Guia offline. F1 abre esta página; o idioma acompanha a interface.</s:String>
+  <s:String x:Key="Help.StartTitle">Primeiros passos</s:String>
+  <s:String x:Key="Help.Start">Analise uma pasta para ver o que ocupa espaço. A análise não exclui arquivos. Antes da primeira limpeza, feche os aplicativos afetados, escolha caches com 7 dias e revise cada arquivo selecionado.</s:String>
+  <s:String x:Key="Help.Cache">Escolha categorias e idade mínima (pelo menos 2 dias) e analise os caches. As datas de criação e modificação devem ser antigas o suficiente. Filtros mudam apenas a visualização: seleções ocultas continuam ativas. Revise todo o plano. Níveis de risco não garantem que um cache seja desnecessário.</s:String>
+  <s:String x:Key="Help.DiskWindows">Escolha uma pasta em Arquivos grandes ou Mapa de pastas e analise. Até 200 arquivos, filtros de tipo e tamanho e exportação CSV. Explore o mapa e o caminho; alterne tamanho lógico e em disco. Arquivos pessoais vão para a Lixeira.</s:String>
+  <s:String x:Key="Help.DiskLinux">Escolha uma pasta em Uso do disco e analise. A lista mostra os 500 maiores arquivos e permite exportar CSV. Abra pastas no mapa ou com clique duplo na lista; use Subir para voltar. Clique duas vezes em um arquivo para abrir sua localização. Não há exclusão aqui.</s:String>
+  <s:String x:Key="Help.DuplicatesWindows">Escolha uma pasta e busque duplicatas exatas ou imagens semelhantes. SHA-256 verifica cópias exatas; avalie você as imagens semelhantes. Revise a regra de preservação e as cópias selecionadas antes de enviá-las à Lixeira. Pastas vazias têm análise própria; pastas do Windows e de aplicativos são excluídas.</s:String>
+  <s:String x:Key="Help.DuplicatesLinux">A busca verifica com SHA-256 as cópias exatas na pasta indicada em Uso do disco. Clique duplo abre a localização. A interface Linux não exclui duplicatas nem busca imagens semelhantes ou pastas vazias.</s:String>
+  <s:String x:Key="Help.Recovery">O Histórico restaura caches ainda presentes na quarentena sem sobrescrever arquivos substitutos. Restaure arquivos pessoais pela Lixeira do sistema. A exclusão permanente não pode ser desfeita aqui. A quarentena continua ocupando espaço; o Windows pode limpá-la por idade ou tamanho, inclusive antes do prazo escolhido.</s:String>
+  <s:String x:Key="Help.SettingsWindows">Configurações controla modo de limpeza, limites da quarentena, exclusões, regras de preservação, idioma e tema. Escolha quarentena explicitamente antes da primeira limpeza: o padrão no Windows é exclusão permanente. O agendamento usa apenas categorias seguras; o menu do Explorer é opcional.</s:String>
+  <s:String x:Key="Help.SettingsLinux">Configurações oferece idioma, atualizações e instruções para servidores; o botão de tema fica no topo. A interface Linux sempre usa quarentena. Limpeza permanente e agendada usa a CLI; o temporizador systemd é opcional. Ajuda CLI: aeris-cli --help.</s:String>
+  <s:String x:Key="Help.TroubleTitle">Se faltarem resultados ou espaço livre</s:String>
+  <s:String x:Key="Help.Trouble">Confira pasta, filtros, exclusões e idade. Arquivos inacessíveis, vinculados, alterados ou bloqueados podem ser ignorados; feche o aplicativo e analise novamente. Quarentena e Lixeira ocupam espaço. Tamanho lógico e em disco podem diferir. Veja o Histórico e o resultado.</s:String>
+  <s:String x:Key="Help.KeysTitle">Teclado</s:String>
+  <s:String x:Key="Help.Keys">F1 — ajuda. Ctrl+F — busca de cache. Esc na busca de cache — limpar. Tab / Shift+Tab — mover o foco. Setas — escolher aba; Page Up / Page Down — rolar o guia.</s:String>
+  <s:String x:Key="Search.Title">Pesquisar no Aeris</s:String>
+  <s:String x:Key="Search.Hint">Funções, configurações, caches ou ajuda · Ctrl+K</s:String>
+  <s:String x:Key="Search.Clear">Limpar</s:String>
+  <s:String x:Key="Search.Results">Resultados da pesquisa</s:String>
+  <s:String x:Key="Search.None">Nenhum resultado. Tente outra frase ou uma mais curta.</s:String>
+  <s:String x:Key="Search.Count">Resultados: {0}. Enter abre o primeiro; ↓ vai para a lista.</s:String>
+  <s:String x:Key="Help.MouseWindows">Windows: Ctrl+K abre a pesquisa no início; Ctrl+F pesquisa ali no Aeris. Clique com o botão do meio em uma área rolável e mova o mouse; clique novamente ou pressione Esc para parar. Também é possível segurar o botão do meio ao mover e soltá-lo para parar.</s:String>
 </ResourceDictionary>

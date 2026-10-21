@@ -30,6 +30,13 @@ public sealed partial class MainWindow
 
     private void WindowSearchKeyDown(object? sender, KeyEventArgs e)
     {
+        if (e.Key == Key.F1 && e.KeyModifiers == KeyModifiers.None)
+        {
+            Tabs.SelectedItem = HelpTab;
+            HelpScroll.Focus();
+            e.Handled = true;
+            return;
+        }
         if (e.Key != Key.F || e.KeyModifiers != KeyModifiers.Control) return;
         Tabs.SelectedIndex = 1;
         CacheSearch.Focus();

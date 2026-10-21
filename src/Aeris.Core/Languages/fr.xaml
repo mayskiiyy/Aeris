@@ -526,4 +526,27 @@
   <s:String x:Key="Similar.StreamProgress">Traités : {0} · Images trouvées : {1} · {2}</s:String>
   <s:String x:Key="Similar.Enumerating">Recherche des images et vérification du cache…</s:String>
   <s:String x:Key="Similar.Grouping">Regroupement des images similaires…</s:String>
+  <s:String x:Key="Nav.Help">Aide</s:String>
+  <s:String x:Key="Help.Intro">Guide hors ligne. F1 ouvre cette page ; la langue suit celle de l’interface.</s:String>
+  <s:String x:Key="Help.StartTitle">Pour commencer</s:String>
+  <s:String x:Key="Help.Start">Analysez un dossier pour identifier ce qui prend de la place. L’analyse ne supprime rien. Avant le premier nettoyage, fermez les applications concernées, choisissez un âge de cache de 7 jours et vérifiez chaque fichier sélectionné.</s:String>
+  <s:String x:Key="Help.Cache">Choisissez les catégories et un âge minimum de 2 jours, puis analysez les caches. Les dates de création et de modification doivent être assez anciennes. Les filtres changent seulement l’affichage : les sélections masquées restent actives. Vérifiez tout le plan. Les niveaux de risque ne garantissent pas qu’un cache soit inutile.</s:String>
+  <s:String x:Key="Help.DiskWindows">Choisissez un dossier dans Gros fichiers ou Carte des dossiers et analysez-le. Jusqu’à 200 fichiers, filtres de type et taille, export CSV. Explorez la carte et le fil d’Ariane ; choisissez la taille logique ou sur disque. Les fichiers personnels vont dans la Corbeille.</s:String>
+  <s:String x:Key="Help.DiskLinux">Choisissez un dossier dans Utilisation du disque, puis analysez-le. La liste contient les 500 plus gros fichiers et s’exporte en CSV. Ouvrez les dossiers sur la carte ou par double-clic dans la liste ; remontez avec le bouton dédié. Un double-clic sur un fichier ouvre son emplacement. Aucune suppression ici.</s:String>
+  <s:String x:Key="Help.DuplicatesWindows">Choisissez un dossier et recherchez les doublons exacts ou les images similaires. SHA-256 vérifie les copies exactes ; jugez vous-même les images similaires. Vérifiez la règle de conservation et les copies sélectionnées avant de les envoyer à la Corbeille. Les dossiers vides ont une analyse séparée ; les dossiers Windows et des applications sont exclus.</s:String>
+  <s:String x:Key="Help.DuplicatesLinux">La recherche vérifie par SHA-256 les copies exactes du dossier indiqué dans Utilisation du disque. Un double-clic ouvre l’emplacement. L’interface Linux ne supprime pas les doublons et ne recherche ni images similaires ni dossiers vides.</s:String>
+  <s:String x:Key="Help.Recovery">L’Historique restaure les caches encore présents en quarantaine sans écraser leurs remplaçants. Restaurez les fichiers personnels depuis la Corbeille système. Une suppression définitive ne peut pas être annulée ici. La quarantaine occupe toujours de l’espace ; Windows peut la purger selon l’âge ou la taille, même avant le délai choisi.</s:String>
+  <s:String x:Key="Help.SettingsWindows">Les paramètres règlent le mode de nettoyage, les limites de quarantaine, les exclusions, les règles de conservation, la langue et le thème. Choisissez explicitement la quarantaine avant le premier nettoyage : Windows supprime définitivement par défaut. La planification utilise seulement les catégories sûres ; le menu Explorateur est facultatif.</s:String>
+  <s:String x:Key="Help.SettingsLinux">Les paramètres proposent langue, mises à jour et instructions serveur ; le thème se change en haut. L’interface Linux met toujours les caches en quarantaine. Le nettoyage définitif et planifié utilise la CLI ; le minuteur systemd est facultatif. Aide CLI : aeris-cli --help.</s:String>
+  <s:String x:Key="Help.TroubleTitle">Si des résultats ou de l’espace libre manquent</s:String>
+  <s:String x:Key="Help.Trouble">Vérifiez dossier, filtres, exclusions et âge. Les fichiers inaccessibles, liés, modifiés ou verrouillés peuvent être ignorés ; fermez l’application et relancez l’analyse. Quarantaine et Corbeille occupent de l’espace. Taille logique et sur disque peuvent différer. Consultez l’Historique et le résultat.</s:String>
+  <s:String x:Key="Help.KeysTitle">Clavier</s:String>
+  <s:String x:Key="Help.Keys">F1 — aide. Ctrl+F — recherche de cache. Échap dans la recherche de cache — effacer. Tab / Maj+Tab — déplacer le focus. Flèches — choisir un onglet ; Page précédente / suivante — faire défiler le guide.</s:String>
+  <s:String x:Key="Search.Title">Rechercher dans Aeris</s:String>
+  <s:String x:Key="Search.Hint">Fonctions, paramètres, caches ou aide · Ctrl+K</s:String>
+  <s:String x:Key="Search.Clear">Effacer</s:String>
+  <s:String x:Key="Search.Results">Résultats de recherche</s:String>
+  <s:String x:Key="Search.None">Aucun résultat. Essayez une autre expression ou une expression plus courte.</s:String>
+  <s:String x:Key="Search.Count">Résultats : {0}. Entrée ouvre le premier ; ↓ passe à la liste.</s:String>
+  <s:String x:Key="Help.MouseWindows">Windows : Ctrl+K ouvre la recherche sur l’accueil ; Ctrl+F y recherche dans Aeris. Cliquez avec le bouton central dans une zone défilante, puis déplacez la souris ; cliquez à nouveau ou appuyez sur Échap pour arrêter. Vous pouvez aussi maintenir le bouton central pendant le déplacement et le relâcher pour arrêter.</s:String>
 </ResourceDictionary>

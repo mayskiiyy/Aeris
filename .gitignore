@@ -9,3 +9,4 @@ artifacts/
 .codebase-memory/
 /docs/*
 !/docs/benchmarks.md
+!/docs/user-guide.md

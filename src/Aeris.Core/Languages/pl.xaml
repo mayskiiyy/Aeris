@@ -526,4 +526,27 @@
   <s:String x:Key="Similar.StreamProgress">Przetworzono: {0} · Znalezione obrazy: {1} · {2}</s:String>
   <s:String x:Key="Similar.Enumerating">Wyszukiwanie obrazów i sprawdzanie cache…</s:String>
   <s:String x:Key="Similar.Grouping">Grupowanie podobnych obrazów…</s:String>
+  <s:String x:Key="Nav.Help">Pomoc</s:String>
+  <s:String x:Key="Help.Intro">Przewodnik offline. F1 otwiera tę stronę; język odpowiada interfejsowi.</s:String>
+  <s:String x:Key="Help.StartTitle">Pierwsze kroki</s:String>
+  <s:String x:Key="Help.Start">Przeskanuj folder, aby sprawdzić, co zajmuje miejsce. Skanowanie niczego nie usuwa. Przed pierwszym czyszczeniem zamknij odpowiednie aplikacje, wybierz wiek pamięci podręcznej 7 dni i sprawdź każdy wybrany plik.</s:String>
+  <s:String x:Key="Help.Cache">Wybierz kategorie i wiek plików (minimum 2 dni), potem sprawdź pamięć podręczną. Daty utworzenia i modyfikacji muszą być wystarczająco stare. Filtry zmieniają tylko widok: ukryte zaznaczenia pozostają aktywne. Sprawdź cały plan. Poziomy ryzyka nie gwarantują, że pamięć podręczna jest zbędna.</s:String>
+  <s:String x:Key="Help.DiskWindows">Wybierz folder w Dużych plikach lub Mapie folderów i uruchom skanowanie. Do 200 plików, filtry typu i rozmiaru oraz eksport CSV. Nawiguj mapą i ścieżką; przełączaj rozmiar logiczny i na dysku. Pliki osobiste trafiają do Kosza.</s:String>
+  <s:String x:Key="Help.DiskLinux">Wybierz folder w Wykorzystaniu dysku i przeskanuj go. Lista pokazuje 500 największych plików i pozwala eksportować CSV. Otwieraj foldery na mapie lub dwuklikiem na liście; wracaj przyciskiem W górę. Dwuklik pliku otwiera jego lokalizację. Nie ma tu usuwania plików.</s:String>
+  <s:String x:Key="Help.DuplicatesWindows">Wybierz folder i znajdź dokładne duplikaty lub podobne obrazy. SHA-256 sprawdza dokładne kopie; podobne obrazy oceń samodzielnie. Sprawdź regułę zachowania i zaznaczone kopie przed przeniesieniem do Kosza. Puste foldery mają osobne skanowanie; foldery Windows i aplikacji są wykluczone.</s:String>
+  <s:String x:Key="Help.DuplicatesLinux">Wyszukiwanie sprawdza SHA-256 dokładnych kopii w folderze podanym w Wykorzystaniu dysku. Dwuklik otwiera lokalizację. Interfejs Linux nie usuwa duplikatów i nie wyszukuje podobnych obrazów ani pustych folderów.</s:String>
+  <s:String x:Key="Help.Recovery">Historia przywraca pliki pamięci podręcznej, które nadal istnieją w kwarantannie, bez nadpisywania nowych plików. Pliki osobiste przywracaj z systemowego Kosza. Trwałego usunięcia nie można tu cofnąć. Kwarantanna nadal zajmuje miejsce; Windows może opróżnić ją według wieku lub limitu rozmiaru, nawet przed wybranym terminem.</s:String>
+  <s:String x:Key="Help.SettingsWindows">Ustawienia obejmują tryb czyszczenia, limity kwarantanny, wykluczenia, reguły zachowania, język i motyw. Przed pierwszym czyszczeniem jawnie wybierz kwarantannę: Windows domyślnie usuwa trwale. Harmonogram czyści tylko bezpieczne kategorie; menu Eksploratora jest opcjonalne.</s:String>
+  <s:String x:Key="Help.SettingsLinux">Ustawienia oferują język, aktualizacje i instrukcje dla serwera; przycisk motywu jest u góry. Interfejs Linux zawsze używa kwarantanny. Trwałe i zaplanowane czyszczenie korzysta z CLI; timer systemd jest opcjonalny. Pomoc CLI: aeris-cli --help.</s:String>
+  <s:String x:Key="Help.TroubleTitle">Gdy brakuje wyników lub wolnego miejsca</s:String>
+  <s:String x:Key="Help.Trouble">Sprawdź folder, filtry, wykluczenia i wiek plików. Niedostępne, zmienione, zablokowane pliki i dowiązania mogą być pomijane; zamknij aplikację i ponów skanowanie. Kwarantanna i Kosz zajmują miejsce. Rozmiar logiczny może różnić się od zajętego miejsca. Szczegóły są w Historii i wyniku operacji.</s:String>
+  <s:String x:Key="Help.KeysTitle">Klawiatura</s:String>
+  <s:String x:Key="Help.Keys">F1 — pomoc. Ctrl+F — wyszukiwanie pamięci podręcznej. Esc w polu wyszukiwania — wyczyść. Tab / Shift+Tab — przenoś fokus. Strzałki — wybierz kartę; Page Up / Page Down — przewijaj przewodnik.</s:String>
+  <s:String x:Key="Search.Title">Szukaj w Aeris</s:String>
+  <s:String x:Key="Search.Hint">Funkcje, ustawienia, pamięć podręczna lub pomoc · Ctrl+K</s:String>
+  <s:String x:Key="Search.Clear">Wyczyść</s:String>
+  <s:String x:Key="Search.Results">Wyniki wyszukiwania</s:String>
+  <s:String x:Key="Search.None">Brak wyników. Spróbuj innego lub krótszego zapytania.</s:String>
+  <s:String x:Key="Search.Count">Wyniki: {0}. Enter otwiera pierwszy; ↓ przechodzi do listy.</s:String>
+  <s:String x:Key="Help.MouseWindows">Windows: Ctrl+K otwiera wyszukiwanie na stronie głównej; Ctrl+F wyszukuje tam w Aeris. Kliknij środkowym przyciskiem w przewijanym obszarze i poruszaj myszą; ponowne kliknięcie lub Esc zatrzymuje przewijanie. Możesz też przytrzymać środkowy przycisk podczas ruchu i puścić go, aby zatrzymać.</s:String>
 </ResourceDictionary>

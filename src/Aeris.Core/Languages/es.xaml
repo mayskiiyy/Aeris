@@ -526,4 +526,27 @@
   <s:String x:Key="Similar.StreamProgress">Procesadas: {0} · Imágenes encontradas: {1} · {2}</s:String>
   <s:String x:Key="Similar.Enumerating">Buscando imágenes y comprobando la caché…</s:String>
   <s:String x:Key="Similar.Grouping">Agrupando imágenes similares…</s:String>
+  <s:String x:Key="Nav.Help">Ayuda</s:String>
+  <s:String x:Key="Help.Intro">Guía sin conexión. F1 abre esta página; el idioma sigue al de la interfaz.</s:String>
+  <s:String x:Key="Help.StartTitle">Primeros pasos</s:String>
+  <s:String x:Key="Help.Start">Analiza una carpeta para ver qué ocupa espacio. El análisis no borra archivos. Antes de la primera limpieza, cierra las aplicaciones afectadas, elige una antigüedad de caché de 7 días y revisa cada archivo seleccionado.</s:String>
+  <s:String x:Key="Help.Cache">Elige categorías y antigüedad (mínimo 2 días) y analiza las cachés. Las fechas de creación y modificación deben ser suficientemente antiguas. Los filtros solo cambian la vista: las selecciones ocultas siguen activas. Revisa todo el plan. Los niveles de riesgo no garantizan que una caché sea innecesaria.</s:String>
+  <s:String x:Key="Help.DiskWindows">Elige una carpeta en Archivos grandes o Mapa de carpetas y analízala. Hasta 200 archivos, filtros de tipo y tamaño y exportación CSV. Explora el mapa y la ruta; alterna tamaño lógico y en disco. Los archivos personales van a la Papelera.</s:String>
+  <s:String x:Key="Help.DiskLinux">Elige una carpeta en Uso del disco y analízala. La lista muestra los 500 archivos más grandes y permite exportar CSV. Abre carpetas en el mapa o con doble clic en la lista; vuelve con Subir. Haz doble clic en un archivo para abrir su ubicación. Aquí no se borran archivos.</s:String>
+  <s:String x:Key="Help.DuplicatesWindows">Elige una carpeta y busca duplicados exactos o imágenes similares. SHA-256 verifica las copias exactas; evalúa tú las imágenes similares. Revisa la regla de conservación y las copias seleccionadas antes de enviarlas a la Papelera. Las carpetas vacías tienen un análisis separado; se excluyen las carpetas de Windows y aplicaciones.</s:String>
+  <s:String x:Key="Help.DuplicatesLinux">La búsqueda verifica con SHA-256 las copias exactas de la carpeta indicada en Uso del disco. Un doble clic abre su ubicación. La interfaz Linux no borra duplicados ni busca imágenes similares o carpetas vacías.</s:String>
+  <s:String x:Key="Help.Recovery">El Historial restaura cachés que aún existan en cuarentena sin sobrescribir sus reemplazos. Restaura archivos personales desde la Papelera del sistema. El borrado permanente no se puede deshacer aquí. La cuarentena sigue ocupando espacio; Windows puede purgarla por edad o tamaño, incluso antes del plazo elegido.</s:String>
+  <s:String x:Key="Help.SettingsWindows">Ajustes controla modo de limpieza, límites de cuarentena, exclusiones, reglas de conservación, idioma y tema. Elige cuarentena explícitamente antes de la primera limpieza: Windows usa borrado permanente por defecto. La programación solo limpia categorías seguras; el menú del Explorador es opcional.</s:String>
+  <s:String x:Key="Help.SettingsLinux">Ajustes ofrece idioma, actualizaciones e instrucciones para servidores; el botón de tema está arriba. La interfaz Linux siempre usa cuarentena. La limpieza permanente y programada usa la CLI; el temporizador systemd es opcional. Ayuda CLI: aeris-cli --help.</s:String>
+  <s:String x:Key="Help.TroubleTitle">Si faltan resultados o espacio libre</s:String>
+  <s:String x:Key="Help.Trouble">Revisa carpeta, filtros, exclusiones y antigüedad. Los archivos inaccesibles, enlazados, modificados o bloqueados pueden omitirse; cierra la aplicación y repite el análisis. Cuarentena y Papelera ocupan espacio. El tamaño lógico puede diferir del tamaño en disco. Consulta el Historial y el resultado.</s:String>
+  <s:String x:Key="Help.KeysTitle">Teclado</s:String>
+  <s:String x:Key="Help.Keys">F1 — ayuda. Ctrl+F — búsqueda de caché. Esc en la búsqueda de caché — vaciar. Tab / Mayús+Tab — mover el foco. Flechas — elegir pestaña; Re Pág / Av Pág — desplazar la guía.</s:String>
+  <s:String x:Key="Search.Title">Buscar en Aeris</s:String>
+  <s:String x:Key="Search.Hint">Funciones, ajustes, cachés o ayuda · Ctrl+K</s:String>
+  <s:String x:Key="Search.Clear">Borrar</s:String>
+  <s:String x:Key="Search.Results">Resultados de búsqueda</s:String>
+  <s:String x:Key="Search.None">Sin resultados. Prueba otra frase o una más corta.</s:String>
+  <s:String x:Key="Search.Count">Resultados: {0}. Intro abre el primero; ↓ pasa a la lista.</s:String>
+  <s:String x:Key="Help.MouseWindows">Windows: Ctrl+K abre la búsqueda de Inicio; Ctrl+F busca allí en Aeris. Haz clic con el botón central en una zona desplazable y mueve el ratón; otro clic o Esc detiene el desplazamiento. También puedes mantener pulsado el botón central al mover y soltarlo para detener.</s:String>
 </ResourceDictionary>

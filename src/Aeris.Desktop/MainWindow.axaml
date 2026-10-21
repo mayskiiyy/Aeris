@@ -100,6 +100,22 @@
           <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="{DynamicResource Desktop.Server}" FontWeight="SemiBold"/><TextBlock Text="{DynamicResource Desktop.ServerHint}" TextWrapping="Wrap" Classes="caption"/><TextBox Text="aeris-cli clean --scheduled --dry-run --json" IsReadOnly="True" AutomationProperties.Name="CLI"/></StackPanel></Border>
         </StackPanel></ScrollViewer>
       </TabItem>
+      <TabItem x:Name="HelpTab" Header="{DynamicResource Nav.Help}">
+        <ScrollViewer x:Name="HelpScroll" Focusable="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" AutomationProperties.Name="{DynamicResource Nav.Help}">
+          <StackPanel MaxWidth="820" Spacing="14" Margin="0,20,12,0">
+            <TextBlock Text="{DynamicResource Nav.Help}" Classes="title"/>
+            <TextBlock Text="{DynamicResource Help.Intro}" TextWrapping="Wrap" LineHeight="23"/>
+            <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="{DynamicResource Help.StartTitle}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{DynamicResource Help.Start}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="{DynamicResource Nav.Caches}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{DynamicResource Help.Cache}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="{DynamicResource Desktop.Disk}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{DynamicResource Help.DiskLinux}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="{DynamicResource Nav.Duplicates}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{DynamicResource Help.DuplicatesLinux}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="{DynamicResource Nav.History}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{DynamicResource Help.Recovery}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="{DynamicResource Nav.Settings}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{DynamicResource Help.SettingsLinux}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="{DynamicResource Help.TroubleTitle}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{DynamicResource Help.Trouble}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="{DynamicResource Help.KeysTitle}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{DynamicResource Help.Keys}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
     </TabControl>
     <Grid x:Name="StatusBar" IsVisible="False" Grid.Row="3" ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,18,0,0">
       <TextBlock x:Name="Status" Text="{DynamicResource Status.Ready}" VerticalAlignment="Center" TextWrapping="Wrap" MaxHeight="65" AutomationProperties.LiveSetting="Polite"/>

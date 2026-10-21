@@ -121,6 +121,7 @@ public partial class MainWindow : Window
         JunkGrid.Items.Refresh();
         FilesHint.Text = filesHint();
         CacheScanButton.Content = Loc.Get(busy && scanningCaches && !cleaning ? "Caches.Checking" : "Caches.Check");
+        RefreshHomeSearch();
         UpdateSelection();
         if (!busy) Status.Text = Loc.Get("Status.Ready");
     }

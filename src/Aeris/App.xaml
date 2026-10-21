@@ -76,7 +76,9 @@
     <Style TargetType="TabControl">
       <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TabControl">
         <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="208"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-          <TabPanel IsItemsHost="True" Margin="14,130,14,0" VerticalAlignment="Top" KeyboardNavigation.TabIndex="1"/>
+          <ScrollViewer Margin="0,130,0,220" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+            <TabPanel IsItemsHost="True" Margin="14,0,14,0" VerticalAlignment="Top" KeyboardNavigation.TabIndex="1"/>
+          </ScrollViewer>
           <ContentPresenter Grid.Column="1" x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" Margin="28,24,28,0"/>
         </Grid>
       </ControlTemplate></Setter.Value></Setter>

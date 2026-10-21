@@ -526,4 +526,27 @@
   <s:String x:Key="Similar.StreamProgress">Verarbeitet: {0} · Gefundene Bilder: {1} · {2}</s:String>
   <s:String x:Key="Similar.Enumerating">Bilder suchen und Cache prüfen…</s:String>
   <s:String x:Key="Similar.Grouping">Ähnliche Bilder gruppieren…</s:String>
+  <s:String x:Key="Nav.Help">Hilfe</s:String>
+  <s:String x:Key="Help.Intro">Offline-Anleitung. F1 öffnet diese Seite; die Sprache folgt der Oberfläche.</s:String>
+  <s:String x:Key="Help.StartTitle">Erste Schritte</s:String>
+  <s:String x:Key="Help.Start">Scannen Sie einen Ordner, um große Dateien zu finden. Ein Scan löscht nichts. Schließen Sie vor der ersten Bereinigung betroffene Apps, wählen Sie 7 Tage Cache-Alter und prüfen Sie jede ausgewählte Datei.</s:String>
+  <s:String x:Key="Help.Cache">Kategorien und Mindestalter (mindestens 2 Tage) wählen, dann Caches prüfen. Erstellungs- und Änderungsdatum müssen alt genug sein. Such- und Kategoriefilter ändern nur die Ansicht: ausgeblendete Auswahlen bleiben aktiv. Prüfen Sie den gesamten Plan. Die Risikostufen garantieren nicht, dass ein Cache unnötig ist.</s:String>
+  <s:String x:Key="Help.DiskWindows">Ordner unter Große Dateien oder Ordnerkarte wählen und scannen. Bis zu 200 Dateien, Typ- und Größenfilter sowie CSV-Export. Karte und Pfadleiste dienen zur Navigation; logische Größe und belegter Platz sind umschaltbar. Persönliche Dateien landen im Papierkorb.</s:String>
+  <s:String x:Key="Help.DiskLinux">Ordner unter Speicherbelegung wählen und scannen. Die 500 größten Dateien lassen sich als CSV exportieren. Ordner auf der Karte oder per Doppelklick öffnen; mit Aufwärts zurückkehren. Doppelklick auf eine Datei öffnet ihren Speicherort. Hier werden keine Dateien gelöscht.</s:String>
+  <s:String x:Key="Help.DuplicatesWindows">Ordner wählen und exakte Duplikate oder ähnliche Bilder suchen. SHA-256 bestätigt exakte Kopien; ähnliche Bilder müssen Sie selbst beurteilen. Aufbewahrungsregel und Auswahl vor dem Verschieben in den Papierkorb prüfen. Leere Ordner haben einen eigenen Scan; Windows- und App-Ordner sind ausgeschlossen.</s:String>
+  <s:String x:Key="Help.DuplicatesLinux">Die Duplikatsuche prüft den unter Speicherbelegung gewählten Ordner mit SHA-256. Doppelklick öffnet den Speicherort. Die Linux-Oberfläche löscht keine Duplikate; ähnliche Bilder und leere Ordner werden hier nicht gesucht.</s:String>
+  <s:String x:Key="Help.Recovery">Der Verlauf stellt vorhandene Cache-Dateien aus der Quarantäne wieder her, ohne Ersatzdateien zu überschreiben. Persönliche Dateien im Systempapierkorb wiederherstellen. Endgültiges Löschen lässt sich hier nicht rückgängig machen. Quarantäne belegt weiter Platz; Windows kann sie wegen Alter oder Größenlimit auch vorzeitig leeren.</s:String>
+  <s:String x:Key="Help.SettingsWindows">Einstellungen bieten Bereinigungsmodus, Quarantänelimits, Ausschlüsse, Aufbewahrungsregeln, Sprache und Design. Vor der ersten Bereinigung ausdrücklich Quarantäne wählen: Windows löscht standardmäßig endgültig. Zeitpläne verwenden nur sichere Kategorien; das Explorer-Menü ist optional.</s:String>
+  <s:String x:Key="Help.SettingsLinux">Einstellungen bieten Sprache, Updates und Serverhinweise; die Design-Schaltfläche steht oben. Die Linux-Oberfläche nutzt immer Quarantäne. Endgültige und geplante Bereinigung erfolgen per CLI; der systemd-Timer ist optional. CLI-Hilfe: aeris-cli --help.</s:String>
+  <s:String x:Key="Help.TroubleTitle">Wenn Ergebnisse oder freier Platz fehlen</s:String>
+  <s:String x:Key="Help.Trouble">Ordner, Filter, Ausschlüsse und Alter prüfen. Unzugängliche, verknüpfte, geänderte oder gesperrte Dateien können übersprungen werden; App schließen und erneut scannen. Quarantäne und Papierkorb belegen Platz. Logische und belegte Größe können abweichen. Details stehen im Verlauf und im Ergebnis.</s:String>
+  <s:String x:Key="Help.KeysTitle">Tastatur</s:String>
+  <s:String x:Key="Help.Keys">F1 — Hilfe. Strg+F — Cache-Suche öffnen. Esc im Cache-Suchfeld — leeren. Tab / Umschalt+Tab — Fokus wechseln. Pfeiltasten wählen Register; Bild auf / Bild ab scrollen die Anleitung.</s:String>
+  <s:String x:Key="Search.Title">Aeris durchsuchen</s:String>
+  <s:String x:Key="Search.Hint">Funktionen, Einstellungen, Caches oder Hilfe · Strg+K</s:String>
+  <s:String x:Key="Search.Clear">Leeren</s:String>
+  <s:String x:Key="Search.Results">Suchergebnisse</s:String>
+  <s:String x:Key="Search.None">Keine Ergebnisse. Versuchen Sie eine andere oder kürzere Suchanfrage.</s:String>
+  <s:String x:Key="Search.Count">Ergebnisse: {0}. Eingabe öffnet das erste; ↓ wechselt zur Liste.</s:String>
+  <s:String x:Key="Help.MouseWindows">Windows: Strg+K öffnet die Suche auf der Startseite; Strg+F durchsucht dort Aeris. Klicken Sie in einem scrollbaren Bereich mit der mittleren Maustaste und bewegen Sie die Maus; erneutes Klicken oder Esc beendet das Scrollen. Alternativ die mittlere Taste beim Bewegen gedrückt halten und zum Beenden loslassen.</s:String>
 </ResourceDictionary>

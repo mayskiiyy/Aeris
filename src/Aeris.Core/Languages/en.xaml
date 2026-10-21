@@ -526,4 +526,27 @@
   <s:String x:Key="Similar.StreamProgress">Processed {0} · Images discovered {1} · {2}</s:String>
   <s:String x:Key="Similar.Enumerating">Finding images and checking cached results…</s:String>
   <s:String x:Key="Similar.Grouping">Grouping similar images…</s:String>
+  <s:String x:Key="Nav.Help">Help</s:String>
+  <s:String x:Key="Help.Intro">Offline guide. F1 opens this page; the guide follows the interface language.</s:String>
+  <s:String x:Key="Help.StartTitle">Start here</s:String>
+  <s:String x:Key="Help.Start">Scan a folder to find what takes up space. Scanning does not delete files. For a first cleanup, close the affected apps, choose a cache age of 7 days and review every selected file.</s:String>
+  <s:String x:Key="Help.Cache">Choose categories and an age limit (at least 2 days), then check caches. Both creation and modification dates must be old enough. Search and category filters only change the view: hidden selections remain selected. Review the full plan before confirming. Safe, Check first and Advanced describe risk, not a guarantee that a cache is unnecessary.</s:String>
+  <s:String x:Key="Help.DiskWindows">Choose a folder in Large files or Folder map and scan it. Large files shows up to 200 matches, with type and size filters and CSV export. Use the map and breadcrumbs to explore folders; switch between logical size and size on disk. Personal files go to the Recycle Bin.</s:String>
+  <s:String x:Key="Help.DiskLinux">Choose a folder in Disk usage, then scan. The list shows the largest 500 files; export it to CSV. Open folders on the map or double-click the folder list; use Up to return. Double-click a file to open its location. This view does not delete files.</s:String>
+  <s:String x:Key="Help.DuplicatesWindows">Choose a folder and search for exact duplicates or similar images. Exact copies are checked with SHA-256; visually similar images require your judgement. Review the keep rule and the selected copies before sending extras to the Recycle Bin. Empty folders has a separate scan; Windows and app folders are excluded.</s:String>
+  <s:String x:Key="Help.DuplicatesLinux">Duplicates scans the folder entered in Disk usage for exact copies verified with SHA-256. Double-click a result to open its location. Linux GUI reports duplicates without deleting them; similar images and empty-folder scanning are unavailable here.</s:String>
+  <s:String x:Key="Help.Recovery">History restores quarantined cache files while they still exist, without overwriting replacements. Recycled personal files are restored from the system Recycle Bin or trash. Permanent deletion cannot be undone here. Quarantine still occupies disk space; Windows can purge it by age or size, possibly before the chosen number of days.</s:String>
+  <s:String x:Key="Help.SettingsWindows">Settings controls cleanup mode, quarantine limits, exclusions, keep rules, language and theme. Choose quarantine explicitly before your first cleanup: the Windows default is permanent deletion. Automation schedules only Safe caches; Explorer integration is optional.</s:String>
+  <s:String x:Key="Help.SettingsLinux">Settings controls language, updates and server instructions; the theme button is at the top. Linux GUI always quarantines caches. Permanent cleanup and scheduled runs use the CLI; the supplied systemd timer is opt-in. CLI help: aeris-cli --help.</s:String>
+  <s:String x:Key="Help.TroubleTitle">If results are missing or space is unchanged</s:String>
+  <s:String x:Key="Help.Trouble">Check the selected folder, filters, exclusions and age limit. Inaccessible, linked, changed or locked files may be skipped; close the affected app and scan again. Quarantine and the Recycle Bin still use space. Logical file size may differ from space on disk. Review History and the operation result for details.</s:String>
+  <s:String x:Key="Help.KeysTitle">Keyboard</s:String>
+  <s:String x:Key="Help.Keys">F1 — open Help. Ctrl+F — open cache search. Esc in cache search — clear it. Tab / Shift+Tab — move focus. Use arrow keys to choose a tab and Page Up / Page Down to scroll the guide.</s:String>
+  <s:String x:Key="Search.Title">Search Aeris</s:String>
+  <s:String x:Key="Search.Hint">Functions, settings, caches or help · Ctrl+K</s:String>
+  <s:String x:Key="Search.Clear">Clear</s:String>
+  <s:String x:Key="Search.Results">Search results</s:String>
+  <s:String x:Key="Search.None">No results. Try a shorter or different phrase.</s:String>
+  <s:String x:Key="Search.Count">Results: {0}. Enter opens the first; ↓ moves to results.</s:String>
+  <s:String x:Key="Help.MouseWindows">Windows: Ctrl+K opens the home search; Ctrl+F on Home searches Aeris. Click the middle mouse button in a scrollable area, then move the mouse to scroll; click again or press Esc to stop. You can also hold the middle button while moving and release it to stop.</s:String>
 </ResourceDictionary>

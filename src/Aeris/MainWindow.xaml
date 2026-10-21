@@ -32,6 +32,30 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal" Margin="0,0,0,16">
             <TextBlock Text="{DynamicResource Home.Title}" Style="{StaticResource PageTitle}"/>
+            <StackPanel Margin="0,0,0,24">
+              <TextBlock Text="{DynamicResource Search.Title}" FontWeight="SemiBold" Margin="0,0,0,8"/>
+              <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <TextBox x:Name="HomeSearch" TextChanged="HomeSearchChanged" PreviewKeyDown="HomeSearchKeyDown" AutomationProperties.Name="{DynamicResource Search.Title}" ToolTip="{DynamicResource Search.Hint}" Background="{DynamicResource Field}" Foreground="{DynamicResource Ink}" BorderBrush="{DynamicResource Line}" Padding="12,10" VerticalContentAlignment="Center"/>
+                <TextBlock Text="{DynamicResource Search.Hint}" Foreground="{DynamicResource Muted}" Margin="13,0" VerticalAlignment="Center" IsHitTestVisible="False" TextTrimming="CharacterEllipsis">
+                  <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=HomeSearch}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                </TextBlock>
+                <Button Grid.Column="1" Content="{DynamicResource Search.Clear}" Click="ClearHomeSearch" Margin="10,0,0,0"/>
+              </Grid>
+              <Border x:Name="HomeSearchPanel" Visibility="Collapsed" ClipToBounds="True" Style="{StaticResource Card}" Margin="0,10,0,0" Padding="8">
+                <StackPanel>
+                  <TextBlock x:Name="HomeSearchSummary" Foreground="{DynamicResource Muted}" Margin="8" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+                  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="300">
+                    <ItemsControl x:Name="HomeSearchResults" AutomationProperties.Name="{DynamicResource Search.Results}">
+                      <ItemsControl.ItemTemplate><DataTemplate>
+                        <Button Click="OpenHomeSearchResult" HorizontalContentAlignment="Stretch" Margin="0,0,0,6" Padding="12" AutomationProperties.Name="{Binding Title}">
+                          <StackPanel TextElement.FontWeight="Normal"><TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{Binding Description}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="38" Margin="0,5,0,0"/></StackPanel>
+                        </Button>
+                      </DataTemplate></ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </ScrollViewer>
+                </StackPanel>
+              </Border>
+            </StackPanel>
             <Grid Margin="0,0,0,26"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="18"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
               <Border Style="{StaticResource Card}" Padding="22"><StackPanel><TextBlock Text="{DynamicResource Home.FreeSpace}" Foreground="{DynamicResource Muted}"/><TextBlock Text="{Binding Text, ElementName=DiskSpace}" FontSize="38" FontWeight="SemiBold" Margin="0,8,0,12"/><ProgressBar Value="{Binding Value, ElementName=DiskBar}" Height="6" Foreground="{DynamicResource Accent}" Background="{DynamicResource Track}" BorderThickness="0"/><TextBlock Text="{Binding Text, ElementName=DiskDetail}" Foreground="{DynamicResource Muted}" FontSize="12" Margin="0,10,0,0"/></StackPanel></Border>
               <Border Grid.Column="2" Style="{StaticResource Card}" Padding="12"><Button x:Name="HomeCacheCard" Tag="cache-view" Click="HomeAction" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" Padding="10" HorizontalContentAlignment="Stretch" ToolTip="{DynamicResource Nav.Caches}" AutomationProperties.Name="{DynamicResource Nav.Caches}"><StackPanel><TextBlock x:Name="HomeCacheTitle" Text="{DynamicResource Home.Caches}" Foreground="{DynamicResource Muted}"/><TextBlock x:Name="HomeCacheSize" FontSize="30" FontWeight="SemiBold" Margin="0,12,0,14"/><TextBlock x:Name="HomeCacheHint" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap"/></StackPanel></Button></Border>
@@ -410,6 +434,22 @@
           </StackPanel>
         </ScrollViewer>
         </Grid>
+      </TabItem>
+      <TabItem x:Name="HelpTab"><TabItem.Header><DockPanel><Path Style="{StaticResource NavigationIcon}" Data="M12 3 A9 9 0 1 0 12 21 A9 9 0 1 0 12 3 M9 9 C9 5 16 5 16 9 C16 12 12 11 12 15 M12 17 V18"/><TextBlock Text="{DynamicResource Nav.Help}" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel></TabItem.Header>
+        <ScrollViewer x:Name="HelpScroll" Focusable="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" AutomationProperties.Name="{DynamicResource Nav.Help}">
+          <StackPanel MaxWidth="820" HorizontalAlignment="Stretch" TextElement.Foreground="{DynamicResource Ink}" TextElement.FontWeight="Normal" Margin="0,0,0,16">
+            <TextBlock Text="{DynamicResource Nav.Help}" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="{DynamicResource Help.Intro}" TextWrapping="Wrap" LineHeight="23" Margin="0,0,0,20"/>
+            <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,14"><StackPanel><TextBlock Text="{DynamicResource Help.StartTitle}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,10"/><TextBlock Text="{DynamicResource Help.Start}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,14"><StackPanel><TextBlock Text="{DynamicResource Nav.Caches}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,10"/><TextBlock Text="{DynamicResource Help.Cache}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,14"><StackPanel><TextBlock Text="{DynamicResource Desktop.Disk}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,10"/><TextBlock Text="{DynamicResource Help.DiskWindows}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,14"><StackPanel><TextBlock Text="{DynamicResource Nav.Duplicates}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,10"/><TextBlock Text="{DynamicResource Help.DuplicatesWindows}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,14"><StackPanel><TextBlock Text="{DynamicResource Nav.History}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,10"/><TextBlock Text="{DynamicResource Help.Recovery}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,14"><StackPanel><TextBlock Text="{DynamicResource Nav.Settings}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,10"/><TextBlock Text="{DynamicResource Help.SettingsWindows}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,14"><StackPanel><TextBlock Text="{DynamicResource Help.TroubleTitle}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,10"/><TextBlock Text="{DynamicResource Help.Trouble}" TextWrapping="Wrap" LineHeight="23"/></StackPanel></Border>
+            <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,14"><StackPanel><TextBlock Text="{DynamicResource Help.KeysTitle}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,10"/><TextBlock Text="{DynamicResource Help.Keys}" TextWrapping="Wrap" LineHeight="23"/><TextBlock Text="{DynamicResource Help.MouseWindows}" TextWrapping="Wrap" LineHeight="23" Margin="0,10,0,0"/></StackPanel></Border>
+          </StackPanel>
+        </ScrollViewer>
       </TabItem>
     </TabControl>
     <StackPanel Grid.RowSpan="2" VerticalAlignment="Top" Margin="22,28,14,0" IsHitTestVisible="False">

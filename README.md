@@ -10,7 +10,7 @@ Windows and Linux have desktop apps. A standalone CLI is available for scripts a
 [![Latest release](https://img.shields.io/github/v/release/mayskiiyy/Aeris)](https://github.com/mayskiiyy/Aeris/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-[Download](https://github.com/mayskiiyy/Aeris/releases/latest) · [Platform support](#platform-support) · [Install](#install) · [Command line](#command-line) · [Build from source](#build-from-source)
+[Download](https://github.com/mayskiiyy/Aeris/releases/latest) · [User guide](docs/user-guide.md) · [Platform support](#platform-support) · [Install](#install) · [Command line](#command-line) · [Build from source](#build-from-source)
 
 ## What you can do
 
@@ -19,6 +19,20 @@ Windows and Linux have desktop apps. A standalone CLI is available for scripts a
 - **Find duplicate files.** Exact matches are verified with SHA-256; hashes of unchanged files are cached for later scans.
 - **Keep a recovery option.** Move caches to quarantine and restore them from History. Permanent cache deletion is also available when explicitly selected.
 - **Automate routine cleanup.** Use the CLI, Windows Task Scheduler or optional Linux systemd user units.
+
+## First run
+
+1. Open **Large files** or **Folder map** on Windows, or **Disk usage** on Linux. Choose a folder and scan it. Scanning only reports files; it does not remove them.
+2. Before your first Windows cache cleanup, open **Settings** and choose **Quarantine** if you want a recovery option. The Windows default is **permanent deletion**. The Linux GUI always uses quarantine.
+3. Close the apps whose caches you want to clean. In **Cache cleanup**, choose categories and an age limit (7 days is a conservative starting point), then check caches.
+4. Open the review, inspect the complete file list and exclude anything you want to keep before confirming. Search and category filters do not clear hidden selections.
+5. Read the result in **History**. Restore quarantined caches there; restore recycled personal files from the system Recycle Bin or trash. Permanent deletion cannot be undone in Aeris.
+
+Open **Help** or press **F1** in either desktop app for an offline guide in the interface language. The [user guide](docs/user-guide.md) covers each workflow, recovery, shortcuts and troubleshooting.
+
+On Windows, the home page searches functions, settings, available cache categories and help topics. Use **Ctrl+K** from any tab, or **Ctrl+F** on Home. Click a result to open it; Enter opens the first result. Scrollable areas also support middle-button autoscroll: click and move the mouse, then click again or press Esc to stop.
+
+Quarantine and the Recycle Bin still occupy disk space. Windows may purge quarantined operations when they exceed the age or size limit, so the retention period is not a guaranteed recovery window.
 
 ## Platform support
 
@@ -168,7 +182,7 @@ Put JSON files in `%LOCALAPPDATA%\Aeris\cleaners` (Settings → Your cleanup rul
 
 ## Command line
 
-`aeris-cli` uses the same code and the same safety checks as the app. Output follows the Windows display language; `--json` gives machine-readable output with a `schema` version.
+`aeris-cli` uses the same code and the same safety checks as the app. Run `aeris-cli --help` for all options. Output follows the system UI language; `--json` gives machine-readable output with a `schema` version.
 
 ```powershell
 aeris-cli categories
