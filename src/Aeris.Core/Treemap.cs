@@ -75,7 +75,7 @@ public static class Treemap
     /// Lays out <paramref name="root"/>'s content down to <paramref name="maxDepth"/> levels. Children smaller than
     /// <paramref name="minSide"/> pixels on a side are merged into one "small files" cell per folder.
     /// </summary>
-    public static List<TreemapCell> Layout(NodeStore nodes, int root, TreemapRect bounds, bool onDisk, int maxDepth = 10, double minSide = 3, double padding = 1.5)
+    public static List<TreemapCell> Layout(NodeStore nodes, int root, TreemapRect bounds, bool onDisk, int maxDepth = 10, double minSide = 3, double padding = 1.5, int maxItems = int.MaxValue)
     {
         var cells = new List<TreemapCell>();
         void Visit(int node, TreemapRect rect, int depth)
@@ -84,7 +84,7 @@ public static class Treemap
             if (children.Count == 0) return;
             double total = children.Sum(c => (double)nodes.Size(c, onDisk));
             double minArea = minSide * minSide * total / Math.Max(1, rect.Area);
-            int keep = children.Count;
+            int keep = Math.Min(children.Count, Math.Max(1, maxItems));
             while (keep > 1 && nodes.Size(children[keep - 1], onDisk) < minArea) keep--;
             var sizes = children.Take(keep).Select(c => (double)nodes.Size(c, onDisk)).ToList();
             long small = children.Skip(keep).Sum(c => nodes.Size(c, onDisk));

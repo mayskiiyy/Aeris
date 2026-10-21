@@ -49,14 +49,16 @@ public sealed class BkTree<T>(Func<T, ulong> key)
         }
     }
 
-    public List<T> Search(ulong hash, int threshold)
+    public List<T> Search(ulong hash, int threshold, CancellationToken token = default)
     {
         var found = new List<T>();
         if (root == null) return found;
         var pending = new Stack<Node>();
         pending.Push(root);
+        int visited = 0;
         while (pending.Count > 0)
         {
+            if ((visited++ & 1023) == 0) token.ThrowIfCancellationRequested();
             var node = pending.Pop();
             int distance = Distance(key(node.Value), hash);
             if (distance <= threshold) found.Add(node.Value);
@@ -69,7 +71,7 @@ public sealed class BkTree<T>(Func<T, ulong> key)
 
 /// <summary>
 /// Finds visually similar images with a 64-bit difference hash. Images are decoded by Windows Imaging Component
-/// at 9×8 pixels, so formats Windows can't decode are skipped and big photos are never loaded in full.
+/// to 9×8 pixels. Output size does not bound native decoder work, so input dimensions are limited.
 /// </summary>
 public static class SimilarImageSearch
 {
@@ -80,58 +82,100 @@ public static class SimilarImageSearch
     public static List<List<SimilarImage>> Find(IEnumerable<string> roots, IReadOnlyCollection<string> exclusions, int threshold, long minimumSize, CancellationToken token,
         Action<string> report, Action skipped, HashCache? cache = null)
     {
-        var files = new List<LargeFile>();
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (string root in roots)
-            foreach (var info in Storage.Walk(root, token, skipped, exclusions))
-                if (IsImage(info.Name) && info.Length >= Math.Max(1, minimumSize) && seen.Add(info.FullName)) files.Add(Analysis.Snapshot(info));
+        var seen = new HashSet<string>(FileSystemPaths.Comparer);
         var images = new System.Collections.Concurrent.ConcurrentBag<SimilarImage>();
         var gate = new object();
-        int done = 0;
+        int discovered = 0, done = 0;
         var watch = System.Diagnostics.Stopwatch.StartNew();
-        Parallel.ForEach(files, new ParallelOptions { CancellationToken = token, MaxDegreeOfParallelism = Math.Clamp(Environment.ProcessorCount, 2, 4) }, file =>
+        void Progress(string path)
         {
-            string identity = $"{file.Size}:{file.Modified}";
-            SimilarImage? image = null;
-            if (cache?.Get(file, identity) is { } cached && Parse(file, cached) is { } fromCache) image = fromCache;
-            else
-            {
-                try
-                {
-                    var (hash, width, height) = Wic.DifferenceHash(file.Path);
-                    image = new(file.Path, file.Size, file.Modified, width, height, hash);
-                    cache?.Set(file, identity, $"{hash:x16}:{width}:{height}");
-                }
-                catch (Exception e) when (e is COMException or IOException or UnauthorizedAccessException or ArgumentException or InvalidCastException) { lock (gate) skipped(); }
-            }
-            if (image != null) images.Add(image);
-            int count = Interlocked.Increment(ref done);
             lock (gate)
-                if (watch.ElapsedMilliseconds >= 200) { report(Loc.Format("Similar.Progress", count, files.Count, file.Path)); watch.Restart(); }
-        });
-        token.ThrowIfCancellationRequested();
-        cache?.Save();
-        return Group(images.OrderBy(i => i.Path, StringComparer.OrdinalIgnoreCase).ToList(), threshold);
+                if (watch.ElapsedMilliseconds >= 200)
+                {
+                    report(Loc.Format("Similar.StreamProgress", Volatile.Read(ref done), Volatile.Read(ref discovered), path));
+                    watch.Restart();
+                }
+        }
+        IEnumerable<LargeFile> Enumerate()
+        {
+            foreach (string root in roots)
+                foreach (var info in Storage.Walk(root, token, () => { lock (gate) skipped(); }, exclusions))
+                {
+                    Progress(info.FullName);
+                    if (!IsImage(info.Name) || !seen.Add(info.FullName)) continue;
+                    LargeFile file;
+                    try { file = Analysis.Snapshot(info); }
+                    catch (Exception e) when (e is IOException or UnauthorizedAccessException) { lock (gate) skipped(); continue; }
+                    if (file.Size < Math.Max(1, minimumSize)) continue;
+                    if (file.Size > MaximumFileBytes) { lock (gate) skipped(); continue; }
+                    Interlocked.Increment(ref discovered);
+                    yield return file;
+                }
+        }
+        report(Loc.Get("Similar.Enumerating"));
+        try
+        {
+            Parallel.ForEach(Enumerate(), new ParallelOptions { CancellationToken = token, MaxDegreeOfParallelism = Math.Clamp(Environment.ProcessorCount, 2, 4) }, file =>
+            {
+                string identity = $"{file.Size}:{file.Modified}";
+                SimilarImage? image = null;
+                if (cache?.Get(file, identity) is { } cached && Parse(file, cached) is { } fromCache) image = fromCache;
+                else
+                {
+                    try
+                    {
+                        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException(Loc.Get("Platform.SimilarUnavailable"));
+                        var (hash, width, height) = Wic.DifferenceHash(file.Path);
+                        image = new(file.Path, file.Size, file.Modified, width, height, hash);
+                        cache?.Set(file, identity, $"{hash:x16}:{width}:{height}");
+                    }
+                    catch (Exception e) when (e is COMException or IOException or UnauthorizedAccessException or ArgumentException or InvalidCastException) { lock (gate) skipped(); }
+                }
+                if (image != null) images.Add(image);
+                Interlocked.Increment(ref done);
+                Progress(file.Path);
+            });
+            token.ThrowIfCancellationRequested();
+            report(Loc.Get("Similar.Grouping"));
+            return Group(images.OrderBy(i => i.Path, StringComparer.OrdinalIgnoreCase).ToList(), threshold, token);
+        }
+        finally { cache?.Save(); }
     }
+
+    internal const long MaximumFileBytes = 256L * 1024 * 1024;
+    internal static bool WithinDecodeLimits(uint width, uint height) =>
+        width > 0 && height > 0 && width <= 32768 && height <= 32768 && (ulong)width * height <= 100_000_000;
 
     private static SimilarImage? Parse(LargeFile file, string cached)
     {
         string[] parts = cached.Split(':');
         if (parts.Length != 3 || !ulong.TryParse(parts[0], System.Globalization.NumberStyles.HexNumber, null, out ulong hash)
-            || !int.TryParse(parts[1], out int width) || !int.TryParse(parts[2], out int height)) return null;
+            || !int.TryParse(parts[1], out int width) || !int.TryParse(parts[2], out int height)
+            || width <= 0 || height <= 0 || !WithinDecodeLimits((uint)width, (uint)height)) return null;
         return new(file.Path, file.Size, file.Modified, width, height, hash);
     }
 
     /// <summary>Joins images within <paramref name="threshold"/> bits into groups and marks the best copy of each: largest resolution, then file size, then newest.</summary>
-    public static List<List<SimilarImage>> Group(IReadOnlyList<SimilarImage> images, int threshold)
+    public static List<List<SimilarImage>> Group(IReadOnlyList<SimilarImage> images, int threshold, CancellationToken token = default)
     {
         var tree = new BkTree<int>(i => images[i].Hash);
-        for (int i = 0; i < images.Count; i++) tree.Add(i);
         int[] parent = Enumerable.Range(0, images.Count).ToArray();
         int Find(int x) { while (parent[x] != x) x = parent[x] = parent[parent[x]]; return x; }
+        var representatives = new Dictionary<ulong, int>();
         for (int i = 0; i < images.Count; i++)
-            foreach (int j in tree.Search(images[i].Hash, threshold))
-                if (j != i) parent[Find(i)] = Find(j);
+        {
+            token.ThrowIfCancellationRequested();
+            if (representatives.TryGetValue(images[i].Hash, out int same)) parent[i] = same;
+            else { representatives.Add(images[i].Hash, i); tree.Add(i); }
+        }
+        if (threshold > 0)
+            foreach (int i in representatives.Values)
+            {
+                token.ThrowIfCancellationRequested();
+                foreach (int j in tree.Search(images[i].Hash, threshold, token))
+                    if (j > i) parent[Find(i)] = Find(j);
+            }
+        token.ThrowIfCancellationRequested();
         var groups = Enumerable.Range(0, images.Count).GroupBy(Find).Where(g => g.Count() > 1)
             .Select(g => g.Select(i => images[i]).OrderByDescending(i => (long)i.Width * i.Height).ThenByDescending(i => i.Size).ThenByDescending(i => i.Modified).ThenBy(i => i.Path, StringComparer.OrdinalIgnoreCase).ToList())
             .OrderByDescending(g => g.Skip(1).Sum(i => i.Size)).ToList();
@@ -157,6 +201,7 @@ public static class SimilarImageSearch
 }
 
 /// <summary>Just enough of Windows Imaging Component to decode an image straight to a tiny grayscale bitmap.</summary>
+[System.Runtime.Versioning.SupportedOSPlatform("windows")]
 internal static class Wic
 {
     private static readonly Guid FactoryClass = new("cacaf262-9370-4615-a13b-9f5539da4c0a");
@@ -165,6 +210,7 @@ internal static class Wic
 
     public static (ulong Hash, int Width, int Height) DifferenceHash(string path)
     {
+        // shortcut: cancellation waits for native decoding; use a timed worker process to interrupt a stuck codec.
         var factory = Factory.Value;
         IWICBitmapDecoder? decoder = null;
         IWICBitmapFrameDecode? frame = null;
@@ -175,7 +221,7 @@ internal static class Wic
             decoder = factory.CreateDecoderFromFilename(path, IntPtr.Zero, 0x80000000, 0);
             frame = decoder.GetFrame(0);
             frame.GetSize(out uint width, out uint height);
-            if (width == 0 || height == 0) throw new IOException(path);
+            if (!SimilarImageSearch.WithinDecodeLimits(width, height)) throw new IOException("Image dimensions exceed decoding limits.");
             scaler = factory.CreateBitmapScaler();
             scaler.Initialize(frame, 9, 8, 3);
             converter = factory.CreateFormatConverter();

@@ -123,10 +123,22 @@ public partial class MainWindow
         for (int n = mapNode; n >= 0; n = nodes.Parent(n)) trail.Insert(0, new(n, n == 0 ? Path.TrimEndingDirectorySeparator(nodes.Name(n)) : nodes.Name(n), n == 0));
         Breadcrumbs.ItemsSource = trail;
         MapUpButton.IsEnabled = !busy && mapNode != 0;
-        long[] kinds = lastScan.KindTotals(mapNode, disk);
+        RefreshMapLegend();
+        MapFooter.Text = Loc.Format(disk ? "Map.FooterDisk" : "Map.FooterLogical", nodes.Files(mapNode), Storage.Format(nodes.Size(mapNode, disk)));
+    }
+
+    private void MapFileTypesChanged(object sender, RoutedEventArgs e) => RefreshMapLegend();
+
+    private void RefreshMapLegend()
+    {
+        if (lastScan == null || !SameFolder(lastScan.RootPath, folder) || !MapFileTypes.IsExpanded)
+        {
+            Legend.ItemsSource = null;
+            return;
+        }
+        long[] kinds = lastScan.KindTotals(mapNode, OnDisk);
         Legend.ItemsSource = Enum.GetValues<FileKind>().Where(k => kinds[(int)k] > 0).OrderByDescending(k => kinds[(int)k])
             .Select(k => new LegendEntry(Loc.Get($"FileKind.{k}"), Storage.Format(kinds[(int)k]), TryFindResource($"Kind.{k}") as Brush ?? Brushes.Gray)).ToList();
-        MapFooter.Text = Loc.Format(disk ? "Map.FooterDisk" : "Map.FooterLogical", nodes.Files(mapNode), Storage.Format(nodes.Size(mapNode, disk)));
     }
 
     private static bool SameFolder(string a, string b) =>

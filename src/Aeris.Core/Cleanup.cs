@@ -144,7 +144,7 @@ public static class Cleanup
         if (plan.Cutoff.Kind != DateTimeKind.Utc || plan.Cutoff > DateTime.UtcNow.AddHours(-48))
             throw new ArgumentOutOfRangeException(nameof(plan), Loc.Get("Error.MinRetention"));
         if (plan.Mode == CleanupMode.Recycle) throw new ArgumentException(nameof(plan.Mode));
-        var allowed = (currentGroups ?? Cleaners.Groups()).SelectMany(g => g.Targets).Select(t => t.Root).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var allowed = (currentGroups ?? Cleaners.Groups()).SelectMany(g => g.Targets).Select(t => t.Root).ToHashSet(FileSystemPaths.Comparer);
         var result = new CleanupResult { Id = journal.Id };
         string quarantine = Quarantine.FolderFor(journal.Id);
         int index = 0;
@@ -166,7 +166,7 @@ public static class Cleanup
             if (Storage.IsExcluded(item.Path, exclusions)) return (Outcome.Excluded, null, null);
             if (!allowed.Contains(item.Root) || !PathGuard.IsAllowedTarget(item.Path, item.Root, item.AllowPrograms)) return (Outcome.NotAllowed, null, Loc.Get("Error.NotAllowed"));
             var file = new FileInfo(item.Path);
-            if (!file.Exists || file.Length != item.Size || file.LastWriteTimeUtc.Ticks != item.Modified || file.CreationTimeUtc.Ticks != item.Created || !Storage.Eligible(file, plan.Cutoff))
+            if (!file.Exists || file.Length != item.Size || file.LastWriteTimeUtc.Ticks != item.Modified || Storage.Created(file) != item.Created || !Storage.Eligible(file, plan.Cutoff))
                 return (Outcome.Changed, null, null);
             if (plan.Mode == CleanupMode.Quarantine)
             {

@@ -1,0 +1,14 @@
+<Application xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Aeris.Desktop.App" RequestedThemeVariant="Default">
+  <Application.Styles>
+    <FluentTheme />
+    <Style Selector="Window"><Setter Property="FontFamily" Value="avares://Avalonia.Fonts.Inter/Assets#Inter"/><Setter Property="FontSize" Value="14"/><Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/></Style>
+    <Style Selector="Button"><Setter Property="MinHeight" Value="40"/><Setter Property="Padding" Value="16,8"/></Style>
+    <Style Selector="TextBlock.title"><Setter Property="FontSize" Value="26"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+    <Style Selector="TextBlock.caption"><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}"/></Style>
+    <Style Selector="Border.card"><Setter Property="Padding" Value="20"/><Setter Property="CornerRadius" Value="10"/><Setter Property="BorderThickness" Value="1"/><Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}"/></Style>
+    <Style Selector="ListBoxItem"><Setter Property="Padding" Value="12,10"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/></Style>
+    <Style Selector="TabItem"><Setter Property="MinHeight" Value="44"/><Setter Property="FontSize" Value="15"/></Style>
+    <Style Selector="TabItem /template/ ContentPresenter"><Setter Property="FontSize" Value="15"/></Style>
+  </Application.Styles>
+</Application>

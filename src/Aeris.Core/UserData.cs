@@ -147,7 +147,7 @@ public class UserData
             try { if (!string.IsNullOrWhiteSpace(candidate) && Path.IsPathFullyQualified(candidate)) folders.Add(Path.TrimEndingDirectorySeparator(Path.GetFullPath(candidate))); }
             catch (ArgumentException) { }
         }
-        return folders.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        return folders.Distinct(FileSystemPaths.Comparer).ToList();
     }
 
     private static readonly JsonSerializerOptions Options = new() { WriteIndented = true, Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } };

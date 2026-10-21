@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFrameworks>net8.0;net8.0-windows</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>Aeris.Core</AssemblyName>
@@ -10,6 +10,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Languages\*.xaml" LogicalName="Aeris.Languages.%(Filename).xaml" />
     <EmbeddedResource Include="Cleaners/builtin.json" LogicalName="Aeris.Cleaners.builtin.json" />
+    <EmbeddedResource Include="Cleaners/linux.json" LogicalName="Aeris.Cleaners.linux.json" />
     <InternalsVisibleTo Include="Aeris.Tests" />
   </ItemGroup>
 </Project>

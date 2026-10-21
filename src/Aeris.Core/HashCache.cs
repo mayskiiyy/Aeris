@@ -11,8 +11,8 @@ public sealed class HashCache
 {
     private const string Header = "aeris-hashcache 1";
     private const int MaxEntries = 500_000;
-    private readonly Dictionary<string, Entry> entries = new(StringComparer.OrdinalIgnoreCase);
-    private readonly HashSet<string> used = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Entry> entries = new(FileSystemPaths.Comparer);
+    private readonly HashSet<string> used = new(FileSystemPaths.Comparer);
     private readonly object gate = new();
     private bool dirty;
     private readonly string file;
@@ -74,10 +74,10 @@ public sealed class HashCache
         lock (gate)
         {
             if (!dirty) return;
-            Directory.CreateDirectory(Folder);
             string temporary = file + "." + Guid.NewGuid().ToString("N") + ".tmp";
             try
             {
+                Directory.CreateDirectory(Folder);
                 using (var writer = new StreamWriter(temporary, false, new UTF8Encoding(false)))
                 {
                     writer.WriteLine(Header);
@@ -88,7 +88,11 @@ public sealed class HashCache
                 dirty = false;
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
-            finally { if (File.Exists(temporary)) File.Delete(temporary); }
+            finally
+            {
+                try { if (File.Exists(temporary)) File.Delete(temporary); }
+                catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+            }
         }
     }
 

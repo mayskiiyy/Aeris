@@ -7,6 +7,8 @@ dotnet build Aeris.sln -c Release -warnaserror
 dotnet test Aeris.sln -c Release
 ```
 
+Linux development uses `src/Aeris.Core`, `src/Aeris.Cli` and `src/Aeris.Desktop`. Build those projects directly; the solution also includes WPF. See the Linux build commands and platform feature matrix in the README. Use `FileSystemPaths.Comparer` and `FileSystemPaths.Comparison` for paths, and `Storage.Created` for retention snapshots. Do not replace these with Windows-only assumptions.
+
 Keep pull requests small and describe the problem, the change and how you tested it.
 
 ## Ground rules

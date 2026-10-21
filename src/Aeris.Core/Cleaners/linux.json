@@ -1,0 +1,10 @@
+[
+  { "id": "thumbnails", "name": "Image thumbnails", "description": "Regenerated desktop thumbnail cache.", "group": "Apps", "risk": "Safe", "targets": [{ "root": "%XDG_CACHE_HOME%/thumbnails" }] },
+  { "id": "pip", "nameKey": "Cache.Pip.Name", "description": "Downloaded Python package cache; installed environments are kept.", "group": "Developer", "risk": "Safe", "closeAppsHint": ["pip", "pip3"], "targets": [{ "root": "%XDG_CACHE_HOME%/pip" }] },
+  { "id": "npm", "name": "npm download cache", "description": "Downloaded packages; node_modules and configuration are kept.", "group": "Developer", "risk": "Normal", "closeAppsHint": ["npm", "node"], "targets": [{ "root": "%HOME%/.npm/_cacache" }] },
+  { "id": "gradle-caches", "name": "Gradle caches", "description": "Build dependencies may need to be downloaded again.", "group": "Developer", "risk": "Advanced", "targets": [{ "root": "%HOME%/.gradle/caches" }] },
+  { "id": "chrome", "name": "Google Chrome cache", "description": "Browser cache only; passwords, sessions and profile data are kept.", "group": "Browsers", "risk": "Safe", "closeAppsHint": ["chrome"], "targets": [{ "root": "%XDG_CACHE_HOME%/google-chrome", "each": "chromium-profiles", "folders": ["Cache", "Code Cache", "GPUCache"] }] },
+  { "id": "chromium", "name": "Chromium cache", "description": "Browser cache only; profile data is kept.", "group": "Browsers", "risk": "Safe", "closeAppsHint": ["chromium", "chromium-browser"], "targets": [{ "root": "%XDG_CACHE_HOME%/chromium", "each": "chromium-profiles", "folders": ["Cache", "Code Cache", "GPUCache"] }] },
+  { "id": "firefox", "name": "Firefox cache", "description": "Cache files only; browser profiles are kept.", "group": "Browsers", "risk": "Safe", "closeAppsHint": ["firefox"], "targets": [{ "root": "%XDG_CACHE_HOME%/mozilla/firefox", "each": "subfolders", "folders": ["cache2"] }] },
+  { "id": "mesa-shaders", "name": "Mesa shader cache", "description": "Shaders are rebuilt by the graphics driver when needed.", "group": "GamesAndGpu", "risk": "Normal", "targets": [{ "root": "%XDG_CACHE_HOME%/mesa_shader_cache" }, { "root": "%XDG_CACHE_HOME%/mesa_shader_cache_db" }] }
+]

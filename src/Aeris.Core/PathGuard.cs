@@ -11,10 +11,10 @@ public static class PathGuard
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern uint GetLongPathName(string shortPath, StringBuilder longPath, uint buffer);
 
-    private static readonly ConcurrentDictionary<string, string> Problems = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ConcurrentDictionary<string, string> Problems = new(FileSystemPaths.Comparer);
 
     private static string[] Folders(params string?[] paths) =>
-        paths.Where(p => !string.IsNullOrEmpty(p)).Select(p => Canonical(p!)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        paths.Where(p => !string.IsNullOrEmpty(p)).Select(p => Canonical(p!)).Distinct(FileSystemPaths.Comparer).ToArray();
 
     private static string Known(Environment.SpecialFolder folder) => Environment.GetFolderPath(folder);
 
@@ -40,7 +40,7 @@ public static class PathGuard
     public static string Canonical(string path)
     {
         string full = Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
-        if (!full.Contains('~')) return full;
+        if (!OperatingSystem.IsWindows() || !full.Contains('~')) return full;
         string existing = full, rest = "";
         while (!Path.Exists(existing))
         {
@@ -58,10 +58,10 @@ public static class PathGuard
     public static bool IsInside(string path, string root) => Inside(Canonical(path), Canonical(root));
 
     private static bool Inside(string full, string parent) =>
-        full.Length > parent.Length && full.StartsWith(parent, StringComparison.OrdinalIgnoreCase)
+        full.Length > parent.Length && full.StartsWith(parent, FileSystemPaths.Comparison)
         && (Path.EndsInDirectorySeparator(parent) || full[parent.Length] == Path.DirectorySeparatorChar);
 
-    private static bool SameOrInside(string full, string parent) => string.Equals(full, parent, StringComparison.OrdinalIgnoreCase) || Inside(full, parent);
+    private static bool SameOrInside(string full, string parent) => string.Equals(full, parent, FileSystemPaths.Comparison) || Inside(full, parent);
 
     /// <summary>
     /// The string key explaining why a folder can't be a cleanup root, or null if it can.
@@ -78,11 +78,18 @@ public static class PathGuard
 
     private static string? Check(string full, bool allowPrograms)
     {
+        if (OperatingSystem.IsLinux())
+        {
+            if (!Path.IsPathFullyQualified(full)) return "Rule.Error.BadPath";
+            if (full == "/") return "Rule.Error.DriveRoot";
+            string[] system = ["/bin", "/boot", "/dev", "/etc", "/lib", "/lib32", "/lib64", "/proc", "/run", "/sbin", "/sys", "/usr", "/var", "/opt", "/snap", "/root"];
+            if (system.Any(p => SameOrInside(full, p))) return "Rule.Error.System";
+        }
         if (!Path.IsPathFullyQualified(full) || full.StartsWith(@"\\", StringComparison.Ordinal)) return "Rule.Error.BadPath";
         string? drive = Path.GetPathRoot(full);
-        if (drive == null || string.Equals(Path.TrimEndingDirectorySeparator(drive), full, StringComparison.OrdinalIgnoreCase)) return "Rule.Error.DriveRoot";
+        if (drive == null || string.Equals(Path.TrimEndingDirectorySeparator(drive), full, FileSystemPaths.Comparison)) return "Rule.Error.DriveRoot";
         var guarded = PersonalFolders.Value.Concat(WindowsFolders.Value).Concat(ProgramFolders.Value).Concat(Containers.Value);
-        if (guarded.Any(folder => SameOrInside(folder, full))) return "Rule.Error.Protected";
+        if (guarded.Any(folder => SameOrInside(folder, full)) || (OperatingSystem.IsLinux() && full is "/home" or "/mnt" or "/media")) return "Rule.Error.Protected";
         if (PersonalFolders.Value.Any(f => Inside(full, f))) return "Rule.Error.Personal";
         if (WindowsFolders.Value.Any(f => Inside(full, f)) && !AllowedWindows.Value.Any(a => SameOrInside(full, a))) return "Rule.Error.System";
         if (!allowPrograms && ProgramFolders.Value.Any(f => Inside(full, f))) return "Rule.Error.System";
@@ -97,6 +104,7 @@ public static class PathGuard
     public static bool IsProtectedArea(string path)
     {
         string full = Canonical(path);
+        if (OperatingSystem.IsLinux() && new[] { "/bin", "/boot", "/dev", "/etc", "/lib", "/lib32", "/lib64", "/proc", "/run", "/sbin", "/sys", "/usr", "/var", "/opt", "/snap", "/root" }.Any(p => SameOrInside(full, p))) return true;
         return WindowsFolders.Value.Concat(ProgramFolders.Value).Concat(AppAreas.Value).Any(f => SameOrInside(full, f));
     }
 
@@ -104,9 +112,9 @@ public static class PathGuard
     public static bool IsKnownFolder(string path)
     {
         string full = Canonical(path);
-        if (Path.GetPathRoot(full) is { } drive && string.Equals(Path.TrimEndingDirectorySeparator(drive), full, StringComparison.OrdinalIgnoreCase)) return true;
+        if (Path.GetPathRoot(full) is { } drive && string.Equals(Path.TrimEndingDirectorySeparator(drive), full, FileSystemPaths.Comparison)) return true;
         return PersonalFolders.Value.Concat(WindowsFolders.Value).Concat(ProgramFolders.Value).Concat(Containers.Value)
-            .Any(f => string.Equals(f, full, StringComparison.OrdinalIgnoreCase));
+            .Any(f => string.Equals(f, full, FileSystemPaths.Comparison));
     }
 
     /// <summary>A file may be cleaned only inside an allowed root and with no links anywhere on its path.</summary>

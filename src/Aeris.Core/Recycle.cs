@@ -52,6 +52,20 @@ public static class Recycle
 
     private static void Shell(string path, IntPtr owner)
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            var info = new System.Diagnostics.ProcessStartInfo("gio") { UseShellExecute = false, RedirectStandardError = true };
+            info.ArgumentList.Add("trash"); info.ArgumentList.Add("--"); info.ArgumentList.Add(path);
+            try
+            {
+                using var process = System.Diagnostics.Process.Start(info)!;
+                string error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+                if (process.ExitCode != 0) throw new IOException(error.Trim());
+            }
+            catch (System.ComponentModel.Win32Exception e) { throw new IOException(Loc.Get("Platform.TrashUnavailable"), e); }
+            return;
+        }
         if (new DriveInfo(Path.GetPathRoot(path)!).DriveType != DriveType.Fixed) throw new IOException(Loc.Get("Error.LocalOnly"));
         IShellItem? item = null;
         IFileOperation? operation = null;

@@ -157,8 +157,12 @@ public partial class MainWindow
     {
         if (HomeCacheSize == null) return;
         bool scanned = caches.Any(c => c.Scanned);
-        HomeCacheSize.Text = scanned ? Storage.Format(caches.Sum(c => c.Eligible)) : Loc.Get("Home.NotChecked");
-        HomeCacheHint.Text = Loc.Get(scanned ? "Home.CanClean" : "Home.SizeAfterCheck");
+        var cleanup = data.History.Where(h => h.Action == HistoryAction.Cleanup && h.Result is HistoryResult.Completed or HistoryResult.Partial)
+            .OrderByDescending(h => h.Time).FirstOrDefault();
+        HomeCacheTitle.Text = Loc.Get(!scanned && cleanup != null ? "Home.LastCacheCleanup" : "Home.Caches");
+        HomeCacheSize.Text = scanned ? Storage.Format(caches.Sum(c => c.Eligible)) : cleanup?.DisplaySize ?? Loc.Get("Home.NotChecked");
+        HomeCacheHint.Text = scanned ? Loc.Get("Home.CanClean") : cleanup == null ? Loc.Get("Home.SizeAfterCheck")
+            : Loc.Format("Home.LastCacheHint", cleanup.DisplayTime, cleanup.DisplayMode, cleanup.DisplayResult);
         var last = data.History.OrderByDescending(h => h.Time).FirstOrDefault();
         HomeLastAction.Text = last == null ? Loc.Get("Home.NoOperations") : $"{last.DisplayTime} · {last.DisplayAction} · {last.DisplaySize} · {last.DisplayResult}";
     }
@@ -168,6 +172,7 @@ public partial class MainWindow
         if (sender is not Button button) return;
         switch (button.Tag)
         {
+            case "cache-view": MainTabs.SelectedItem = CacheTab; break;
             case "cache": MainTabs.SelectedItem = CacheTab; await Scan(true); break;
             case "files": MainTabs.SelectedItem = FilesTab; break;
             case "map": MainTabs.SelectedItem = MapTab; break;

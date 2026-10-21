@@ -21,7 +21,7 @@ public static class DuplicateRules
             "ShortestName" => ordered.ThenBy(f => f.Name.Length),
             _ => ordered.ThenBy(f => f.File.Modified),
         };
-        return ordered.ThenBy(f => f.Path, StringComparer.OrdinalIgnoreCase).First();
+        return ordered.ThenBy(f => f.Path, FileSystemPaths.Comparer).First();
     }
 
     /// <summary>Every copy except the keeper, minus copies inside protected folders, which are never picked.</summary>
@@ -69,7 +69,7 @@ public static class Duplicates
         {
             var keeper = all.Where(i => i.Group == group.Key && !chosen.Contains(i)).OrderByDescending(i => i.Best).FirstOrDefault()
                 ?? throw new InvalidOperationException(Loc.Get("Recycle.KeepOne"));
-            var items = group.Select(i => new PlanItem(i.Path, i.Size, i.Modified, new FileInfo(i.Path) is { Exists: true } f ? f.CreationTimeUtc.Ticks : 0, $"img-{group.Key}") { Keeper = keeper.Path }).ToList();
+            var items = group.Select(i => new PlanItem(i.Path, i.Size, i.Modified, new FileInfo(i.Path) is { Exists: true } f ? Storage.Created(f) : 0, $"img-{group.Key}") { Keeper = keeper.Path }).ToList();
             categories.Add(new($"img-{group.Key}", Loc.Format("Preview.DuplicateGroup", group.Key, keeper.Path), items));
         }
         return new(HistoryAction.Recycle, CleanupMode.Recycle, categories) { Details = string.Join("\n", selected.Select(f => f.Path)) };
@@ -77,7 +77,7 @@ public static class Duplicates
 
     /// <summary>True when, after the user's choices in the preview, every group still keeps at least one file on disk.</summary>
     public static bool KeepsOne(CleanupPlan plan) =>
-        plan.Included.Where(i => i.Keeper != null).All(i => !plan.Included.Any(o => string.Equals(o.Path, i.Keeper, StringComparison.OrdinalIgnoreCase)));
+        plan.Included.Where(i => i.Keeper != null).All(i => !plan.Included.Any(o => string.Equals(o.Path, i.Keeper, FileSystemPaths.Comparison)));
 
     /// <summary>
     /// The copy that stays still exists. For exact duplicates both files must also still be two different files

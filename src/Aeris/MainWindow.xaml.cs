@@ -40,7 +40,10 @@ public partial class MainWindow : Window
         InitializeMap();
         ResetCaches();
         LocalizeView();
+        InitializeStatusBar();
         StartMaintenance();
+        ContentRendered += CheckStartupUpdate;
+        Closed += (_, _) => { windowClosed = true; updating?.Cancel(); };
         Closing += (_, e) =>
         {
             if (cleaning) { e.Cancel = true; Status.Text = Loc.Get("Status.WaitForCleanup"); }
@@ -102,7 +105,7 @@ public partial class MainWindow : Window
         UpdateTheme();
         RefreshDisk();
         foreach (var group in caches) group.Refresh();
-        CacheList.Items.Refresh();
+        ApplyCacheFilter();
         FilesGrid.Items.Refresh();
         ShowMap();
         DuplicatesGrid.Items.Refresh();
@@ -112,6 +115,7 @@ public partial class MainWindow : Window
         RefreshHistory();
         RestoreCleanupSettings();
         RestoreIntegrationSettings();
+        RefreshUpdateCard();
         RefreshRulesInfo();
         RefreshQuarantine();
         JunkGrid.Items.Refresh();
@@ -236,14 +240,28 @@ public partial class MainWindow : Window
     private void SelectAllCaches(object sender, RoutedEventArgs e)
     {
         if (busy) return;
-        bool select = caches.Any(c => c.CanClean && !c.IsAdvanced && !c.Selected);
-        foreach (var group in caches) group.Selected = select && group.CanClean && (!group.IsAdvanced || group.Selected);
+        var visible = VisibleCaches().ToArray();
+        bool select = visible.Any(c => !c.IsAdvanced && !c.Selected);
+        foreach (var group in visible) group.Chosen = select && (!group.IsAdvanced || group.Selected);
         CacheList.Items.Refresh();
         UpdateSelection();
     }
 
+    private void CacheRowClicked(object sender, MouseButtonEventArgs e)
+    {
+        if (busy || sender is not Grid row || row.DataContext is not CacheGroup group) return;
+        var box = row.Children.OfType<CheckBox>().First();
+        if (e.OriginalSource is Visual source && (source == box || box.IsAncestorOf(source))) return;
+        CacheList.SelectedItem = group;
+        box.Focus();
+        box.SetCurrentValue(System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty, box.IsChecked != true);
+        e.Handled = true;
+    }
+
     private void CacheSelectionChanged(object sender, RoutedEventArgs e)
     {
+        if (sender is CheckBox { DataContext: CacheGroup changed } checkbox && !restoring)
+            changed.Chosen = checkbox.IsChecked == true;
         if (sender is CheckBox { IsChecked: true, DataContext: CacheGroup group } box)
         {
             CacheList.SelectedItem = group;
@@ -257,7 +275,10 @@ public partial class MainWindow : Window
     private void ResetCaches()
     {
         var errors = new List<RuleError>();
+        var choices = caches.ToDictionary(c => c.Rule.Id, c => c.Scanned ? c.Selected : c.SelectionPreference);
+        bool hasChoices = choices.Values.Any(choice => choice.HasValue);
         caches = Cleaners.Groups(errors);
+        foreach (var group in caches) group.RestoreSelection(choices.GetValueOrDefault(group.Rule.Id) ?? (hasChoices ? false : (bool?)null));
         ShowCaches(errors);
     }
 
@@ -266,11 +287,27 @@ public partial class MainWindow : Window
         ruleErrors = errors.ToList();
         var view = new ListCollectionView(caches);
         view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(CacheGroup.GroupName)));
+        view.Filter = item => CacheMatches((CacheGroup)item);
         CacheList.ItemsSource = view;
         CacheList.SelectedIndex = 0;
         RuleNotice.Visibility = ruleErrors.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         RuleErrors.Text = string.Join("\n", ruleErrors.Select(e => $"{e.Source}: {e.Message}"));
         RefreshRulesInfo();
+        UpdateSelection();
+    }
+
+    private bool CacheMatches(CacheGroup group) => group.MatchesFilter((CacheCategory.SelectedItem as ComboBoxItem)?.Tag as string, CacheSearch.Text);
+    private IEnumerable<CacheGroup> VisibleCaches() => caches.Where(CacheMatches);
+
+    private void CacheFilterChanged(object sender, SelectionChangedEventArgs e) => ApplyCacheFilter();
+    private void CacheSearchChanged(object sender, TextChangedEventArgs e) => ApplyCacheFilter();
+
+    private void ApplyCacheFilter()
+    {
+        if (CacheList?.ItemsSource is not ListCollectionView view || CacheSearch == null) return;
+        var selected = CacheList.SelectedItem;
+        view.Refresh();
+        CacheList.SelectedItem = selected != null && view.Contains(selected) ? selected : view.Cast<object>().FirstOrDefault();
         UpdateSelection();
     }
 
@@ -281,20 +318,26 @@ public partial class MainWindow : Window
 
     private void UpdateSelection()
     {
-        var selected = caches.Where(c => c.Selected && c.Eligible > 0).ToArray();
-        CleanButton.IsEnabled = !busy && selected.Length > 0;
-        SelectAllButton.IsEnabled = !busy && caches.Any(c => c.CanClean);
-        SelectAllButton.Content = Loc.Get(selected.Length == 0 || caches.Any(c => c.CanClean && !c.IsAdvanced && !c.Selected) ? "Caches.SelectAll" : "Caches.ClearSelection");
+        var selected = caches.Where(c => c.Selected).ToArray();
+        bool awaitingScan = selected.Any(c => !c.Scanned);
+        CleanButton.IsEnabled = !busy && !awaitingScan && selected.Any(c => c.CanClean);
+        var visible = VisibleCaches().ToArray();
+        SelectAllButton.IsEnabled = !busy && visible.Length > 0;
+        SelectAllButton.Content = Loc.Get(visible.Any(c => !c.IsAdvanced && !c.Selected) ? "Caches.SelectVisible" : "Caches.ClearVisible");
+        CacheFilterSummary.Text = Loc.Format("Caches.FilterSummary", visible.Length, caches.Count, selected.Count(c => !CacheMatches(c)));
+        if (visible.Length == 0) CacheFilterSummary.Text = Loc.Get("Caches.NoMatches") + " " + CacheFilterSummary.Text;
         SelectionSummary.Text = selected.Length == 0
             ? Loc.Get("Caches.NothingSelected")
+            : awaitingScan ? Loc.Format("Caches.SelectedBeforeScan", selected.Length)
             : Loc.Format("Caches.SelectedSummary", Storage.Format(selected.Sum(c => c.Eligible)), selected.Length);
-        CleanModeHint.Text = data.CleanupMode == CleanupMode.Quarantine ? Loc.Plural("Caches.ReviewQuarantine", data.QuarantineDays) : Loc.Get("Caches.ReviewPermanent");
+        CleanModeHint.Text = caches.Any(c => !c.Scanned) ? Loc.Get("Caches.ChooseThenCheck") : data.CleanupMode == CleanupMode.Quarantine ? Loc.Plural("Caches.ReviewQuarantine", data.QuarantineDays) : Loc.Get("Caches.ReviewPermanent");
         RefreshHome();
     }
 
     private void SetBusy(bool value)
     {
         busy = value;
+        RefreshStatusBar();
         DriveButton.IsEnabled = !value;
         if (value) DrivePopup.IsOpen = false;
         ChooseButton.IsEnabled = ScanButton.IsEnabled = CacheScanButton.IsEnabled = Threshold.IsEnabled = Retention.IsEnabled = !value;
@@ -345,6 +388,8 @@ public partial class MainWindow : Window
             ScanFile.Text = s.File;
         });
         IProgress<StatusProgress> report = progress;
+        var choices = caches.ToDictionary(c => c.Rule.Id, c => c.Scanned ? c.Selected : c.SelectionPreference);
+        bool hasChoices = choices.Values.Any(choice => choice.HasValue);
         try
         {
             var result = await Task.Run(() =>
@@ -371,7 +416,7 @@ public partial class MainWindow : Window
                         watch.Restart();
                     });
                     skipped += group.Skipped;
-                    if (group.IsSafe && group.Rule.Enabled && group.Eligible > 0) group.Selected = true;
+                    group.RestoreSelection(choices.GetValueOrDefault(group.Rule.Id) ?? (hasChoices ? false : (bool?)null));
                 }
                 return (foundCaches, ruleProblems, skipped);
             }, token);

@@ -49,6 +49,11 @@ public class Cli(CliIO io, UserData data, CancellationToken token)
             io.Error.WriteLine(Loc.Get("Cli.Cancelled"));
             return ExitCode.Cancelled;
         }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            io.Error.WriteLine(e.Message);
+            return ExitCode.Partial;
+        }
     }
 
     private int Execute(CommandLine line)
@@ -60,6 +65,8 @@ public class Cli(CliIO io, UserData data, CancellationToken token)
 
     private int Dispatch(CommandLine line)
     {
+        if (!OperatingSystem.IsWindows() && line.Has("--similar-images"))
+            throw new UsageException(Loc.Get("Platform.SimilarUnavailable"));
         return line.Command switch
         {
             "help" => Help(),
@@ -179,8 +186,12 @@ public class Cli(CliIO io, UserData data, CancellationToken token)
             ?? (profile is { Categories.Count: > 0 } ? profile.Categories.ToArray() : null);
         if (ids != null)
         {
-            var known = Cleaners.Builtin().Select(r => r.Id).Concat(groups.Select(g => g.Rule.Id)).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var rules = Cleaners.Builtin().Concat(groups.Select(g => g.Rule)).ToList();
+            var known = rules.Select(r => r.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
             if (ids.FirstOrDefault(id => !known.Contains(id)) is { } unknown) throw new UsageException(Loc.Format("Cli.UnknownCategory", unknown));
+            // Validate requested rules even when their cache folders don't exist on this machine.
+            if (line.Has("--scheduled") && rules.FirstOrDefault(r => ids.Contains(r.Id, StringComparer.OrdinalIgnoreCase) && r.Risk != Risk.Safe) is { } riskyRule)
+                throw new UsageException(Loc.Format("Cli.ScheduledSafeOnly", riskyRule.Id));
             selected = groups.Where(g => ids.Contains(g.Rule.Id, StringComparer.OrdinalIgnoreCase)).ToList();
         }
         else selected = groups.Where(g => g.Rule.Enabled).ToList();
@@ -244,7 +255,7 @@ public class Cli(CliIO io, UserData data, CancellationToken token)
     private List<string> Roots(CommandLine line)
     {
         if (line.Positional.Count == 0) throw new UsageException(Loc.Get("Cli.NeedsFolder"));
-        return line.Positional.Select(Folder).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        return line.Positional.Select(Folder).Distinct(FileSystemPaths.Comparer).ToList();
     }
 
     private int FindDuplicates(CommandLine line)
@@ -354,7 +365,7 @@ public class Cli(CliIO io, UserData data, CancellationToken token)
             }
             catch (Exception e) { failure = e; }
         });
-        thread.SetApartmentState(ApartmentState.STA);
+        if (OperatingSystem.IsWindows()) thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
         thread.Join();
         if (failure is OperationCanceledException) throw failure;

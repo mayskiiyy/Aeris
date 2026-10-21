@@ -64,6 +64,7 @@ public static class Schedule
 }
 
 /// <summary>Explorer context menu entries under HKCU, so no administrator rights are needed.</summary>
+[System.Runtime.Versioning.SupportedOSPlatform("windows")]
 public static class ShellMenu
 {
     public static readonly (string Verb, string Argument, string LabelKey)[] Verbs =

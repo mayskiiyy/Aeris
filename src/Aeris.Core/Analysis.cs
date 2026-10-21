@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.IO;
 using System.Security.Cryptography;
 using System.Runtime.InteropServices;
@@ -20,13 +21,13 @@ public static class Analysis
 {
     private static readonly string[][] Extensions = [[], [".mp4", ".mkv", ".avi", ".mov", ".webm", ".m4v", ".wmv"], [".zip", ".rar", ".7z", ".tar", ".gz", ".iso"], [".exe", ".msi", ".msix", ".appx"], [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv", ".odt"], [".jpg", ".jpeg", ".png", ".gif", ".webp", ".heic", ".tiff", ".bmp"]];
     public static bool Matches(string path, int type) => type == 0 || (type > 0 && type < Extensions.Length && Extensions[type].Contains(System.IO.Path.GetExtension(path), StringComparer.OrdinalIgnoreCase));
-    public static LargeFile Snapshot(FileInfo file) => new(file.FullName, file.Length, file.LastWriteTimeUtc.Ticks, file.CreationTimeUtc.Ticks);
+    public static LargeFile Snapshot(FileInfo file) => new(file.FullName, file.Length, file.LastWriteTimeUtc.Ticks, Storage.Created(file));
     public static bool Unchanged(LargeFile file)
     {
         try
         {
             var current = new FileInfo(file.Path);
-            return current.Exists && current.Length == file.Size && current.LastWriteTimeUtc.Ticks == file.Modified && current.CreationTimeUtc.Ticks == file.Created && Storage.SafePath(current.DirectoryName!) && (current.Attributes & FileAttributes.ReparsePoint) == 0;
+            return current.Exists && current.Length == file.Size && current.LastWriteTimeUtc.Ticks == file.Modified && Storage.Created(current) == file.Created && Storage.SafePath(current.DirectoryName!) && (current.Attributes & FileAttributes.ReparsePoint) == 0;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return false; }
     }
@@ -50,6 +51,7 @@ public static class Analysis
 
     public static string Identity(FileStream stream)
     {
+        if (OperatingSystem.IsLinux()) return LinuxFiles.Read("", stream.SafeFileHandle.DangerousGetHandle().ToInt32()).Identity;
         if (!GetFileInformationByHandle(stream.SafeFileHandle, out var info)) throw new IOException(Loc.Get("Error.FileIdentity"));
         return $"{info.Volume:X8}:{info.IndexHigh:X8}{info.IndexLow:X8}";
     }
@@ -57,11 +59,20 @@ public static class Analysis
     public static string Hash(FileStream stream, CancellationToken token)
     {
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        byte[] buffer = new byte[1024 * 1024];
-        int read;
-        while ((read = stream.Read(buffer)) > 0) { token.ThrowIfCancellationRequested(); hash.AppendData(buffer, 0, read); }
-        token.ThrowIfCancellationRequested();
-        return Convert.ToHexString(hash.GetHashAndReset());
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(1024 * 1024);
+        try
+        {
+            while (true)
+            {
+                token.ThrowIfCancellationRequested();
+                int read = stream.Read(buffer, 0, 1024 * 1024);
+                if (read == 0) break;
+                hash.AppendData(buffer, 0, read);
+            }
+            token.ThrowIfCancellationRequested();
+            return Convert.ToHexString(hash.GetHashAndReset());
+        }
+        finally { ArrayPool<byte>.Shared.Return(buffer); }
     }
 
     public const int PrefixBytes = 64 * 1024;
@@ -71,14 +82,20 @@ public static class Analysis
     {
         if (size <= 2L * PrefixBytes) return Hash(stream, token);
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        byte[] buffer = new byte[PrefixBytes];
-        stream.ReadExactly(buffer);
-        hash.AppendData(buffer);
-        stream.Seek(-PrefixBytes, SeekOrigin.End);
-        stream.ReadExactly(buffer);
-        hash.AppendData(buffer);
-        stream.Seek(0, SeekOrigin.Begin);
-        return "P" + Convert.ToHexString(hash.GetHashAndReset());
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(PrefixBytes);
+        try
+        {
+            token.ThrowIfCancellationRequested();
+            stream.ReadExactly(buffer.AsSpan(0, PrefixBytes));
+            hash.AppendData(buffer, 0, PrefixBytes);
+            stream.Seek(-PrefixBytes, SeekOrigin.End);
+            token.ThrowIfCancellationRequested();
+            stream.ReadExactly(buffer.AsSpan(0, PrefixBytes));
+            hash.AppendData(buffer, 0, PrefixBytes);
+            stream.Seek(0, SeekOrigin.Begin);
+            return "P" + Convert.ToHexString(hash.GetHashAndReset());
+        }
+        finally { ArrayPool<byte>.Shared.Return(buffer); }
     }
 
     public static List<DuplicateFile> FindDuplicates(string root, IReadOnlyCollection<string> exclusions, CancellationToken token, Action<string> report, Action skipped, DuplicateOptions? options = null) =>
@@ -92,7 +109,7 @@ public static class Analysis
     {
         options ??= new();
         var sizes = new Dictionary<long, List<LargeFile>>();
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var seen = new HashSet<string>(FileSystemPaths.Comparer);
         int count = 0;
         foreach (string root in roots)
             foreach (var info in Storage.Walk(root, token, skipped, exclusions))

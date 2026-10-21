@@ -22,7 +22,7 @@ public static class Quarantine
     {
         string full = Path.GetFullPath(original);
         string root = Path.GetPathRoot(full)!;
-        string drive = root.TrimEnd('\\', ':').Replace(":", "");
+        string drive = OperatingSystem.IsWindows() ? root.TrimEnd('\\', ':').Replace(":", "") : "root";
         return Path.Combine(operationFolder, drive, full[root.Length..]);
     }
 
@@ -32,6 +32,12 @@ public static class Quarantine
     /// <summary>The mount point a path lives on, so a volume mounted inside a folder counts as a different volume.</summary>
     private static string VolumeOf(string path)
     {
+        if (OperatingSystem.IsLinux())
+        {
+            string existing = Path.GetFullPath(path);
+            while (!Path.Exists(existing) && Path.GetDirectoryName(existing) is { } parent) existing = parent;
+            return LinuxFiles.Read(existing).Device;
+        }
         var buffer = new System.Text.StringBuilder(1024);
         return GetVolumePathName(Path.GetFullPath(path), buffer, buffer.Capacity) ? buffer.ToString() : Path.GetPathRoot(Path.GetFullPath(path)) ?? path;
     }

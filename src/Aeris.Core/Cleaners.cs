@@ -52,8 +52,8 @@ public record ResolvedTarget(string Root, string Pattern, bool Recurse, bool All
 {
     public string Display => Pattern == "*" ? Root : Path.Combine(Root, Pattern);
     public bool Matches(string file, string directory) =>
-        (Recurse || string.Equals(Path.TrimEndingDirectorySeparator(directory), Root, StringComparison.OrdinalIgnoreCase))
-        && (Pattern == "*" || FileSystemName.MatchesSimpleExpression(Pattern, Path.GetFileName(file)));
+        (Recurse || string.Equals(Path.TrimEndingDirectorySeparator(directory), Root, FileSystemPaths.Comparison))
+        && (Pattern == "*" || FileSystemName.MatchesSimpleExpression(Pattern, Path.GetFileName(file), OperatingSystem.IsWindows()));
 }
 
 public record RuleError(string Source, string Message);
@@ -79,7 +79,7 @@ public static class Cleaners
 
     public static List<CleanerRule> Builtin()
     {
-        using var stream = typeof(Cleaners).Assembly.GetManifestResourceStream("Aeris.Cleaners.builtin.json")!;
+        using var stream = typeof(Cleaners).Assembly.GetManifestResourceStream(OperatingSystem.IsLinux() ? "Aeris.Cleaners.linux.json" : "Aeris.Cleaners.builtin.json")!;
         return JsonSerializer.Deserialize<List<CleanerRule>>(stream, Json)!;
     }
 
@@ -145,10 +145,12 @@ public static class Cleaners
         string result = Token.Replace(template, match =>
         {
             string? value = match.Groups[1].Success
-                ? Environment.GetEnvironmentVariable(match.Groups[1].Value)
+                ? (OperatingSystem.IsLinux() && match.Groups[1].Value == "XDG_CACHE_HOME"
+                    ? Environment.GetEnvironmentVariable("XDG_CACHE_HOME") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cache")
+                    : Environment.GetEnvironmentVariable(match.Groups[1].Value))
                 : ReadRegistry(match.Groups[2].Value, match.Groups[3].Value, match.Groups[4].Value);
             if (string.IsNullOrEmpty(value)) { missing = true; return ""; }
-            return value.Replace('/', '\\');
+            return OperatingSystem.IsWindows() ? value.Replace('/', '\\') : value;
         });
         if (missing || result.Contains('%') || !Path.IsPathFullyQualified(result)) return null;
         try { return PathGuard.Canonical(result); }
@@ -157,6 +159,7 @@ public static class Cleaners
 
     private static string? ReadRegistry(string hive, string key, string value)
     {
+        if (!OperatingSystem.IsWindows()) return null;
         try
         {
             var root = hive == "HKLM" ? Registry.LocalMachine : Registry.CurrentUser;
@@ -199,7 +202,7 @@ public static class Cleaners
     {
         var builtin = Builtin();
         var rules = builtin.Concat(LoadUser(userFolder ?? UserFolder, errors ?? new List<RuleError>(), builtin.Select(r => r.Id)));
-        var known = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var known = new HashSet<string>(FileSystemPaths.Comparer);
         var groups = new List<CacheGroup>();
         foreach (var rule in rules)
         {

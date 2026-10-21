@@ -55,7 +55,7 @@ public class TreemapControl : FrameworkElement
 
     private void Relayout()
     {
-        cells = result == null || ActualWidth < 4 || ActualHeight < 4 ? [] : Treemap.Layout(result.Nodes, root, new(0, 0, ActualWidth, ActualHeight), onDisk);
+        cells = result == null || ActualWidth < 4 || ActualHeight < 4 ? [] : Treemap.Layout(result.Nodes, root, new(0, 0, ActualWidth, ActualHeight), onDisk, maxDepth: 1, minSide: 36, maxItems: 24);
         hovered = -1;
         InvalidateVisual();
     }
@@ -69,25 +69,31 @@ public class TreemapControl : FrameworkElement
         if (result == null) return;
         var nodes = result.Nodes;
         var kinds = Enum.GetValues<FileKind>().Select(k => Resource($"Kind.{k}")).ToArray();
-        var folder = Resource("Kind.Folder");
-        var gap = new Pen(canvas, 1); gap.Freeze();
-        var folderLine = new Pen(Resource("Kind.FolderLine"), 1); folderLine.Freeze();
         var ink = Resource("Ink");
         var muted = Resource("Muted");
-        var small = Resource("Kind.Other").Clone(); small.Opacity = 0.45; small.Freeze();
         double dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
         var typeface = new Typeface(new FontFamily("Segoe UI"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal);
+        long total = Math.Max(1, nodes.Size(root, onDisk));
         foreach (var cell in cells)
         {
-            var rect = new Rect(cell.Rect.X, cell.Rect.Y, cell.Rect.Width, cell.Rect.Height);
-            if (cell.Node < 0) { dc.DrawRectangle(small, gap, rect); continue; }
-            bool directory = nodes.IsDirectory(cell.Node);
-            dc.DrawRectangle(directory ? folder : kinds[(int)nodes.Kind(cell.Node)], directory ? folderLine : gap, rect);
-            if (directory && rect.Width >= 63 && rect.Height >= 51)
+            var bounds = cell.Rect.Inset(3);
+            if (bounds.Width <= 0 || bounds.Height <= 0) continue;
+            var rect = new Rect(bounds.X, bounds.Y, bounds.Width, bounds.Height);
+            bool directory = cell.Node >= 0 && nodes.IsDirectory(cell.Node);
+            var color = cell.Node < 0 ? Resource("Kind.Other") : directory ? Resource("Accent") : kinds[(int)nodes.Kind(cell.Node)];
+            var fill = color.Clone(); fill.Opacity = 0.14; fill.Freeze();
+            dc.DrawRoundedRectangle(fill, null, rect, 6, 6);
+            dc.DrawRectangle(color, null, new Rect(rect.X + 6, rect.Y + 6, Math.Max(0, rect.Width - 12), 2));
+            if (rect.Width >= 85 && rect.Height >= 52)
             {
-                var label = new FormattedText(nodes.Name(cell.Node), CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, typeface, 11, ink, dpi)
-                { MaxTextWidth = rect.Width - 8, MaxLineCount = 1, Trimming = TextTrimming.CharacterEllipsis };
-                dc.DrawText(label, new Point(rect.X + 4, rect.Y + 1));
+                string name = cell.Node < 0 ? Loc.Format("Map.OtherItems", cell.SmallCount) : nodes.Name(cell.Node);
+                var label = new FormattedText(name, Loc.Culture, FlowDirection.LeftToRight, typeface, 14, ink, dpi)
+                { MaxTextWidth = rect.Width - 20, MaxLineCount = 1, Trimming = TextTrimming.CharacterEllipsis };
+                dc.DrawText(label, new Point(rect.X + 10, rect.Y + 14));
+                string detail = $"{Storage.Format(cell.Size)} · {100.0 * cell.Size / total:0.#}%";
+                var size = new FormattedText(detail, Loc.Culture, FlowDirection.LeftToRight, typeface, 12, muted, dpi)
+                { MaxTextWidth = rect.Width - 20, MaxLineCount = 1, Trimming = TextTrimming.CharacterEllipsis };
+                dc.DrawText(size, new Point(rect.X + 10, rect.Y + 34));
             }
         }
         if (cells.Count == 0)
@@ -143,7 +149,7 @@ public class TreemapControl : FrameworkElement
     {
         var nodes = result!.Nodes;
         long parentSize = Math.Max(1, cell.Node >= 0 && nodes.Parent(cell.Node) >= 0 ? nodes.Size(nodes.Parent(cell.Node), onDisk) : nodes.Size(root, onDisk));
-        if (cell.Node < 0) return Loc.Format("Map.SmallTip", cell.SmallCount, Storage.Format(cell.Size));
+        if (cell.Node < 0) return Loc.Format("Map.OtherItemsTip", cell.SmallCount, Storage.Format(cell.Size));
         string path = nodes.FullPath(cell.Node);
         double share = 100.0 * nodes.Size(cell.Node, onDisk) / parentSize;
         return nodes.IsDirectory(cell.Node)

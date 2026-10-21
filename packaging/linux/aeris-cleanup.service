@@ -1,0 +1,10 @@
+[Unit]
+Description=Aeris scheduled cache cleanup (Safe categories only)
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/aeris-cli clean --scheduled --older-than 7d --mode quarantine --yes --quiet
+Nice=10
+IOSchedulingClass=idle
+UMask=0077
+NoNewPrivileges=true

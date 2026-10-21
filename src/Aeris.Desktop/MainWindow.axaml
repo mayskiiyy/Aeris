@@ -1,0 +1,109 @@
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:Aeris.Desktop" x:Class="Aeris.Desktop.MainWindow"
+        Title="Aeris" Width="1140" Height="800" MinWidth="850" MinHeight="620"
+        Icon="/Assets/aeris.ico" WindowStartupLocation="CenterScreen" KeyDown="WindowSearchKeyDown">
+  <Window.Styles>
+    <Style Selector="Border#CacheSearchBox:focus-within"><Setter Property="BorderBrush" Value="{DynamicResource SystemControlHighlightAccentBrush}"/></Style>
+    <Style Selector="TextBox.cache-search"><Setter Property="Background" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Padding" Value="0,9"/><Setter Property="FontSize" Value="13"/></Style>
+    <Style Selector="TextBox.cache-search:focus /template/ Border#PART_BorderElement"><Setter Property="Background" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/></Style>
+  </Window.Styles>
+  <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="28,22">
+    <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="18" Margin="0,0,0,18">
+      <StackPanel Spacing="3"><TextBlock Text="Aeris" Classes="title"/><TextBlock Text="{DynamicResource Desktop.Subtitle}" Classes="caption"/></StackPanel>
+      <Border Grid.Column="1" x:Name="CacheSearchBox" IsVisible="False" VerticalAlignment="Center" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+        <Grid ColumnDefinitions="34,*,32">
+          <Path Data="M10 3 A7 7 0 1 0 10 17 A7 7 0 1 0 10 3 M15 15 L21 21" Stroke="{DynamicResource SystemControlForegroundBaseMediumBrush}" StrokeThickness="1.6" Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+          <TextBox Grid.Column="1" x:Name="CacheSearch" Classes="cache-search" TextChanged="CacheSearchChanged" KeyDown="CacheSearchKeyDown" Watermark="{DynamicResource Caches.Search}" AutomationProperties.Name="{DynamicResource Caches.Search}" ToolTip.Tip="{DynamicResource Caches.SearchHint}"/>
+          <Button Grid.Column="2" x:Name="CacheSearchClear" IsVisible="False" Click="ClearCacheSearch" Padding="7" Background="Transparent" BorderThickness="0" AutomationProperties.Name="{DynamicResource Caches.ClearSearch}" ToolTip.Tip="{DynamicResource Caches.ClearSearch}"><Path Data="M4 4 L14 14 M14 4 L4 14" Stroke="{DynamicResource SystemControlForegroundBaseMediumBrush}" StrokeThickness="1.5" Width="10" Height="10" Stretch="Uniform"/></Button>
+        </Grid>
+      </Border>
+      <Button Grid.Column="2" Content="{DynamicResource Desktop.Theme}" Click="ToggleTheme" VerticalAlignment="Center"/>
+    </Grid>
+    <Border Grid.Row="1" x:Name="UpdateBanner" Classes="card" Margin="0,0,0,14" IsVisible="False">
+      <DockPanel><Button DockPanel.Dock="Right" Content="{DynamicResource Desktop.Settings}" Click="ShowUpdate"/><TextBlock x:Name="BannerText" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,20,0"/></DockPanel>
+    </Border>
+    <TabControl Grid.Row="2" x:Name="Tabs" SelectionChanged="DesktopTabChanged">
+      <TabItem Header="{DynamicResource Desktop.Disk}">
+        <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="0,20,0,0">
+          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+            <TextBox x:Name="FolderBox" Watermark="{DynamicResource Files.FolderCaption}" AutomationProperties.Name="{DynamicResource Files.FolderCaption}" VerticalContentAlignment="Center"/>
+            <Button Grid.Column="1" x:Name="BrowseButton" Content="{DynamicResource Desktop.Browse}" Click="Browse"/>
+            <Button Grid.Column="2" x:Name="ScanButton" Classes="accent" Content="{DynamicResource Desktop.Scan}" Click="Scan"/>
+          </Grid>
+          <TextBlock Grid.Row="1" x:Name="ScanSummary" Text="{DynamicResource Files.Hint}" Margin="0,14" TextWrapping="Wrap"/>
+          <Grid Grid.Row="2" RowDefinitions="2*,3*" RowSpacing="16">
+            <Grid ColumnDefinitions="2*,*" ColumnSpacing="12">
+              <Border Classes="card" Padding="4"><local:DiskMap x:Name="Map" AutomationProperties.Name="{DynamicResource Home.Map}"/></Border>
+              <Grid Grid.Column="1" RowDefinitions="Auto,*" RowSpacing="6">
+                <Button Content="{DynamicResource Desktop.Up}" Click="MapUp" HorizontalAlignment="Left"/>
+                <ListBox Grid.Row="1" x:Name="FolderList" DoubleTapped="OpenMapFolder" KeyDown="MapFolderKey" AutomationProperties.Name="{DynamicResource Map.List}">
+                  <ListBox.ItemTemplate><DataTemplate><StackPanel Spacing="3"><TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Size}" Classes="caption"/></StackPanel></DataTemplate></ListBox.ItemTemplate>
+                </ListBox>
+              </Grid>
+            </Grid>
+            <ListBox Grid.Row="1" x:Name="FileList" DoubleTapped="OpenFileLocation" KeyDown="FileKey" AutomationProperties.Name="{DynamicResource Files.Title}">
+              <ListBox.ItemTemplate><DataTemplate><Grid ColumnDefinitions="*,110" ColumnSpacing="16"><StackPanel Spacing="3"><TextBlock Text="{Binding Name}" FontWeight="SemiBold"/><TextBlock Text="{Binding Directory}" Classes="caption" TextTrimming="CharacterEllipsis"/></StackPanel><TextBlock Grid.Column="1" Text="{Binding DisplaySize}" HorizontalAlignment="Right"/></Grid></DataTemplate></ListBox.ItemTemplate>
+            </ListBox>
+          </Grid>
+          <Button Grid.Row="3" Content="{DynamicResource Files.SaveCsv}" Click="ExportCsv" HorizontalAlignment="Left" Margin="0,12,0,0"/>
+        </Grid>
+      </TabItem>
+      <TabItem Header="{DynamicResource Nav.Caches}">
+        <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="0,20,0,0">
+          <WrapPanel Orientation="Horizontal">
+            <TextBlock Text="{DynamicResource Desktop.Retention}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+            <NumericUpDown x:Name="Retention" Minimum="2" Maximum="36500" Value="7" Width="110" FormatString="0" ValueChanged="RetentionChanged" AutomationProperties.Name="{DynamicResource Desktop.Retention}" Margin="0,0,16,0"/>
+            <Button x:Name="CacheScanButton" Content="{DynamicResource Caches.Check}" Click="ScanCaches"/>
+          </WrapPanel>
+          <StackPanel Grid.Row="1" Spacing="8" Margin="0,14">
+            <TextBlock Text="{DynamicResource Desktop.CacheHint}" TextWrapping="Wrap" Classes="caption"/>
+            <Grid ColumnDefinitions="*" ColumnSpacing="12">
+              <StackPanel Spacing="6"><TextBlock Text="{DynamicResource Caches.Category}" Classes="caption"/><ComboBox x:Name="CacheCategory" SelectedIndex="0" SelectionChanged="CacheFilterChanged" HorizontalAlignment="Stretch" AutomationProperties.Name="{DynamicResource Caches.Category}"><ComboBoxItem Tag="" Content="{DynamicResource Caches.AllCategories}"/><ComboBoxItem Tag="Windows" Content="{DynamicResource CacheGroup.Windows}"/><ComboBoxItem Tag="Browsers" Content="{DynamicResource CacheGroup.Browsers}"/><ComboBoxItem Tag="Apps" Content="{DynamicResource CacheGroup.Apps}"/><ComboBoxItem Tag="GamesAndGpu" Content="{DynamicResource CacheGroup.GamesAndGpu}"/><ComboBoxItem Tag="Developer" Content="{DynamicResource CacheGroup.Developer}"/><ComboBoxItem Tag="Custom" Content="{DynamicResource CacheGroup.Custom}"/></ComboBox></StackPanel>
+            </Grid>
+            <TextBlock x:Name="CacheFilterSummary" TextWrapping="Wrap" Classes="caption" AutomationProperties.LiveSetting="Polite"/>
+          </StackPanel>
+          <ListBox Grid.Row="2" x:Name="CacheList" AutomationProperties.Name="{DynamicResource Caches.List}">
+            <ListBox.ItemTemplate><DataTemplate><Grid ColumnDefinitions="Auto,*,110" ColumnSpacing="14" Background="Transparent" Tapped="CacheRowClicked" Cursor="Hand"><CheckBox IsChecked="{Binding Chosen, Mode=TwoWay}" IsCheckedChanged="CacheSelectionChanged" AutomationProperties.Name="{Binding Name}"/><StackPanel Grid.Column="1" Spacing="4"><TextBlock Text="{Binding GroupName}" Classes="caption"/><TextBlock Text="{Binding Name}" FontWeight="SemiBold"/><TextBlock Text="{Binding Description}" Classes="caption" TextWrapping="Wrap"/><TextBlock Text="{Binding RiskText}" Classes="caption"/><TextBlock Text="{Binding RootsText}" Classes="caption" TextWrapping="Wrap"/></StackPanel><TextBlock Grid.Column="2" Text="{Binding EligibleText}" HorizontalAlignment="Right"/></Grid></DataTemplate></ListBox.ItemTemplate>
+          </ListBox>
+          <Button Grid.Row="3" x:Name="ReviewButton" Content="{DynamicResource Caches.CleanSelected}" Classes="accent" Click="ReviewCleanup" HorizontalAlignment="Right" Margin="0,14,0,0" IsEnabled="False"/>
+        </Grid>
+      </TabItem>
+      <TabItem Header="{DynamicResource Nav.Duplicates}">
+        <Grid RowDefinitions="Auto,Auto,*" Margin="0,20,0,0">
+          <DockPanel><Button DockPanel.Dock="Right" x:Name="DuplicateButton" Content="{DynamicResource Dup.Find}" Classes="accent" Click="FindDuplicates"/><TextBlock Text="{DynamicResource Desktop.DuplicateHint}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,16,0"/></DockPanel>
+          <TextBlock Grid.Row="1" Text="{DynamicResource Dup.Footer}" Classes="caption" TextWrapping="Wrap" Margin="0,14"/>
+          <ListBox Grid.Row="2" x:Name="DuplicateList" DoubleTapped="OpenDuplicateLocation" AutomationProperties.Name="{DynamicResource Home.Duplicates}">
+            <ListBox.ItemTemplate><DataTemplate><Grid ColumnDefinitions="50,*,110" ColumnSpacing="12"><TextBlock Text="{Binding Group}"/><StackPanel Grid.Column="1" Spacing="4"><TextBlock Text="{Binding Name}" FontWeight="SemiBold"/><TextBlock Text="{Binding Path}" Classes="caption" TextTrimming="CharacterEllipsis"/></StackPanel><TextBlock Grid.Column="2" Text="{Binding DisplaySize}" HorizontalAlignment="Right"/></Grid></DataTemplate></ListBox.ItemTemplate>
+          </ListBox>
+        </Grid>
+      </TabItem>
+      <TabItem Header="{DynamicResource Nav.History}">
+        <Grid RowDefinitions="Auto,*,Auto" Margin="0,20,0,0">
+          <Button Content="{DynamicResource Desktop.Refresh}" Click="RefreshHistoryClick" HorizontalAlignment="Left" Margin="0,0,0,14"/>
+          <ListBox Grid.Row="1" x:Name="HistoryList" AutomationProperties.Name="{DynamicResource History.Title}">
+            <ListBox.ItemTemplate><DataTemplate><Grid ColumnDefinitions="*,140" ColumnSpacing="12"><StackPanel Spacing="4"><TextBlock Text="{Binding DisplayAction}" FontWeight="SemiBold"/><TextBlock Text="{Binding DisplayTime}" Classes="caption"/><TextBlock Text="{Binding DisplayResult}" Classes="caption"/></StackPanel><TextBlock Grid.Column="1" Text="{Binding DisplaySize}" HorizontalAlignment="Right"/></Grid></DataTemplate></ListBox.ItemTemplate>
+          </ListBox>
+          <Button Grid.Row="2" x:Name="RestoreButton" Content="{DynamicResource Desktop.Restore}" Click="Restore" HorizontalAlignment="Right" Margin="0,14,0,0"/>
+        </Grid>
+      </TabItem>
+      <TabItem x:Name="SettingsTab" Header="{DynamicResource Desktop.Settings}">
+        <ScrollViewer><StackPanel Spacing="20" Margin="0,20,0,0">
+          <Border Classes="card"><StackPanel Spacing="12">
+            <TextBlock Text="{DynamicResource Settings.Updates}" FontWeight="SemiBold"/><TextBlock x:Name="VersionText" FontSize="22"/>
+            <TextBlock x:Name="UpdateText" Text="{DynamicResource Update.NotChecked}" TextWrapping="Wrap"/>
+            <WrapPanel><Button x:Name="CheckButton" Content="{DynamicResource Update.Check}" Click="CheckUpdates" Margin="0,0,10,0"/><Button x:Name="DownloadButton" Content="{DynamicResource Desktop.Download}" Click="DownloadUpdate" IsVisible="False" Margin="0,0,10,0"/><Button Content="{DynamicResource Update.OpenPage}" Click="OpenReleasePage"/></WrapPanel>
+            <ProgressBar x:Name="DownloadProgress" IsVisible="False" Height="5"/>
+            <TextBox x:Name="ReleaseNotes" IsVisible="False" IsReadOnly="True" TextWrapping="Wrap" MaxHeight="180" AutomationProperties.Name="{DynamicResource Update.Notes}"/>
+            <TextBlock Text="{DynamicResource Update.Privacy}" Classes="caption" TextWrapping="Wrap"/>
+          </StackPanel></Border>
+          <Border Classes="card"><StackPanel Spacing="12"><TextBlock Text="{DynamicResource Language.Label}" FontWeight="SemiBold"/><ComboBox x:Name="LanguagePicker" SelectionChanged="LanguageChanged" AutomationProperties.Name="{DynamicResource Language.Label}"><ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Name}"/></DataTemplate></ComboBox.ItemTemplate></ComboBox></StackPanel></Border>
+          <Border Classes="card"><StackPanel Spacing="10"><TextBlock Text="{DynamicResource Desktop.Server}" FontWeight="SemiBold"/><TextBlock Text="{DynamicResource Desktop.ServerHint}" TextWrapping="Wrap" Classes="caption"/><TextBox Text="aeris-cli clean --scheduled --dry-run --json" IsReadOnly="True" AutomationProperties.Name="CLI"/></StackPanel></Border>
+        </StackPanel></ScrollViewer>
+      </TabItem>
+    </TabControl>
+    <Grid x:Name="StatusBar" IsVisible="False" Grid.Row="3" ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,18,0,0">
+      <TextBlock x:Name="Status" Text="{DynamicResource Status.Ready}" VerticalAlignment="Center" TextWrapping="Wrap" MaxHeight="65" AutomationProperties.LiveSetting="Polite"/>
+      <Button Grid.Column="1" x:Name="CancelButton" Content="{DynamicResource Desktop.Cancel}" Click="Cancel" IsVisible="False"/>
+    </Grid>
+  </Grid>
+</Window>

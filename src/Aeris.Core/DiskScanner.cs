@@ -149,12 +149,13 @@ public sealed class ScanResult(NodeStore nodes, int skipped, TimeSpan elapsed)
     {
         string full = Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
         string root = Path.TrimEndingDirectorySeparator(RootPath);
-        if (string.Equals(full, root, StringComparison.OrdinalIgnoreCase)) return 0;
-        if (!full.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) return -1;
+        if (string.Equals(full, root, FileSystemPaths.Comparison)) return 0;
+        string prefix = Path.EndsInDirectorySeparator(root) ? root : root + Path.DirectorySeparatorChar;
+        if (!full.StartsWith(prefix, FileSystemPaths.Comparison)) return -1;
         int node = 0;
-        foreach (string part in full[(root.Length + 1)..].Split(Path.DirectorySeparatorChar))
+        foreach (string part in full[prefix.Length..].Split(Path.DirectorySeparatorChar))
         {
-            node = Nodes.Children(node).FirstOrDefault(c => string.Equals(Nodes.Name(c), part, StringComparison.OrdinalIgnoreCase), -1);
+            node = Nodes.Children(node).FirstOrDefault(c => string.Equals(Nodes.Name(c), part, FileSystemPaths.Comparison), -1);
             if (node < 0) return -1;
         }
         return node;
@@ -190,6 +191,7 @@ public sealed class StandardScanner : IDiskScanner
 
     public static ScanResult Scan(string root, ScanOptions options, IProgress<ScanProgress>? progress, CancellationToken token)
     {
+        if (OperatingSystem.IsLinux()) return PortableScanner.Scan(root, options, progress, token);
         var watch = System.Diagnostics.Stopwatch.StartNew();
         string full = Path.GetFullPath(root);
         if (!Storage.SafePath(full) || !Directory.Exists(full)) throw new DirectoryNotFoundException(full);

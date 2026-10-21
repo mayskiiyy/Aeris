@@ -64,3 +64,11 @@ Filename: "{sys}\schtasks.exe"; Parameters: "/Delete /TN ""Aeris automatic clean
 
 [Run]
 Filename: "{app}\Aeris.exe"; Description: "{cm:LaunchProgram,Aeris}"; Flags: nowait postinstall skipifsilent
+; An update started from Aeris runs silently and passes /relaunch=1 so the new version opens again.
+Filename: "{app}\Aeris.exe"; Flags: nowait; Check: ShouldRelaunch
+
+[Code]
+function ShouldRelaunch: Boolean;
+begin
+  Result := WizardSilent and (ExpandConstant('{param:relaunch|0}') = '1');
+end;

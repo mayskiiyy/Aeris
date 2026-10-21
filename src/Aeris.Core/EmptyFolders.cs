@@ -10,7 +10,7 @@ public static class EmptyFolders
     private static readonly string[] Junk = ["desktop.ini", "thumbs.db"];
     private static readonly EnumerationOptions Listing = new() { IgnoreInaccessible = false, AttributesToSkip = 0, RecurseSubdirectories = false };
 
-    public static bool IsJunk(string name) => Junk.Contains(name, StringComparer.OrdinalIgnoreCase);
+    public static bool IsJunk(string name) => Junk.Contains(name, FileSystemPaths.Comparer);
 
     /// <summary>No files and no non-empty subfolders, recursively. A link or unreadable entry counts as content.</summary>
     public static bool IsEmpty(string path, bool ignoreJunk)

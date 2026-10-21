@@ -17,6 +17,17 @@ public class CacheGroup(CleanerRule rule, ResolvedTarget[] targets) : INotifyPro
     public ResolvedTarget[] Targets { get; } = targets;
     public string[] Roots => Targets.Select(t => t.Display).ToArray();
     public bool Selected { get; set; }
+    public bool? SelectionPreference { get; private set; }
+    public bool Chosen
+    {
+        get => Selected;
+        set { SelectionPreference = value; Selected = value; Refresh(); }
+    }
+    public void RestoreSelection(bool? preference)
+    {
+        SelectionPreference = preference;
+        Selected = preference ?? (IsSafe && Rule.Enabled && CanClean);
+    }
     public bool Scanned { get; set; }
     public int Skipped { get; set; }
     public long Total { get; set; }
@@ -29,6 +40,27 @@ public class CacheGroup(CleanerRule rule, ResolvedTarget[] targets) : INotifyPro
     public string Description => Rule.Description ?? (Rule.DescriptionKey is { } key ? Loc.Get(key) : "");
     public string FriendlyLocation => Rule.LocationKey is { } key ? Loc.Format(key, Name) : Loc.Get("Cache.Custom.Location");
     public string GroupName => Loc.Get($"CacheGroup.{Rule.Group}");
+    public bool MatchesFilter(string? category, string? search)
+    {
+        if (!string.IsNullOrEmpty(category) && Rule.Group != category) return false;
+        string query = NormalizeSearch(search ?? "");
+        if (string.IsNullOrWhiteSpace(query)) return true;
+        string aliases = Rule.Group switch
+        {
+            CleanerGroup.Developer => "developer development dev разработчик разработка программирование инструменты packages пакеты пакет сборка",
+            CleanerGroup.Browsers => "browser browsers браузер браузера браузеров интернет",
+            CleanerGroup.GamesAndGpu => "games gaming gpu shaders игры видеокарта шейдеры",
+            CleanerGroup.Windows => "windows system система временные temp temporary",
+            CleanerGroup.Apps => "apps applications приложения программы",
+            _ => "custom пользовательские правила"
+        };
+        string text = NormalizeSearch(string.Join(" ", new[] { Name, Description, GroupName, Rule.Id, aliases, "cache caches кеш кэш" }.Concat(Roots)));
+        return query.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).All(word => text.Contains(word, StringComparison.Ordinal));
+    }
+    private static string NormalizeSearch(string text) => string.Concat(text.Normalize(System.Text.NormalizationForm.FormD)
+        .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark))
+        .ToLowerInvariant().Replace('ё', 'е');
+
     public string RiskText => Loc.Get($"Risk.{Rule.Risk}");
     public string RiskHint => Loc.Get($"Risk.{Rule.Risk}.Hint");
     public bool IsAdvanced => Rule.Risk == Risk.Advanced;
@@ -47,7 +79,7 @@ public class CacheGroup(CleanerRule rule, ResolvedTarget[] targets) : INotifyPro
     public void Scan(DateTime cutoff, IReadOnlyCollection<string>? exclusions, CancellationToken token, Action<string, FileInfo?>? progress = null)
     {
         Items.Clear(); Total = Eligible = 0; Skipped = 0;
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var seen = new HashSet<string>(FileSystemPaths.Comparer);
         foreach (var target in Targets)
         {
             progress?.Invoke(target.Root, null);
@@ -61,7 +93,7 @@ public class CacheGroup(CleanerRule rule, ResolvedTarget[] targets) : INotifyPro
                     if (Storage.Eligible(file, cutoff))
                     {
                         Eligible += size;
-                        Items.Add(new(file.FullName, size, file.LastWriteTimeUtc.Ticks, file.CreationTimeUtc.Ticks, Rule.Id, target.Root, target.AllowPrograms));
+                        Items.Add(new(file.FullName, size, file.LastWriteTimeUtc.Ticks, Storage.Created(file), Rule.Id, target.Root, target.AllowPrograms));
                     }
                 }
                 catch (Exception e) when (e is IOException or UnauthorizedAccessException) { Skipped++; }
@@ -119,7 +151,7 @@ public static class Storage
     {
         if (exclusions == null || exclusions.Count == 0) return false;
         string full = Path.GetFullPath(path);
-        return exclusions.Any(p => string.Equals(full, Path.TrimEndingDirectorySeparator(p), StringComparison.OrdinalIgnoreCase) || full.StartsWith(Path.EndsInDirectorySeparator(p) ? p : p + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
+        return exclusions.Any(p => string.Equals(full, Path.TrimEndingDirectorySeparator(p), FileSystemPaths.Comparison) || full.StartsWith(Path.EndsInDirectorySeparator(p) ? p : p + Path.DirectorySeparatorChar, FileSystemPaths.Comparison));
     }
 
     private static readonly EnumerationOptions Listing = new() { IgnoreInaccessible = false, AttributesToSkip = 0, RecurseSubdirectories = false, ReturnSpecialDirectories = false };
@@ -152,7 +184,17 @@ public static class Storage
                     catch (Exception e) when (e is IOException or UnauthorizedAccessException) { skipped(); break; }
                     if ((entry.Attributes & FileAttributes.ReparsePoint) != 0 || IsExcluded(entry.FullName, exclusions)) { skipped(); continue; }
                     if (entry is DirectoryInfo) { if (recurse) pending.Push(entry.FullName); }
-                    else if (entry is FileInfo file) yield return file;
+                    else if (entry is FileInfo file)
+                    {
+                        if (OperatingSystem.IsLinux())
+                        {
+                            bool regular;
+                            try { regular = LinuxFiles.Read(file.FullName).IsRegular; }
+                            catch (Exception e) when (e is IOException or UnauthorizedAccessException) { skipped(); continue; }
+                            if (!regular) { skipped(); continue; }
+                        }
+                        yield return file;
+                    }
                 }
         }
     }
@@ -163,5 +205,8 @@ public static class Storage
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return false; }
     }
 
-    public static bool Eligible(FileInfo file, DateTime cutoff) => file.LastWriteTimeUtc < cutoff && file.CreationTimeUtc < cutoff;
+    // Some Unix filesystems have no birth time; ctime then gives a conservative retention boundary.
+    public static long Created(FileInfo file) => OperatingSystem.IsLinux() ? LinuxFiles.Read(file.FullName).CreatedTicks : file.CreationTimeUtc.Ticks;
+
+    public static bool Eligible(FileInfo file, DateTime cutoff) => file.LastWriteTimeUtc < cutoff && Created(file) < cutoff.Ticks;
 }

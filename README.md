@@ -1,6 +1,6 @@
 # Aeris
 
-Aeris is a small Windows app that shows where your disk space went and cleans out old cache and temp files. It runs locally, makes no network requests and collects no telemetry.
+Aeris shows where your disk space went and helps you review old cache files before cleaning them. Windows has a WPF app; Linux has an Avalonia app and a standalone CLI for desktops and servers. File analysis stays local and Aeris collects no telemetry. Desktop apps check GitHub Releases once at startup and when you ask; downloads and installation require your confirmation.
 
 ![Aeris home screen](.github/screenshot.png)
 
@@ -8,15 +8,15 @@ Aeris is a small Windows app that shows where your disk space went and cleans ou
 [![Latest release](https://img.shields.io/github/v/release/mayskiiyy/Aeris)](https://github.com/mayskiiyy/Aeris/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-## Features
+## Windows features
 
 - Cache cleanup for Windows, every installed browser Aeris knows, GPU shader caches, Steam, developer tools (npm, Yarn, pip, NuGet, Gradle) and a few Electron apps. Only files whose creation and modification dates are both older than the retention period you pick (2 days minimum) are touched. The full list is in [How cleanup works](#how-cleanup-works).
-- Before anything is deleted you see every file in a review window, grouped by category, with search and sorting. You can untick single files or whole categories.
+- Cache categories can be filtered by purpose and searched by name, description or path. Choose categories before checking; the scan preserves that choice. Before anything is deleted you see every file in a review window, with search, sorting and per-file or per-category exclusion.
 - Cache files can be deleted permanently or moved to a quarantine for 1 to 30 days. History restores a quarantined cleanup with the original dates and never overwrites a file that took its place.
 - A list of the 200 largest files in any folder or drive, filtered by type and minimum size, with CSV export.
-- A folder map drawn as a treemap, colored by file type, with a list next to it, breadcrumbs, logical size or size on disk, and a context menu. Scanning uses all CPU cores and counts hard links once.
+- A folder map that shows one level at a time with readable names and sizes, a complete list next to it, breadcrumbs, logical size or size on disk, and a context menu. Click a folder to explore it; small entries are grouped and file-type totals are available on demand. Scanning reads folders in parallel and counts hard links once.
 - Duplicate search by size, a quick check of the first and last 64 KB, and full SHA-256. Hashes of unchanged files are cached, so a second search is much faster. Rules pick which copy stays (oldest, newest, shortest path or name, folders with originals, folders that are never touched).
-- Similar image search (resized, re-saved or slightly cropped copies) with side-by-side previews and the best copy marked.
+- Similar image search (resized, re-saved or slightly cropped copies) with side-by-side previews and the best copy marked. Completed hashes survive cancellation, and equal visual hashes are grouped without repeated pairwise comparisons. Inputs above 256 MiB, 32,768 pixels on either side or 100 million pixels are skipped. Native image decoding still runs in the app process; size limits do not provide sandboxing or a hard timeout.
 - Empty folders and 0-byte files. Folders that belong to Windows or to apps are never offered.
 - Personal files (duplicates, similar images, large files, empty folders) only ever go to the Recycle Bin, and each duplicate group always keeps at least one copy.
 - `aeris-cli` for scripts, and an optional scheduled cleanup of Safe categories through Windows Task Scheduler.
@@ -38,11 +38,53 @@ Or install it with winget:
 winget install MAYSKIY.Aeris
 ```
 
-All builds include the .NET runtime, so nothing else needs to be installed. Aeris requires Windows 10 or 11 (x64).
+All builds include the .NET runtime. The Windows app requires Windows 10 or 11 (x64). Linux desktop packages also need the system graphics libraries listed below.
 
 The builds are not code-signed yet, so SmartScreen may say that Windows protected your PC. Click **More info → Run anyway**. Before that you can check that the file is the one from the release: run `Get-FileHash .\Aeris-<version>-Setup-x64.exe` in PowerShell and compare the hash with `SHA256SUMS.txt` from the same release. Installing through winget doesn't show this warning.
 
 Settings, history, quarantine and caches of hashes are stored in `%LOCALAPPDATA%\Aeris`. Uninstalling the app leaves that folder in place, but removes the scheduled task and the Explorer menu entries.
+
+### Linux desktop and servers
+
+Linux packages start with version 1.1. Choose `linux-x64` for Intel/AMD or `linux-arm64` for ARM64. These are glibc builds for Ubuntu 22.04+, Debian 12+ and compatible systems; Alpine/musl is not supported. Ubuntu 24.04 x64 is the runtime validation environment.
+
+- `Aeris-<version>-linux-<arch>.tar.gz`: desktop app, CLI, desktop-menu installer and optional systemd user units.
+- `aeris-cli-<version>-linux-<arch>.tar.gz`: CLI and optional user units, with no desktop requirement.
+
+Check the archive against `SHA256SUMS.txt` from the same release, then extract it. For the desktop app, run `bash install.sh` as your own user. It installs into `~/.local/opt/aeris/<build>`, creates commands under `~/.local/bin`, and adds an application-menu entry. No sudo is needed. Run `Aeris.Desktop` directly if you prefer a portable installation. Close Aeris before installing an update; old release directories are kept until you remove them.
+
+On Debian/Ubuntu, the desktop needs `libx11-6 libice6 libsm6 libfontconfig1` and an X11 session or XWayland. The CLI needs no display server. `gio` (usually `libglib2.0-bin`) is required only for CLI operations that send files to the desktop trash; failure to reach the trash never falls back to permanent deletion.
+
+| Feature | Windows GUI | Linux GUI | Linux CLI |
+| --- | --- | --- | --- |
+| Disk usage and largest files | Yes | Treemap, folder navigation, largest 500, CSV | Scan reports and CSV |
+| Exact duplicates | Review and recycle | Report and open location | Report; optional desktop trash |
+| Cache cleanup | Permanent or quarantine | Per-file review and quarantine | Dry run, permanent or quarantine |
+| History and quarantine restore | Yes | Yes | Yes |
+| Similar images | Yes | Not yet | Not yet |
+| Empty folders and zero-byte files | Yes | Not yet | Yes |
+| Scheduling | Task Scheduler settings | Optional systemd units | systemd or another scheduler |
+| Updates | Offer, verify and run installer; portable ZIP download | Offer and verify archive; manual install | Download a new release manually |
+
+Linux rules cover thumbnails, pip, npm, Gradle, Chrome, Chromium, Firefox and Mesa shader caches. Browser profiles, passwords, cookies, installed dependencies and system package caches are not targets. Cache roots respect `XDG_CACHE_HOME`; app data uses .NET's local application-data location (normally `~/.local/share/Aeris`). System folders are blocked, path comparisons are case-sensitive, and symlinks and special files are skipped. Retention uses the filesystem birth time where available, otherwise the metadata-change time, as well as modification time. Quarantine only moves files on the same filesystem as app data.
+
+For a server, install the standalone `aeris-cli` into `~/.local/bin`, create `~/.config/systemd/user`, and copy the two supplied units there. Inspect a dry run before enabling the timer:
+
+```bash
+~/.local/bin/aeris-cli clean --scheduled --older-than 7d --mode quarantine --dry-run --json
+systemctl --user daemon-reload
+systemctl --user enable --now aeris-cleanup.timer
+systemctl --user list-timers aeris-cleanup.timer
+journalctl --user -u aeris-cleanup.service
+```
+
+The timer is opt-in, weekly, and runs only Safe categories. It does not install a resident Aeris service. A user manager normally stops after logout; an administrator can enable lingering if unattended runs are needed. Disable the schedule with `systemctl --user disable --now aeris-cleanup.timer`.
+
+### Updates
+
+The desktop checks the latest stable release of `mayskiiyy/Aeris` once per launch, in the background. Settings also has a manual check. Drafts, prereleases and older versions are not offered. An offline check reports an error in Settings and does not prevent local work. GitHub receives the client's IP address and Aeris version; scanned paths and file contents are never sent.
+
+Downloads require a matching SHA-256 in the release's `SHA256SUMS.txt`; GitHub's asset digest must also agree when present. Windows installations can launch the per-user installer after confirmation. Windows portable and Linux builds download a verified archive for manual installation. Checksums detect corruption; they do not protect against a compromised GitHub publisher account. Releases are currently unsigned.
 
 ## How cleanup works
 
@@ -123,6 +165,16 @@ The same page adds "Scan in Aeris", "Find duplicates here" and "Show largest fil
 
 ## Build from source
 
+On Linux, build the portable projects separately; `Aeris.sln` also contains Windows-only WPF projects:
+
+```bash
+dotnet build src/Aeris.Cli -c Release -warnaserror
+dotnet build src/Aeris.Desktop -c Release -warnaserror
+bash build-linux.sh linux-x64  # or linux-arm64
+```
+
+The Linux script requires Bash, the .NET 8 SDK, Python 3 (for bundled dependency notices), tar and sha256sum. It creates desktop and standalone CLI archives, without modifying existing Windows artifacts.
+
 You need Windows 10 or 11 and the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0). Visual Studio is optional.
 
 ```powershell
@@ -167,7 +219,7 @@ Releases are published by hand from the Actions tab:
 2. Push to `main`.
 3. Open **Actions → Release → Run workflow**. You can mark the release as a draft or a pre-release.
 
-The workflow builds everything on Windows, creates the `v<version>` tag, uses the changelog section as release notes and attaches the files with their checksums. It refuses to overwrite a release that already exists. After a release, update `packaging/winget` as described in its README.
+The workflow builds Windows packages and Linux x64/ARM64 archives, creates the `v<version>` tag, uses the changelog section as release notes and attaches the files with combined checksums. Windows tests gate the release. Linux CI builds both projects and checks the packaged CLI on isolated files. It refuses to overwrite a release that already exists. After a release, update `packaging/winget` as described in its README.
 
 ## Contributing and security
 

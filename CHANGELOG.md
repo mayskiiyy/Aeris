@@ -2,10 +2,26 @@
 
 ## 1.1.0
 
+Interface and performance
+
+- Added cache category filtering, multi-word search, preselection before scanning and preserved manual choices. Search follows the current theme and supports Ctrl+F, Escape and clearing the query.
+- Simplified the folder map to one level with readable sizes and grouped small entries. File-type totals are calculated when opened. Home shows the last cache cleanup after results are invalidated; empty history details and idle status bars are hidden.
+- Reused SHA-256 buffers to reduce allocations during duplicate searches. Similar-image grouping indexes distinct hashes once, starts decoding during discovery and retains completed hashes on cancellation.
+- Added image input/dimension limits before expensive scaling. Native decoding remains in-process and cannot yet be forcibly interrupted by a timeout.
+- Updated the Linux interface to Avalonia 11.3.22. Builds still target .NET 8; migration is needed before its support ends on November 10, 2026.
+
+Updates and Linux
+
+- Desktop apps check GitHub Releases once at startup and from Settings. New stable versions are offered without blocking startup; downloads verify SHA-256 and file size before use. Installed Windows builds can run the per-user installer after confirmation.
+- Added a Linux Avalonia desktop app with disk maps, large files, CSV export, exact duplicate reports, reviewed quarantine cleanup, history and restore. Windows retains its WPF interface; similar-image matching remains Windows-only.
+- Shared CLI and core support Linux paths, inode identities, hard links, XDG cache rules and filesystem-aware quarantine. Special files and symlinks are skipped; retention uses birth time or metadata-change time instead of inferring creation from modification time.
+- Added Linux x64/ARM64 packages, a per-user desktop installer and opt-in systemd cleanup units. Linux builds run separately in CI and release packaging.
+- Fixed scheduled cleanup accepting a risky category when that category's folders did not exist, including on GitHub Actions runners.
+
 Cleanup
 
 - Cleanup categories now come from a JSON rule set. New categories: crash dumps and Windows Error Reporting files, DirectX, NVIDIA and AMD shader caches, the Steam web and shader caches, npm, Yarn, pip, NuGet HTTP and Gradle caches, and the browser caches of Discord, Slack, classic Teams and VS Code.
-- Categories are grouped (Windows, Browsers, Games and GPU, Developer tools, Apps) and rated Safe, Check first or Advanced. Only Safe ones are selected after a check.
+- Categories are grouped (Windows, Browsers, Games and GPU, Developer tools, Apps) and rated Safe, Check first or Advanced. Safe categories are selected automatically only when there is no manual choice.
 - Apps with a built-in browser, such as Discord, are now cleaned when you tick them. Before 1.1 they were never cleaned.
 - Your own rules can be added as JSON files in `%LOCALAPPDATA%\Aeris\cleaners`. They are validated, never Safe and never selected by default.
 - A single path check (`PathGuard`) resolves `..` and 8.3 short names, refuses links and junctions on the path and keeps every file inside its rule's folder. It runs during the scan and again before each file is touched.
