@@ -75,7 +75,7 @@ public partial class MainWindow : Window
     private void LanguageChanged(object sender, SelectionChangedEventArgs e)
     {
         if (restoring || LanguagePicker.SelectedItem is not Language language || language == Loc.Current) return;
-        Loc.Apply(Application.Current.Resources, language.Code);
+        ((App)Application.Current).ApplyLanguage(language.Code);
         LocalizeView();
         try { Loc.Save(); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Status.Text = Loc.Get("Language.SaveFailed"); }

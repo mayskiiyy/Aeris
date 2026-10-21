@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Aeris.Core</AssemblyName>
+    <RootNamespace>Aeris</RootNamespace>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Languages\*.xaml" LogicalName="Aeris.Languages.%(Filename).xaml" />
+    <InternalsVisibleTo Include="Aeris.Tests" />
+  </ItemGroup>
+</Project>

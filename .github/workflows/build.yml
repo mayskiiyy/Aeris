@@ -21,4 +21,6 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - name: Build
-        run: dotnet build src/Aeris/Aeris.csproj -c Release --nologo -warnaserror
+        run: dotnet build Aeris.sln -c Release --nologo -warnaserror
+      - name: Test
+        run: dotnet test Aeris.sln -c Release --nologo --no-build

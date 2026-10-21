@@ -18,4 +18,7 @@
   <ItemGroup>
     <Resource Include="Assets\aeris.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aeris.Core\Aeris.Core.csproj" />
+  </ItemGroup>
 </Project>

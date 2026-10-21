@@ -14,12 +14,22 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        Loc.Apply(Resources, Loc.Preferred());
+        ApplyLanguage(Loc.Preferred());
         bool dark = true;
         try { if (File.Exists(ThemeFile)) dark = File.ReadAllText(ThemeFile).Trim() == "dark"; }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
         SetTheme(dark);
         base.OnStartup(e);
+    }
+
+    public void ApplyLanguage(string code)
+    {
+        Loc.Load(code);
+        var strings = new ResourceDictionary();
+        foreach (var (key, text) in Loc.Strings) strings[key] = text;
+        var merged = Resources.MergedDictionaries;
+        while (merged.Count > 1) merged.RemoveAt(merged.Count - 1);
+        merged.Add(strings);
     }
 
     public void SetTheme(bool dark, bool animate = false)

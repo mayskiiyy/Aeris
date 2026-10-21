@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.IO;
-using System.Windows;
+using System.Xml.Linq;
 
 namespace Aeris;
 
@@ -9,6 +9,7 @@ public record Language(string Code, string Tag, string Name);
 public static class Loc
 {
     public const string Fallback = "en";
+    private static readonly XNamespace Xaml = "http://schemas.microsoft.com/winfx/2006/xaml";
 
     public static IReadOnlyList<Language> Languages { get; } =
     [
@@ -24,6 +25,7 @@ public static class Loc
 
     private static IReadOnlyDictionary<string, string> strings = new Dictionary<string, string>();
 
+    public static IReadOnlyDictionary<string, string> Strings => strings;
     public static Language Current { get; private set; } = Languages[0];
     public static CultureInfo Culture { get; private set; } = CultureInfo.GetCultureInfo(Fallback);
     public static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aeris", "language.txt");
@@ -39,6 +41,11 @@ public static class Loc
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        return System();
+    }
+
+    public static string System()
+    {
         var system = CultureInfo.CurrentUICulture;
         return (Find(system.Name) ?? Find(system.TwoLetterISOLanguageName) ?? Languages[0]).Code;
     }
@@ -49,26 +56,32 @@ public static class Loc
         File.WriteAllText(FilePath, Current.Code);
     }
 
-    public static void Apply(ResourceDictionary resources, string code)
+    public static void Load(string code)
     {
         var language = Find(code) ?? Languages[0];
-        var fallback = Dictionary(Fallback);
-        var selected = language.Code == Fallback ? fallback : Dictionary(language.Code);
-        var merged = resources.MergedDictionaries;
-        while (merged.Count > 1) merged.RemoveAt(merged.Count - 1);
-        merged.Add(fallback);
-        if (selected != fallback) merged.Add(selected);
-
-        var table = new Dictionary<string, string>();
-        foreach (var source in new[] { fallback, selected })
-            foreach (var key in source.Keys.OfType<string>())
-                if (source[key] is string text) table[key] = text;
+        var table = new Dictionary<string, string>(Dictionary(Fallback));
+        if (language.Code != Fallback)
+            foreach (var (key, text) in Dictionary(language.Code)) table[key] = text;
         strings = table;
-
         Current = language;
         Culture = CultureInfo.GetCultureInfo(language.Code);
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = Culture;
         CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = Culture;
+    }
+
+    public static Dictionary<string, string> Dictionary(string code)
+    {
+        using var stream = typeof(Loc).Assembly.GetManifestResourceStream($"Aeris.Languages.{code}.xaml")
+            ?? throw new FileNotFoundException(code);
+        return Parse(stream);
+    }
+
+    public static Dictionary<string, string> Parse(Stream stream)
+    {
+        var table = new Dictionary<string, string>();
+        foreach (var element in XDocument.Load(stream).Root!.Elements())
+            if (element.Attribute(Xaml + "Key")?.Value is { } key) table[key] = element.Value;
+        return table;
     }
 
     public static string Get(string key) => strings.TryGetValue(key, out var text) ? text : key;
@@ -81,7 +94,7 @@ public static class Loc
         return string.Format(Culture, forms[Math.Min(PluralForm(count), forms.Length - 1)], count);
     }
 
-    private static int PluralForm(long count)
+    public static int PluralForm(long count)
     {
         long ones = count % 10, tens = count % 100;
         return Current.Code switch
@@ -93,10 +106,7 @@ public static class Loc
         };
     }
 
-    private static Language? Find(string code) =>
+    public static Language? Find(string code) =>
         Languages.FirstOrDefault(l => string.Equals(l.Code, code, StringComparison.OrdinalIgnoreCase))
         ?? Languages.FirstOrDefault(l => string.Equals(l.Code.Split('-')[0], code, StringComparison.OrdinalIgnoreCase));
-
-    private static ResourceDictionary Dictionary(string code) =>
-        new() { Source = new Uri($"/Aeris;component/Languages/{code}.xaml", UriKind.Relative) };
 }
