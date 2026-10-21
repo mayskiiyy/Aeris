@@ -16,7 +16,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Aeris.Core\Aeris.Core.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <InternalsVisibleTo Include="Aeris.Tests" />
-  </ItemGroup>
 </Project>

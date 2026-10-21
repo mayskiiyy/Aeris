@@ -174,7 +174,9 @@ public class Cli(CliIO io, UserData data, CancellationToken token)
             profile = data.Profiles.FirstOrDefault(p => string.Equals(p.Name, profileName, StringComparison.OrdinalIgnoreCase))
                 ?? throw new UsageException(Loc.Format("Cli.UnknownProfile", profileName));
         List<CacheGroup> selected;
-        var ids = line.Value("--categories")?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? profile?.Categories.ToArray();
+        // A profile without categories means the default set: every Safe category that is on by default.
+        var ids = line.Value("--categories")?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            ?? (profile is { Categories.Count: > 0 } ? profile.Categories.ToArray() : null);
         if (ids != null)
         {
             var known = Cleaners.Builtin().Select(r => r.Id).Concat(groups.Select(g => g.Rule.Id)).ToHashSet(StringComparer.OrdinalIgnoreCase);

@@ -358,6 +358,28 @@
               <DockPanel Margin="0,8,0,0"><Button x:Name="ClearHashCacheButton" Content="{DynamicResource Settings.ClearHashCache}" Click="ClearHashCache" DockPanel.Dock="Right" Margin="12,0,0,0"/><TextBlock x:Name="HashCacheInfo" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center"/></DockPanel>
             </StackPanel></Border>
             <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,18"><StackPanel>
+              <TextBlock Text="{DynamicResource Settings.Automation}" Style="{StaticResource Caption}"/>
+              <CheckBox x:Name="ScheduleEnabled" Content="{DynamicResource Schedule.Enable}" Margin="0,10,0,0" Click="ScheduleToggled"/>
+              <TextBlock Text="{DynamicResource Schedule.Hint}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,12" LineHeight="18"/>
+              <WrapPanel x:Name="SchedulePanel">
+                <ComboBox x:Name="ScheduleFrequency" Width="170" Margin="0,0,10,8" AutomationProperties.Name="{DynamicResource Schedule.Frequency}" ToolTip="{DynamicResource Schedule.Frequency}">
+                  <ComboBoxItem Tag="Daily" Content="{DynamicResource Schedule.Daily}"/><ComboBoxItem Tag="Weekly" Content="{DynamicResource Schedule.Weekly}"/><ComboBoxItem Tag="Monthly" Content="{DynamicResource Schedule.Monthly}"/>
+                </ComboBox>
+                <ComboBox x:Name="ScheduleHour" Width="110" Margin="0,0,10,8" AutomationProperties.Name="{DynamicResource Schedule.Time}" ToolTip="{DynamicResource Schedule.Time}"/>
+                <ComboBox x:Name="ScheduleAge" Width="190" Margin="0,0,10,8" AutomationProperties.Name="{DynamicResource Caches.Retention}" ToolTip="{DynamicResource Caches.OlderThan}">
+                  <ComboBoxItem Tag="2"/><ComboBoxItem Tag="7"/><ComboBoxItem Tag="14"/><ComboBoxItem Tag="30"/>
+                </ComboBox>
+                <ComboBox x:Name="ScheduleMode" Width="210" Margin="0,0,10,8" AutomationProperties.Name="{DynamicResource Settings.Mode}" ToolTip="{DynamicResource Settings.Mode}">
+                  <ComboBoxItem Tag="Quarantine" Content="{DynamicResource Mode.Quarantine}"/><ComboBoxItem Tag="Permanent" Content="{DynamicResource Mode.Permanent}"/>
+                </ComboBox>
+                <Button x:Name="ScheduleSaveButton" Content="{DynamicResource Schedule.Save}" Click="SaveSchedule" Style="{StaticResource PrimaryButton}" Margin="0,0,0,8"/>
+              </WrapPanel>
+              <TextBlock x:Name="ScheduleStatus" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,0"/>
+              <Border Height="1" Background="{DynamicResource Line}" Margin="0,16,0,12"/>
+              <CheckBox x:Name="ShellMenuEnabled" Content="{DynamicResource Shell.Enable}" Click="ShellMenuToggled"/>
+              <TextBlock Text="{DynamicResource Shell.Hint}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,0" LineHeight="18"/>
+            </StackPanel></Border>
+            <Border Style="{StaticResource Card}" Padding="20" Margin="0,0,0,18"><StackPanel>
               <TextBlock Text="{DynamicResource Settings.Rules}" Style="{StaticResource Caption}"/>
               <TextBlock Text="{DynamicResource Settings.RulesHint}" Foreground="{DynamicResource Muted}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,10" LineHeight="18"/>
               <DockPanel><Button Content="{DynamicResource Rules.OpenFolder}" Click="OpenRulesFolder" DockPanel.Dock="Right" Margin="12,0,0,0"/><TextBlock x:Name="RulesInfo" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="13"/></DockPanel>

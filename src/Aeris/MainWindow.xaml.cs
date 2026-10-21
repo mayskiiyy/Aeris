@@ -111,6 +111,7 @@ public partial class MainWindow : Window
         DuplicateFooter.Text = Loc.Get(SimilarMode ? "Dup.SimilarFooter" : "Dup.Footer");
         RefreshHistory();
         RestoreCleanupSettings();
+        RestoreIntegrationSettings();
         RefreshRulesInfo();
         RefreshQuarantine();
         JunkGrid.Items.Refresh();
@@ -301,7 +302,7 @@ public partial class MainWindow : Window
         FileType.IsEnabled = MapScanButton.IsEnabled = MapChooseButton.IsEnabled = DuplicateScanButton.IsEnabled = DuplicateChooseButton.IsEnabled = AddExclusionButton.IsEnabled = RemoveExclusionButton.IsEnabled = !value;
         JunkScanButton.IsEnabled = JunkChooseButton.IsEnabled = IgnoreJunkFiles.IsEnabled = KeepRule.IsEnabled = !value;
         AddPriorityButton.IsEnabled = RemovePriorityButton.IsEnabled = AddProtectedButton.IsEnabled = RemoveProtectedButton.IsEnabled = !value;
-        EmptyQuarantineButton.IsEnabled = ClearHashCacheButton.IsEnabled = ModeSetting.IsEnabled = !value;
+        EmptyQuarantineButton.IsEnabled = ClearHashCacheButton.IsEnabled = ModeSetting.IsEnabled = ScheduleSaveButton.IsEnabled = ShellMenuEnabled.IsEnabled = !value;
         RestoreButton.IsEnabled = !value && HistoryGrid.SelectedItem is HistoryEntry { CanRestore: true };
         HomeCacheAction.IsEnabled = LanguagePicker.IsEnabled = !value;
         UpdateSelection();

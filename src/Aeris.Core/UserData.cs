@@ -33,7 +33,7 @@ public class HistoryEntry
     public string Result { get; set; } = HistoryResult.Running;
     public string DisplaySize => Storage.Format(Bytes);
     public string DisplayTime => Time.ToString("g", Loc.Culture);
-    public string DisplayAction => Loc.Get($"History.Action.{Action}");
+    public string DisplayAction => Scheduled ? Loc.Format("History.Scheduled", Loc.Get($"History.Action.{Action}")) : Loc.Get($"History.Action.{Action}");
     public string DisplayResult => Loc.Get($"History.Result.{Result}");
     public string DisplayMode => Mode.Length == 0 ? "" : Loc.Get($"Mode.{Mode}");
     public bool CanRestore => Mode == nameof(CleanupMode.Quarantine) && !Restored && Id.Length > 0 && Directory.Exists(Quarantine.FolderFor(Id));
@@ -79,6 +79,7 @@ public class UserData
     public List<string> ProtectedFolders { get; set; } = [];
     public bool SequentialHashing { get; set; }
     public List<CleanupProfile> Profiles { get; set; } = [];
+    public ScheduleSettings Schedule { get; set; } = new();
     public static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aeris", "settings.json");
 
     public static UserData Load(string? path = null)
@@ -107,6 +108,11 @@ public class UserData
         data.LargeOperationGb = Math.Clamp(data.LargeOperationGb, 1, 100000);
         if (!DuplicateRules.Names.Contains(data.KeepRule)) data.KeepRule = DuplicateRules.Names[0];
         data.Profiles = (data.Profiles ?? []).Where(p => p != null && !string.IsNullOrWhiteSpace(p.Name)).GroupBy(p => p.Name, StringComparer.OrdinalIgnoreCase).Select(g => g.Last()).ToList();
+        data.Schedule ??= new();
+        data.Schedule.Hour = Math.Clamp(data.Schedule.Hour, 0, 23);
+        data.Schedule.OlderThanDays = Math.Clamp(data.Schedule.OlderThanDays, 2, 365);
+        if (!Enum.IsDefined(data.Schedule.Frequency)) data.Schedule.Frequency = ScheduleFrequency.Weekly;
+        if (data.Schedule.Mode is not (CleanupMode.Permanent or CleanupMode.Quarantine)) data.Schedule.Mode = CleanupMode.Quarantine;
         foreach (var profile in data.Profiles)
         {
             profile.Categories = (profile.Categories ?? []).Where(c => !string.IsNullOrWhiteSpace(c)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();

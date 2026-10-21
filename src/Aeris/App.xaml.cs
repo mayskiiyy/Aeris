@@ -9,17 +9,44 @@ namespace Aeris;
 
 public partial class App : Application
 {
+    private Mutex? instance;
+    private readonly CancellationTokenSource listening = new();
     public bool DarkTheme { get; private set; }
     public static string ThemeFile => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Aeris", "theme.txt");
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        if (e.Args.Length == 2 && e.Args[0] == "--scheduled-clean") { Shutdown(RunScheduled(e.Args[1])); return; }
+        instance = new Mutex(true, SingleInstance.MutexName, out bool first);
+        if (!first && SingleInstance.Send(e.Args)) { Shutdown(); return; }
         ApplyLanguage(Loc.Preferred());
         bool dark = true;
         try { if (File.Exists(ThemeFile)) dark = File.ReadAllText(ThemeFile).Trim() == "dark"; }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
         SetTheme(dark);
         base.OnStartup(e);
+        var window = new MainWindow();
+        MainWindow = window;
+        window.Show();
+        window.Launch(LaunchRequest.Parse(e.Args), false);
+        SingleInstance.Listen(args => Dispatcher.BeginInvoke(() => window.Launch(LaunchRequest.Parse(args), true)), listening.Token);
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        listening.Cancel();
+        instance?.Dispose();
+        base.OnExit(e);
+    }
+
+    /// <summary>The Task Scheduler entry point: the scheduled profile through the CLI code, with no window and no output.</summary>
+    private static int RunScheduled(string profile)
+    {
+        Loc.Load(Loc.Preferred());
+        var data = UserData.Load();
+        if (!data.Schedule.Enabled || data.Profiles.All(p => !string.Equals(p.Name, profile, StringComparison.OrdinalIgnoreCase))) return Cli.ExitCode.Usage;
+        var io = new Cli.CliIO(TextWriter.Null, TextWriter.Null, TextReader.Null, false);
+        return Cli.Cli.Run(["clean", "--profile", profile, "--yes", "--quiet", "--scheduled"], io, data, CancellationToken.None);
     }
 
     public void ApplyLanguage(string code)
